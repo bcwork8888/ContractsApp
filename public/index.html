@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON Manager</title>
+    <style>
+        .hidden { display: none !important; }
+	#modal { 
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; border: 2px solid black; padding: 20px; z-index: 100;
+        }
+        .folder-card { border: 1px solid #ccc; padding: 10px; margin: 5px; cursor: pointer; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div id="login-section">
+    <h2>Login</h2>
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <button onclick="toggleView('signup-section')">Sign Up</button>
+</div>
+
+<div id="signup-section" class="hidden">
+    <h2>Create Account</h2>
+    <input type="text" id="new-user" placeholder="Choose Username">
+    <input type="password" id="new-pass" placeholder="Choose Password">
+    <button onclick="signup()">Register</button>
+    <button onclick="toggleView('login-section')">Back to Login</button>
+</div>
+
+<div id="dashboard-view" class="hidden">
+    <h2>My Projects</h2>
+    <button onclick="navigate('add-project')">+ Add Project</button>
+    <div id="folder-container" style="display: flex; gap: 20px; margin-top: 20px;">
+        </div>
+</div>
+
+<div id="add-project-view" class="hidden">
+    <h2>Create New Project</h2>
+    <input type="text" id="project-name" placeholder="Enter project name...">
+    <br><br>
+    <button onclick="saveNewProject()">Save Project</button>
+    <button onclick="navigate('dashboard')">Cancel</button>
+</div>
+
+<div id="work-view" class="hidden">
+    <button onclick="navigate('dashboard')">← Back to Projects</button>
+    <h2 id="folder-title">Project: Work</h2>
+    
+    <div style="display: flex; gap: 40px; margin-top: 20px;">
+        <div style="flex: 1; border-right: 1px solid #ccc; padding-right: 20px;">
+            <h3>Contracts</h3>
+            <button onclick="navigate('add-contract')">Add Contract</button>
+            <div id="contracts-list" style="margin-top: 10px;">
+            </div>
+        </div>
+
+        <div style="flex: 1;">
+            <h3>Notes</h3>
+            <button onclick="navigate('add-note')">Add New Notes</button>
+            <div id="notes-list" style="margin-top: 10px;">
+                </div>
+        </div>
+    </div>
+</div>
+
+<div id="add-note-view" class="hidden">
+    <h2>Add New Note</h2>
+    <textarea id="note-text" rows="5" style="width: 100%;" placeholder="Write your note here..."></textarea>
+    <br><br>
+    <button onclick="saveNote()">Save Note</button>
+    <button onclick="navigate('work')">Cancel</button>
+</div>
+
+<div id="dashboard-view" class="hidden">
+    <h2>My Projects</h2>
+    <button onclick="navigate('add-project')">+ Add Project</button>
+    <div id="folder-container" style="display: flex; gap: 20px; margin-top: 20px;">
+    </div>
+</div>
+
+<div id="add-contract-view" class="hidden">
+    <h2>Create New Contract</h2>
+    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
+        <input type="text" id="cust-name" placeholder="Customer's Name">
+        <input type="text" id="my-name" placeholder="Your Name">
+        <input type="number" id="price" placeholder="Price">
+        <input type="date" id="contract-date">
+
+        <label>Sign Here:</label>
+        <canvas id="sig-canvas" width="300" height="100" style="border: 1px solid #000; background: #fff;"></canvas>
+        <button type="button" onclick="clearCanvas()">Clear</button>
+
+        <button onclick="saveContract()">Save Contract</button>
+        <button onclick="navigate('work')">Cancel</button>
+    </div>
+</div>
+
+    <div id="folder-detail-section" class="hidden">
+        <button onclick="backToDashboard()">Back</button>
+        <h2 id="current-folder-name"></h2>
+        <div id="file-list"></div>
+        <button onclick="openContractModal()">Create New Contract</button>
+    </div>
+
+    <div id="modal" class="hidden">
+        <h3>New Contract</h3>
+        <div id="modal-fields"></div>
+        <button onclick="saveContract()">Save</button>
+        <button onclick="document.getElementById('modal').classList.add('hidden')">Cancel</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

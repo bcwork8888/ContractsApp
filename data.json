@@ -1,0 +1,107 @@
+{
+  "users": [
+    {
+      "username": "alice",
+      "password": "password123",
+      "folders": [
+        {
+          "id": 1,
+          "name": "Work",
+          "contracts": [
+            {
+              "id": 101,
+              "fields": [
+                "Value 1",
+                "Value 2",
+                "Value 3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "username": "abc",
+      "password": "abc",
+      "fullname": "abc, xyz",
+      "folders": [
+        {
+          "id": 1777502778520,
+          "name": "116 Ashley Hill Dr",
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1777502794440,
+          "name": "612 Fairgate Dr, Wexford, PA",
+          "contracts": [
+            {
+              "id": 1777512060201,
+              "customer": "c1",
+              "seller": "abc, xyz",
+              "price": "10000",
+              "date": "2026-04-30"
+            },
+            {
+              "id": 1777512920294,
+              "customer": "testUser",
+              "seller": "abc, xyz",
+              "price": "1000",
+              "date": "2026-04-30"
+            },
+            {
+              "id": 1777513621258,
+              "customer": "a",
+              "seller": "a",
+              "price": "2340",
+              "date": "2026-04-30"
+            },
+            {
+              "id": 1777514924251,
+              "customer": "testUser",
+              "seller": "abc",
+              "price": "20030",
+              "date": "2026-04-30"
+            },
+            {
+              "id": 1777516263421,
+              "customer": "abc",
+              "seller": "asdf",
+              "price": "34909",
+              "date": "2026-04-30",
+              "signature": "data:image/png;base64,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"
+            }
+          ],
+          "notes": [
+            {
+              "id": 1777506900701,
+              "content": "test123",
+              "date": "4/29/2026, 7:55:00 PM"
+            },
+            {
+              "id": 1777514794720,
+              "content": "test2",
+              "date": "4/29/2026, 10:06:34 PM"
+            },
+            {
+              "id": 1777514899796,
+              "content": "test3",
+              "date": "4/29/2026, 10:08:19 PM"
+            }
+          ]
+        },
+        {
+          "id": 1777514894074,
+          "name": "test",
+          "contracts": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "username": "abcd",
+      "password": "abcd",
+      "folders": []
+    }
+  ]
+}
