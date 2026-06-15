@@ -1,0 +1,328 @@
+/* 蓝色主题变量定义 */
+:root {
+    --primary-blue: #1e40af;       /* 主色：深蓝色，用于导航、重要标题 */
+    --brand-blue: #3b82f6;         /* 品牌蓝：用于按钮、高亮链接 */
+    --light-blue: #eff6ff;         /* 浅蓝底色：用于表格头部、卡片背景 */
+    --hover-blue: #1d4ed8;         /* 悬停蓝：按钮 Hover 效果 */
+    --border-blue: #bfdbfe;        /* 边框蓝：用于温柔的分割线 */
+    --text-dark: #1e293b;          /* 深灰字：主要文字 */
+    --text-muted: #64748b;         /* 浅灰字：次要文字/日期 */
+    --bg-gray: #f8fafc;            /* 页面全局背景 */
+}
+
+/* 基础页面样式 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-gray);
+    color: var(--text-dark);
+    line-height: 1.5;
+    margin: 0;
+    padding: 20px;
+}
+/* 确保 header 内部使用全新的弹性盒模型 */
+.main-header {
+    background-color: #0f172a;      /* 深色背景 */
+    height: 65px;                   /* 固定高度 */
+
+    /* 🌟 核心：开启强制横向排列，并且两端对齐 */
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+
+    padding: 0 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+/* 1. 左侧占位 */
+.header-placeholder {
+    flex: 1 !important;
+}
+
+/* 2. 中间：确保 Logo 和文字横向并列居中 */
+.header-center {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px;
+    flex: 2 !important; /* 给中间更多空间 */
+}
+
+/* Logo 盒子 */
+.logo-box {
+    background-color: #3b82f6;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white;
+}
+
+.logo-image {
+    max-height: 48px;
+    width: auto;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+/* 标题 */
+.site-title {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* 3. 右侧：确保用户和登出按钮横向并列靠右 */
+.header-right {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 15px;
+}
+
+.user-name {
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.logout-link {
+    color: #3b82f6;
+    text-decoration: underline;
+    font-size: 14px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* 页面头部 */
+.history-header {
+    border-bottom: 2px solid var(--border-blue);
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-header h1 {
+    color: var(--primary-blue);
+    margin: 0;
+    font-size: 24px;
+}
+
+/* 搜索/筛选工具栏 */
+.filter-bar {
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-blue);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.filter-bar input, .filter-bar select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-blue);
+    border-radius: 6px;
+    outline: none;
+}
+
+.filter-bar input:focus, .filter-bar select:focus {
+    border-color: var(--brand-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* 合同历史表格样式 */
+.history-table-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-blue);
+    overflow: hidden;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.history-table th {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+    padding: 14px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 2px solid var(--border-blue);
+}
+
+.history-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+/* 隔行变色，增加阅读体验 */
+.history-table tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.history-table tr:hover {
+    background-color: #f0fdf4; /* 鼠标悬停时轻微变色 */
+}
+
+/* 合同编号与日期 */
+.contract-id {
+    font-weight: bold;
+    color: var(--brand-blue);
+    text-decoration: none;
+}
+
+.contract-id:hover {
+    text-decoration: underline;
+}
+
+.date-text {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* 蓝色核心按钮 */
+.btn-primary {
+    background-color: var(--brand-blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-blue);
+}
+
+/* 合同状态标签 (Status Badges) */
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* 配合蓝色主题的状态色 */
+.badge-active { background-color: #e0f2fe; color: #0369a1; }    /* 生效中 - 浅蓝 */
+.badge-completed { background-color: #dcfce7; color: #15803d; } /* 已完成 - 浅绿 */
+.badge-pending { background-color: #fef3c7; color: #b45309; }   /* 待审核 - 浅黄 */
+.badge-terminated { background-color: #fee2e2; color: #b91c1c; }/* 已终止 - 浅红 */
+
+/* --- Premium Inputs & Voice Input Styling --- */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    padding: 10px 14px;
+    border: 1px solid var(--border-blue, #bfdbfe);
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #ffffff;
+    color: var(--text-dark, #1e293b);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--brand-blue, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.input-voice-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ensure inputs inside wrapper occupy full width and have right padding for mic */
+.input-voice-wrapper input[type="text"],
+.input-voice-wrapper textarea {
+    padding-right: 40px !important;
+}
+
+.voice-input-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted, #64748b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    padding: 4px;
+    z-index: 10;
+}
+
+.voice-input-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Position mic button at top-right for textareas */
+.input-voice-wrapper textarea + .voice-input-btn {
+    top: 18px;
+    transform: none;
+}
+
+.voice-input-btn:hover {
+    background-color: var(--light-blue, #eff6ff);
+    color: var(--brand-blue, #3b82f6);
+}
+
+/* Listening/recording pulsing animation */
+.voice-input-btn.listening {
+    color: #ef4444 !important;
+    background-color: #fee2e2;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+    animation: voicePulse 1.5s infinite;
+}
+
+@keyframes voicePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}

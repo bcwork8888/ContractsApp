@@ -73,13 +73,16 @@ function toggleView(viewId) {
 async function signup() {
     const user = document.getElementById('new-user').value;
     const pass = document.getElementById('new-pass').value;
+    const fullname = document.getElementById('signup-fullname').value;
+    const company = document.getElementById('signup-company').value;
+    const role = document.getElementById('signup-role').value;
 
     if (!user || !pass) return alert("Please fill in all fields");
 
     const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, password: pass })
+        body: JSON.stringify({ username: user, password: pass, fullname, company, role })
     });
 
     const result = await res.json();
@@ -100,6 +103,25 @@ function navigate(view) {
 
     // Show the requested view
     if (view === 'dashboard') {
+        const fullname = sessionStorage.getItem('fullname');
+        const company = sessionStorage.getItem('company');
+        const role = sessionStorage.getItem('role');
+
+        document.getElementById('welcome-msg').innerText = `Welcome, ${fullname} (${role})`;
+        if (role === 'admin') {
+            document.getElementById('company-msg').innerHTML = `Workspace: ${company} <a href="#" id="admin-link" onclick="navigate('admin'); return false;" style="margin-left: 15px; font-size: 14px; color: var(--brand-blue); text-decoration: underline;">[Admin Console]</a>`;
+        } else {
+            document.getElementById('company-msg').innerText = `Workspace: ${company}`;
+        }
+        
+        const userNameSpan = document.querySelector('.user-name');
+        if (userNameSpan) userNameSpan.innerText = fullname;
+
+        const addProjBtn = document.getElementById('add-project-btn');
+        if (addProjBtn) {
+            addProjBtn.style.display = (role === 'crew') ? 'none' : 'inline-block';
+        }
+
         document.getElementById('dashboard-view').classList.remove('hidden');
         loadFolders(); // Refresh list from server
     } else if (view === 'add-project') {
@@ -107,6 +129,18 @@ function navigate(view) {
     } else if (view === 'login') {
         document.getElementById('login-section').classList.remove('hidden');
     } else if (view === 'work') {
+        const role = sessionStorage.getItem('role');
+        const contractsCol = document.getElementById('contracts-column');
+        const addNoteBtn = document.getElementById('add-note-btn');
+
+        if (role === 'crew') {
+            if (contractsCol) contractsCol.style.display = 'none';
+            if (addNoteBtn) addNoteBtn.style.display = 'none';
+        } else {
+            if (contractsCol) contractsCol.style.display = 'block';
+            if (addNoteBtn) addNoteBtn.style.display = 'inline-block';
+        }
+
         document.getElementById('work-view').classList.remove('hidden');
     } else if (view === 'add-note') {
         document.getElementById('add-note-view').classList.remove('hidden');
@@ -114,6 +148,14 @@ function navigate(view) {
         document.getElementById('add-contract-view').classList.remove('hidden');
         document.getElementById('contract-date').valueAsDate = new Date();
         document.getElementById('my-name').value = sessionStorage.getItem('fullname');
+    } else if (view === 'admin') {
+        const role = sessionStorage.getItem('role');
+        if (role !== 'admin') {
+            alert("Unauthorized access");
+            return navigate('dashboard');
+        }
+        document.getElementById('admin-view').classList.remove('hidden');
+        loadAdminConsole();
     }
 }
 
@@ -130,8 +172,10 @@ async function login() {
 
     if (res.ok) {
         const result = await res.json();
-        sessionStorage.setItem('username', user); // Store user in session
+        sessionStorage.setItem('username', result.username);
         sessionStorage.setItem('fullname', result.fullname);
+        sessionStorage.setItem('company', result.company);
+        sessionStorage.setItem('role', result.role);
         navigate('dashboard');
     } else {
         alert("Login failed");
@@ -291,6 +335,196 @@ function clearCanvas() {
 // When saving, convert the drawing to a string to store in JSON
 function getSignatureImage() {
     return canvas.toDataURL(); // Converts drawing to a Base64 string
+}
+
+// --- Voice Input (Speech-to-Text) Implementation ---
+function initVoiceInput() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        return; // Speech recognition not supported in this browser
+    }
+
+    // Find all text inputs and textareas
+    const targets = document.querySelectorAll('input[type="text"], textarea');
+    targets.forEach(input => {
+        // Skip if already initialized
+        if (input.dataset.voiceInit === "true") return;
+        input.dataset.voiceInit = "true";
+
+        // Create container wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'input-voice-wrapper';
+        
+        // Insert wrapper before input
+        input.parentNode.insertBefore(wrapper, input);
+        // Move input inside wrapper
+        wrapper.appendChild(input);
+
+        // Create mic button
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'voice-input-btn';
+        btn.title = 'Voice Input';
+        btn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+            </svg>
+        `;
+
+        wrapper.appendChild(btn);
+
+        // Initialize SpeechRecognition
+        const rec = new SpeechRecognition();
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.lang = navigator.language || 'zh-CN';
+
+        let isListening = false;
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isListening) {
+                rec.stop();
+            } else {
+                // Stop any other active instances first
+                document.querySelectorAll('.voice-input-btn.listening').forEach(activeBtn => {
+                    activeBtn.click();
+                });
+                rec.start();
+            }
+        });
+
+        rec.onstart = () => {
+            isListening = true;
+            btn.classList.add('listening');
+            input.placeholder = "Listening...";
+        };
+
+        rec.onresult = (event) => {
+            const text = event.results[0][0].transcript;
+            if (input.value) {
+                input.value += ' ' + text;
+            } else {
+                input.value = text;
+            }
+            // Trigger input and change events to update bindings/listeners
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+
+        rec.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+            btn.classList.remove('listening');
+            isListening = false;
+        };
+
+        rec.onend = () => {
+            btn.classList.remove('listening');
+            isListening = false;
+            input.placeholder = input.getAttribute('placeholder') || '';
+        };
+    });
+}
+
+// Initialize on script load
+initVoiceInput();
+
+// Setup MutationObserver to watch for dynamically added text fields
+const voiceObserver = new MutationObserver(() => {
+    initVoiceInput();
+});
+voiceObserver.observe(document.body, { childList: true, subtree: true });
+
+// --- Admin Console Functions ---
+async function loadAdminConsole() {
+    const company = sessionStorage.getItem('company');
+    document.getElementById('admin-company-title').innerText = `Workspace Company: ${company}`;
+
+    const res = await fetch(`/api/admin/company-data?company=${encodeURIComponent(company)}`);
+    if (!res.ok) {
+        alert("Failed to load admin data");
+        return;
+    }
+    const { managers, crews, projects } = await res.json();
+
+    const container = document.getElementById('admin-projects-list');
+    if (!projects || projects.length === 0) {
+        container.innerHTML = '<p>No projects found in this company.</p>';
+        return;
+    }
+
+    container.innerHTML = projects.map(proj => {
+        // Generate options for managers
+        const managerOptionsHtml = managers.map(m => {
+            const selected = m.username.toLowerCase() === proj.managerUsername.toLowerCase() ? 'selected' : '';
+            return `<option value="${m.username}" ${selected}>${m.fullname} (${m.username})</option>`;
+        }).join('');
+
+        // Generate options for crews (including Unassigned)
+        const crewOptionsHtml = `
+            <option value="" ${!proj.crewUsername ? 'selected' : ''}>Unassigned</option>
+            ${crews.map(c => {
+                const selected = c.username.toLowerCase() === proj.crewUsername.toLowerCase() ? 'selected' : '';
+                return `<option value="${c.username}" ${selected}>${c.fullname} (${c.username})</option>`;
+            }).join('')}
+        `;
+
+        return `
+            <div class="project-admin-card" style="border: 1px solid var(--border-blue); padding: 18px; margin-bottom: 15px; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <strong style="font-size: 16px; color: var(--primary-blue);">📁 ${proj.name}</strong>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                    <!-- Manager Assignment -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="font-size: 13px; font-weight: 600;">Manager:</span>
+                        <select id="reassign-mgr-select-${proj.id}" style="padding: 4px 8px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-blue);">
+                            ${managerOptionsHtml}
+                        </select>
+                        <button onclick="reassignProject('manager', ${proj.id})" class="btn-primary" style="padding: 4px 10px; font-size: 12px; border-radius: 6px;">
+                            Assign Manager
+                        </button>
+                    </div>
+                    <!-- Crew Assignment -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="font-size: 13px; font-weight: 600;">Crew:</span>
+                        <select id="reassign-crew-select-${proj.id}" style="padding: 4px 8px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-blue);">
+                            ${crewOptionsHtml}
+                        </select>
+                        <button onclick="reassignProject('crew', ${proj.id})" class="btn-primary" style="padding: 4px 10px; font-size: 12px; border-radius: 6px;">
+                            Assign Crew
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function reassignProject(type, folderId) {
+    const selectEl = document.getElementById(`reassign-${type === 'manager' ? 'mgr' : 'crew'}-select-${folderId}`);
+    const toUser = selectEl.value;
+
+    if (!confirm(`Are you sure you want to change the ${type} of this project?`)) {
+        return;
+    }
+
+    const res = await fetch('/api/admin/reassign-project', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, folderId, toUser })
+    });
+
+    if (res.ok) {
+        alert(`${type.charAt(0).toUpperCase() + type.slice(1)} reassigned successfully!`);
+        loadAdminConsole();
+    } else {
+        const error = await res.json();
+        alert("Error: " + (error.message || "Failed to reassign"));
+    }
 }
 
 
