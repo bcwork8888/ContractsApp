@@ -5,20 +5,30 @@
       "password": "password123",
       "folders": [
         {
-          "id": 1,
-          "name": "Work",
+          "id": 1781464413314,
+          "name": "Project Alpha",
           "contracts": [
             {
-              "id": 101,
-              "fields": [
-                "Value 1",
-                "Value 2",
-                "Value 3"
-              ]
+              "id": 1781464424163,
+              "customer": "John Doe",
+              "seller": "Test User",
+              "price": "2500",
+              "date": "2026-06-14"
             }
-          ]
+          ],
+          "notes": [
+            {
+              "id": 1781464420622,
+              "content": "This is a test note",
+              "date": "6/14/2026, 3:13:40 PM"
+            }
+          ],
+          "crew": "crew"
         }
-      ]
+      ],
+      "role": "manager",
+      "company": "test company",
+      "fullname": "alice"
     },
     {
       "username": "abc",
@@ -28,8 +38,28 @@
         {
           "id": 1777502778520,
           "name": "116 Ashley Hill Dr",
-          "contracts": [],
-          "notes": []
+          "contracts": [
+            {
+              "id": 1781465256857,
+              "customer": "hi",
+              "seller": "abc, xyz",
+              "price": "20000",
+              "date": "2026-06-14",
+              "signature": "data:image/png;base64,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"
+            }
+          ],
+          "notes": [
+            {
+              "id": 1781465265532,
+              "content": "test",
+              "date": "6/14/2026, 3:27:45 PM"
+            },
+            {
+              "id": 1781465269371,
+              "content": "test2",
+              "date": "6/14/2026, 3:27:49 PM"
+            }
+          ]
         },
         {
           "id": 1777502794440,
@@ -96,11 +126,63 @@
           "contracts": [],
           "notes": []
         }
-      ]
+      ],
+      "role": "manager",
+      "company": "test company"
     },
     {
       "username": "abcd",
       "password": "abcd",
+      "folders": [],
+      "role": "manager",
+      "company": "test company",
+      "fullname": "abcd"
+    },
+    {
+      "username": "admin",
+      "password": "admin",
+      "fullname": "admin",
+      "company": "test company",
+      "role": "admin",
+      "folders": []
+    },
+    {
+      "username": "testuser",
+      "password": "testpassword",
+      "fullname": "Test User",
+      "company": "test company",
+      "role": "manager",
+      "folders": []
+    },
+    {
+      "username": "crew1",
+      "password": "crew1password",
+      "fullname": "Crew Member 1",
+      "company": "test company",
+      "role": "crew",
+      "folders": [
+        {
+          "id": 1,
+          "name": "Work",
+          "contracts": [
+            {
+              "id": 101,
+              "fields": [
+                "Value 1",
+                "Value 2",
+                "Value 3"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "username": "crew",
+      "password": "crew",
+      "fullname": "crew",
+      "company": "test company",
+      "role": "crew",
       "folders": []
     }
   ]
