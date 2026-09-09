@@ -1,0 +1,16 @@
+{
+  "short_name": "FieldSync",
+  "name": "FieldSync Contracts & Management",
+  "icons": [
+    {
+      "src": "logo.JPG",
+      "type": "image/jpeg",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/#login",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "display": "standalone",
+  "orientation": "portrait"
+}
