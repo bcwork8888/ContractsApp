@@ -21,10 +21,12 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-// Helper to read JSON
-const getData = () => JSON.parse(fs.readFileSync('data.json'));
-// Helper to write JSON
-const saveData = (data) => fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
+const db = require('./db.js');
+
+// Helper to read JSON / Database
+const getData = () => db.readLocalData();
+// Helper to write JSON / Database
+const saveData = (data) => db.writeLocalData(data);
 
 const STATUS_ORDER = {
     'draft': 0,
@@ -1573,4 +1575,8 @@ app.post('/api/company/upgrade', (req, res) => {
     res.json({ success: true, tier: 'premium' });
 });
 
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+}
+
+module.exports = app;
