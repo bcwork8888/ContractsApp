@@ -24,9 +24,9 @@ app.get('/logout', (req, res) => {
 const db = require('./db.js');
 
 // Helper to read JSON / Database
-const getData = () => db.readLocalData();
+const getData = async () => await db.getData();
 // Helper to write JSON / Database
-const saveData = (data) => db.writeLocalData(data);
+const saveData = async (data) => await db.saveData(data);
 
 const STATUS_ORDER = {
     'draft': 0,
@@ -50,9 +50,9 @@ function sortFolders(folders) {
 }
 
 // API: Login
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    const data = getData();
+    const data = await getData();
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     
     if (user) {
@@ -87,7 +87,7 @@ app.post('/api/login', (req, res) => {
 });
 
 // API: Add Folder
-app.post('/api/add-folder', (req, res) => {
+app.post('/api/add-folder', async (req, res) => {
     const { 
         username, 
         projectName, 
@@ -103,7 +103,7 @@ app.post('/api/add-folder', (req, res) => {
         return res.status(400).json({ success: false, message: "Missing mandatory fields" });
     }
 
-    const data = getData();
+    const data = await getData();
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
@@ -130,12 +130,12 @@ app.post('/api/add-folder', (req, res) => {
 
     if (!user.folders) user.folders = [];
     user.folders.push(newFolder);
-    saveData(data);
+    await saveData(data);
     res.json(newFolder);
 });
 
 // API: Edit Folder
-app.post('/api/edit-folder', (req, res) => {
+app.post('/api/edit-folder', async (req, res) => {
     const { 
         folderId, 
         projectName, 
@@ -151,7 +151,7 @@ app.post('/api/edit-folder', (req, res) => {
         return res.status(400).json({ success: false, message: "Missing mandatory fields" });
     }
 
-    const data = getData();
+    const data = await getData();
     let folder = null;
 
     data.users.forEach(u => {
@@ -175,14 +175,14 @@ app.post('/api/edit-folder', (req, res) => {
     folder.customerEmail = customerEmail || "";
     folder.crewsViewContractPayment = !!crewsViewContractPayment;
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true, folderName: folder.name });
 });
 
 // API: Sign Up
-app.post('/api/signup', (req, res) => {
+app.post('/api/signup', async (req, res) => {
     const { username, password, fullname, company, role } = req.body;
-    const data = getData();
+    const data = await getData();
 
     // Check if user already exists
     const existingUser = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
@@ -203,14 +203,14 @@ app.post('/api/signup', (req, res) => {
     };
 
     data.users.push(newUser);
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Get user folders
-app.get('/api/folders', (req, res) => {
+app.get('/api/folders', async (req, res) => {
     const { username } = req.query;
-    const data = getData();
+    const data = await getData();
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (user) {
         if (user.role === 'crew') {
@@ -235,9 +235,9 @@ app.get('/api/folders', (req, res) => {
     }
 });
 
-app.post('/api/add-note', (req, res) => {
+app.post('/api/add-note', async (req, res) => {
     const { username, folderId, noteContent, price, photos, uncontract } = req.body;
-    const data = getData();
+    const data = await getData();
     
     let folder = null;
     data.users.forEach(u => {
@@ -295,18 +295,18 @@ app.post('/api/add-note', (req, res) => {
         date: new Date().toLocaleString(),
         photos: photos || []
     });
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Update multiple notes in a project folder
-app.post('/api/project/update-notes', (req, res) => {
+app.post('/api/project/update-notes', async (req, res) => {
     const { folderId, notes } = req.body;
     if (!folderId || !notes || !Array.isArray(notes)) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
     }
 
-    const data = getData();
+    const data = await getData();
     let folder = null;
     data.users.forEach(u => {
         if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
@@ -330,13 +330,13 @@ app.post('/api/project/update-notes', (req, res) => {
         });
     }
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
-app.post('/api/add-contract', (req, res) => {
+app.post('/api/add-contract', async (req, res) => {
     const { username, folderId, contractData } = req.body;
-    const data = getData();
+    const data = await getData();
 
     let folder = null;
     data.users.forEach(u => {
@@ -396,20 +396,20 @@ http://localhost:8888/sign.html?token=${token}
         }
 
         folder.contracts.push(newContract);
-        saveData(data);
+        await saveData(data);
         return res.json({ success: true });
     }
     res.status(404).json({ success: false });
 });
 
 // API: Add Payment
-app.post('/api/add-payment', (req, res) => {
+app.post('/api/add-payment', async (req, res) => {
     const { username, folderId, amount, date, method, notes, depositPaidFull, receipts } = req.body;
     if (!folderId || !amount || !date || !method) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
     }
 
-    const data = getData();
+    const data = await getData();
     let folder = null;
 
     data.users.forEach(u => {
@@ -441,15 +441,15 @@ app.post('/api/add-payment', (req, res) => {
     if (newPayment.depositPaidFull) {
         folder.paymentStatus = 'Paid in Full';
     }
-    saveData(data);
+    await saveData(data);
     res.json({ success: true, payment: newPayment });
 });
 
 
 // API: Generate temporary PDF preview from request parameters (unsaved)
-app.get('/api/preview-pdf', (req, res) => {
+app.get('/api/preview-pdf', async (req, res) => {
     const { company, customer, seller, price, date, projectName, items: itemsStr, template, workingAddress, billingAddress } = req.query;
-    const data = getData();
+    const data = await getData();
     
     // Fetch company info
     const companies = data.companies || {};
@@ -614,9 +614,9 @@ app.get('/api/preview-pdf', (req, res) => {
 });
 
 // API: Generate PDF for a specific contract
-app.get('/api/view-pdf', (req, res) => {
+app.get('/api/view-pdf', async (req, res) => {
     const { username, folderId, contractId, termination } = req.query;
-    const data = getData();
+    const data = await getData();
 
     let folder = null;
     let managerUser = null;
@@ -915,11 +915,11 @@ app.get('/api/view-pdf', (req, res) => {
 });
 
 // API: Get admin company data (managers, crews, and all company projects)
-app.get('/api/admin/company-data', (req, res) => {
+app.get('/api/admin/company-data', async (req, res) => {
     const { company } = req.query;
     if (!company) return res.status(400).json({ success: false, message: "Company parameter required" });
 
-    const data = getData();
+    const data = await getData();
     // Filter users belonging to this company (case-insensitive)
     const companyUsers = data.users.filter(u => u.company && u.company.toLowerCase() === company.toLowerCase());
 
@@ -977,13 +977,13 @@ app.get('/api/admin/company-data', (req, res) => {
 });
 
 // API: Reassign project (manager or crew)
-app.post('/api/admin/reassign-project', (req, res) => {
+app.post('/api/admin/reassign-project', async (req, res) => {
     const { type, folderId, toUser } = req.body;
     if (!type || !folderId) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
     }
 
-    const data = getData();
+    const data = await getData();
 
     if (type === 'manager') {
         // Find the manager currently owning the folder
@@ -1013,7 +1013,7 @@ app.post('/api/admin/reassign-project', (req, res) => {
         if (!destUser.folders) destUser.folders = [];
         destUser.folders.push(folderToMove);
 
-        saveData(data);
+        await saveData(data);
         return res.json({ success: true });
     } else if (type === 'crew') {
         // Find the folder inside whoever owns it (must be under some manager's folders)
@@ -1039,7 +1039,7 @@ app.post('/api/admin/reassign-project', (req, res) => {
             folder.crew = null; // Unassigned
         }
 
-        saveData(data);
+        await saveData(data);
         return res.json({ success: true });
     }
 
@@ -1047,11 +1047,11 @@ app.post('/api/admin/reassign-project', (req, res) => {
 });
 
 // API: Get company settings (logo and official name)
-app.get('/api/admin/company-info', (req, res) => {
+app.get('/api/admin/company-info', async (req, res) => {
     const { company } = req.query;
     if (!company) return res.status(400).json({ success: false, message: "Company parameter required" });
 
-    const data = getData();
+    const data = await getData();
     const companies = data.companies || {};
     const compInfo = companies[company.toLowerCase()] || {
         officialName: "FieldSync Draft",
@@ -1063,13 +1063,13 @@ app.get('/api/admin/company-info', (req, res) => {
 });
 
 // API: Save company settings
-app.post('/api/admin/company-info', (req, res) => {
+app.post('/api/admin/company-info', async (req, res) => {
     const { company, officialName, logo, nameCard } = req.body;
     if (!company || !officialName) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
     }
 
-    const data = getData();
+    const data = await getData();
     if (!data.companies) data.companies = {};
 
     data.companies[company.toLowerCase()] = {
@@ -1078,14 +1078,14 @@ app.post('/api/admin/company-info', (req, res) => {
         nameCard: nameCard || ""
     };
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Add reply to a note
-app.post('/api/add-reply', (req, res) => {
+app.post('/api/add-reply', async (req, res) => {
     const { username, folderId, noteId, replyContent } = req.body;
-    const data = getData();
+    const data = await getData();
     
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user) {
@@ -1116,15 +1116,15 @@ app.post('/api/add-reply', (req, res) => {
             content: replyContent,
             date: new Date().toLocaleString()
         });
-        saveData(data);
+        await saveData(data);
         return res.json({ success: true });
     }
     res.status(404).json({ success: false, message: "Note not found" });
 });
 
 // API: Get all unique companies (public, used for signup page suggestion)
-app.get('/api/companies', (req, res) => {
-    const data = getData();
+app.get('/api/companies', async (req, res) => {
+    const data = await getData();
     const map = new Map(); // lowercase -> original case
     if (data.companies) {
         Object.values(data.companies).forEach(c => {
@@ -1142,8 +1142,8 @@ app.get('/api/companies', (req, res) => {
 });
 
 // API: Get Super Admin console data (all users, all unique companies)
-app.get('/api/super-admin/data', (req, res) => {
-    const data = getData();
+app.get('/api/super-admin/data', async (req, res) => {
+    const data = await getData();
     
     const companiesSet = new Set();
     if (data.companies) {
@@ -1167,11 +1167,11 @@ app.get('/api/super-admin/data', (req, res) => {
 });
 
 // API: Create new company (Super Admin only)
-app.post('/api/super-admin/create-company', (req, res) => {
+app.post('/api/super-admin/create-company', async (req, res) => {
     const { companyName } = req.body;
     if (!companyName) return res.status(400).json({ success: false, message: "Company name is required" });
 
-    const data = getData();
+    const data = await getData();
     if (!data.companies) data.companies = {};
 
     const key = companyName.toLowerCase().trim();
@@ -1184,32 +1184,32 @@ app.post('/api/super-admin/create-company', (req, res) => {
         logo: "./logo.JPG"
     };
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Assign user to company (Super Admin only)
-app.post('/api/super-admin/assign-user-company', (req, res) => {
+app.post('/api/super-admin/assign-user-company', async (req, res) => {
     const { username, company } = req.body;
     if (!username) return res.status(400).json({ success: false, message: "Username is required" });
 
-    const data = getData();
+    const data = await getData();
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     user.company = company ? company.trim() : '';
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Create new user with any role/company (Super Admin only)
-app.post('/api/super-admin/create-user', (req, res) => {
+app.post('/api/super-admin/create-user', async (req, res) => {
     const { username, password, fullname, role, company } = req.body;
     if (!username || !password || !role) {
         return res.status(400).json({ success: false, message: "Username, password and role are required" });
     }
 
-    const data = getData();
+    const data = await getData();
     const exists = data.users.some(u => u.username.toLowerCase() === username.toLowerCase());
     if (exists) {
         return res.status(400).json({ success: false, message: "Username already exists" });
@@ -1224,16 +1224,16 @@ app.post('/api/super-admin/create-user', (req, res) => {
         folders: []
     });
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Get contract details by signature token
-app.get('/api/contract-by-token', (req, res) => {
+app.get('/api/contract-by-token', async (req, res) => {
     const { token } = req.query;
     if (!token) return res.status(400).json({ success: false, message: "Token is required" });
 
-    const data = getData();
+    const data = await getData();
     let foundContract = null;
     let managerUser = null;
     let projectName = "";
@@ -1280,13 +1280,13 @@ app.get('/api/contract-by-token', (req, res) => {
 });
 
 // API: Submit signature using token
-app.post('/api/submit-signature', (req, res) => {
+app.post('/api/submit-signature', async (req, res) => {
     const { token, signature } = req.body;
     if (!token || !signature) {
         return res.status(400).json({ success: false, message: "Token and signature are required" });
     }
 
-    const data = getData();
+    const data = await getData();
     let foundContract = null;
     let foundFolder = null;
 
@@ -1315,13 +1315,13 @@ app.post('/api/submit-signature', (req, res) => {
         foundFolder.status = "Signed";
     }
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Get all customers across the platform (Super Admin only)
-app.get('/api/super-admin/customers', (req, res) => {
-    const data = getData();
+app.get('/api/super-admin/customers', async (req, res) => {
+    const data = await getData();
     const customers = [];
 
     data.users.forEach(u => {
@@ -1346,7 +1346,7 @@ app.get('/api/super-admin/customers', (req, res) => {
 });
 
 // API: Update project status (Manager only)
-app.post('/api/project/update-status', (req, res) => {
+app.post('/api/project/update-status', async (req, res) => {
     const { folderId, status, signature, date, terminationDoc } = req.body;
     if (!folderId || !status) {
         return res.status(400).json({ success: false, message: "Folder ID and status are required" });
@@ -1357,7 +1357,7 @@ app.post('/api/project/update-status', (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid status value" });
     }
 
-    const data = getData();
+    const data = await getData();
     let folder = null;
 
     data.users.forEach(u => {
@@ -1387,12 +1387,12 @@ app.post('/api/project/update-status', (req, res) => {
         folder.terminationDoc = terminationDoc;
     }
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Update project payment status (Manager only)
-app.post('/api/project/update-payment-status', (req, res) => {
+app.post('/api/project/update-payment-status', async (req, res) => {
     const { folderId, paymentStatus } = req.body;
     if (!folderId || !paymentStatus) {
         return res.status(400).json({ success: false, message: "Folder ID and payment status are required" });
@@ -1403,7 +1403,7 @@ app.post('/api/project/update-payment-status', (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid payment status value" });
     }
 
-    const data = getData();
+    const data = await getData();
     let folder = null;
 
     data.users.forEach(u => {
@@ -1418,47 +1418,47 @@ app.post('/api/project/update-payment-status', (req, res) => {
     }
 
     folder.paymentStatus = paymentStatus;
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Approve pending user (Admin only)
-app.post('/api/admin/approve-user', (req, res) => {
+app.post('/api/admin/approve-user', async (req, res) => {
     const { username } = req.body;
     if (!username) return res.status(400).json({ success: false, message: "Username required" });
 
-    const data = getData();
+    const data = await getData();
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     user.approved = true;
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Deny pending user (Admin only)
-app.post('/api/admin/deny-user', (req, res) => {
+app.post('/api/admin/deny-user', async (req, res) => {
     const { username } = req.body;
     if (!username) return res.status(400).json({ success: false, message: "Username required" });
 
-    const data = getData();
+    const data = await getData();
     const idx = data.users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
     if (idx === -1) return res.status(404).json({ success: false, message: "User not found" });
 
     // Remove the user from the database
     data.users.splice(idx, 1);
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Reassign multiple crews to project (Admin only)
-app.post('/api/admin/reassign-project-crews', (req, res) => {
+app.post('/api/admin/reassign-project-crews', async (req, res) => {
     const { folderId, crews } = req.body;
     if (!folderId || !Array.isArray(crews)) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
     }
 
-    const data = getData();
+    const data = await getData();
     let folder = null;
 
     data.users.forEach(u => {
@@ -1482,18 +1482,18 @@ app.post('/api/admin/reassign-project-crews', (req, res) => {
     // Sync legacy single crew property to the first one in the list for compatibility
     folder.crew = validCrews.length > 0 ? validCrews[0] : null;
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Reassign crews by Manager (Manager can only edit their own projects)
-app.post('/api/manager/reassign-project-crews', (req, res) => {
+app.post('/api/manager/reassign-project-crews', async (req, res) => {
     const { folderId, crews, username } = req.body;
     if (!folderId || !Array.isArray(crews) || !username) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
     }
 
-    const data = getData();
+    const data = await getData();
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user || (user.role !== 'manager' && user.role !== 'admin')) {
         return res.status(403).json({ success: false, message: "Unauthorized access" });
@@ -1513,14 +1513,14 @@ app.post('/api/manager/reassign-project-crews', (req, res) => {
     folder.crews = validCrews;
     folder.crew = validCrews.length > 0 ? validCrews[0] : null;
 
-    saveData(data);
+    await saveData(data);
     res.json({ success: true });
 });
 
 // API: Customer lookup by exact match of phone or email
-app.get('/api/customer-lookup', (req, res) => {
+app.get('/api/customer-lookup', async (req, res) => {
     const { phone, email } = req.query;
-    const data = getData();
+    const data = await getData();
     
     let matchedCustomer = null;
 
@@ -1554,11 +1554,11 @@ app.get('/api/customer-lookup', (req, res) => {
 });
 
 // API: Upgrade company to premium
-app.post('/api/company/upgrade', (req, res) => {
+app.post('/api/company/upgrade', async (req, res) => {
     const { company } = req.body;
     if (!company) return res.status(400).json({ success: false, message: "Company name required" });
 
-    const data = getData();
+    const data = await getData();
     if (!data.companies) data.companies = {};
     
     const companyKey = company.toLowerCase();
@@ -1571,7 +1571,7 @@ app.post('/api/company/upgrade', (req, res) => {
     }
 
     data.companies[companyKey].tier = 'premium';
-    saveData(data);
+    await saveData(data);
     res.json({ success: true, tier: 'premium' });
 });
 
