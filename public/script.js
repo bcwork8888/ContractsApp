@@ -1120,8 +1120,6 @@ async function loadFolders() {
     folders.forEach(f => {
         const div = document.createElement('div');
         div.className = 'folder-card';
-        // Add styling so it looks like a clickable folder
-        div.style = "border: 1px solid #000; padding: 20px; cursor: pointer; background: #f9f9f9;";
 
         div.innerHTML = `<strong>📁 ${f.name}</strong> <span style="font-size: 11px; margin-left: 8px; padding: 2px 6px; border-radius: 4px; background: #e2e8f0; font-weight: bold; color: #475569;">${f.status || 'Draft'}</span>`;
 

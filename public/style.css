@@ -326,3 +326,47 @@ select:focus {
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
     }
 }
+
+/* Dashboard My Projects Container */
+#folder-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.folder-card {
+    border: 1px solid var(--border-blue, #bfdbfe);
+    padding: 16px 20px;
+    cursor: pointer;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.folder-card:hover {
+    border-color: var(--brand-blue, #3b82f6);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background-color: var(--light-blue, #eff6ff);
+}
+
+/* 📱 📱 手机和 iPad 屏幕适配：My Projects 列表竖列（单列 Stack）显示 */
+@media screen and (max-width: 1024px) {
+    #folder-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        width: 100% !important;
+    }
+
+    .folder-card {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 16px 18px !important;
+    }
+}
