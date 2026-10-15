@@ -615,8 +615,15 @@ async function loadWorkData() {
     const username = sessionStorage.getItem('username');
     const role = sessionStorage.getItem('role');
     const res = await fetch(`/api/folders?username=${username}`);
-    const folders = await res.json();
-    const folder = folders.find(f => f.id == currentFolderId);
+    const folders = await res.json().catch(() => []);
+    let folder = folders.find(f => String(f.id) === String(currentFolderId));
+    if (!folder && currentFolderId) {
+        const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+        if (directRes.ok) {
+            const data = await directRes.json();
+            folder = data.folder;
+        }
+    }
     currentFolder = folder;
 
     if (folder) {
@@ -711,10 +718,19 @@ async function loadWorkData() {
 
 async function loadPayments() {
     const username = sessionStorage.getItem('username');
-    const res = await fetch(`/api/folders?username=${username}`);
-    const folders = await res.json();
-
-    const folder = folders.find(f => f.id == currentFolderId);
+    let folder = (currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
+    if (!folder) {
+        const res = await fetch(`/api/folders?username=${username}`);
+        const folders = await res.json().catch(() => []);
+        folder = folders.find(f => String(f.id) === String(currentFolderId));
+        if (!folder && currentFolderId) {
+            const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+            if (directRes.ok) {
+                const data = await directRes.json();
+                folder = data.folder;
+            }
+        }
+    }
     const container = document.getElementById('payments-list');
 
     if (!container) return;
@@ -863,7 +879,11 @@ async function signup() {
     const result = await res.json();
 
     if (result.success) {
-        alert("Account created! Please login.");
+        if (result.pendingApproval) {
+            alert("Account registered successfully! Your account is pending administrator approval before you can access projects.");
+        } else {
+            alert("Account created! Please login.");
+        }
         toggleView('login-section');
     } else {
         alert(result.message);
@@ -1232,10 +1252,19 @@ async function saveNote() {
 async function loadNotes() {
     const username = sessionStorage.getItem('username');
     // Fetch folders to get the latest notes for the current folder
-    const res = await fetch(`/api/folders?username=${username}`);
-    const folders = await res.json();
-
-    const folder = folders.find(f => f.id == currentFolderId);
+    let folder = (currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
+    if (!folder) {
+        const res = await fetch(`/api/folders?username=${username}`);
+        const folders = await res.json().catch(() => []);
+        folder = folders.find(f => String(f.id) === String(currentFolderId));
+        if (!folder && currentFolderId) {
+            const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+            if (directRes.ok) {
+                const data = await directRes.json();
+                folder = data.folder;
+            }
+        }
+    }
     const container = document.getElementById('notes-list');
 
     if (folder && folder.notes && folder.notes.length > 0) {
@@ -1289,11 +1318,19 @@ async function loadNotes() {
 
 async function loadContracts() {
     const username = sessionStorage.getItem('username');
-    // Fetch folders to get the latest notes for the current folder
-    const res = await fetch(`/api/folders?username=${username}`);
-    const folders = await res.json();
-
-    const folder = folders.find(f => f.id == currentFolderId);
+    let folder = (currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
+    if (!folder) {
+        const res = await fetch(`/api/folders?username=${username}`);
+        const folders = await res.json().catch(() => []);
+        folder = folders.find(f => String(f.id) === String(currentFolderId));
+        if (!folder && currentFolderId) {
+            const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+            if (directRes.ok) {
+                const data = await directRes.json();
+                folder = data.folder;
+            }
+        }
+    }
     const container = document.getElementById('contracts-list');
 
     let itemsToRender = [];
@@ -2033,7 +2070,7 @@ async function loadSuperAdminConsole() {
         const companyOptions = `
             <option value="" ${!user.company ? 'selected' : ''}>Unassigned</option>
             ${companies.map(c => `
-                <option value="${c}" ${user.company.toLowerCase() === c.toLowerCase() ? 'selected' : ''}>${c}</option>
+                <option value="${c}" ${(user.company || '').toLowerCase() === (c || '').toLowerCase() ? 'selected' : ''}>${c}</option>
             `).join('')}
         `;
         

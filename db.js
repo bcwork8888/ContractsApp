@@ -8,7 +8,7 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
-const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
+const isSupabaseConfigured = Boolean(process.env.USE_LOCAL_DB !== 'true' && process.env.NODE_ENV !== 'test' && supabaseUrl && supabaseKey);
 let supabase = null;
 
 if (isSupabaseConfigured) {
@@ -58,6 +58,14 @@ async function getData() {
             return readLocalData();
         }
 
+        // Auto-seed Supabase if database tables are currently empty
+        if (!usersData || usersData.length === 0) {
+            console.log('[DB] Supabase database is empty. Auto-seeding initial data from data.json...');
+            const localData = readLocalData();
+            await saveData(localData);
+            return localData;
+        }
+
         const companies = {};
         (companiesData || []).forEach(c => {
             companies[c.key] = {
@@ -83,7 +91,11 @@ async function getData() {
                     email: c.email,
                     signature: c.signature,
                     token: c.token,
-                    signed: c.signed,
+                    signatureToken: c.token,
+                    signed: Boolean(c.signed),
+                    isChangeOrder: Boolean(c.is_change_order || c.isChangeOrder),
+                    void: Boolean(c.void),
+                    expirationDate: c.expiration_date || c.expirationDate || '',
                     companyOfficialName: c.company_official_name,
                     companyLogo: c.company_logo,
                     companyNameCard: c.company_name_card,
@@ -121,6 +133,10 @@ async function getData() {
                     status: p.status,
                     crew: p.crew,
                     crews: p.crews || [],
+                    payments: p.payments || [],
+                    paymentStatus: p.payment_status || 'N/A',
+                    crewsViewContractPayment: Boolean(p.crews_view_contract_payment),
+                    terminationDoc: p.termination_doc || null,
                     contracts: projContracts,
                     notes: projNotes
                 };
@@ -144,7 +160,7 @@ async function getData() {
     }
 }
 
-// Asynchronous Data Saver
+// Asynchronous Data Saver with Fast Batch Upsert
 async function saveData(data) {
     writeLocalData(data);
 
@@ -153,35 +169,43 @@ async function saveData(data) {
     }
 
     try {
-        // 1. Sync Companies
-        if (data.companies) {
-            for (const [key, comp] of Object.entries(data.companies)) {
-                await supabase.from('companies').upsert({
-                    key: key,
-                    official_name: comp.officialName || key,
-                    logo: comp.logo || './logo.JPG',
-                    name_card: comp.nameCard || '',
-                    tier: comp.tier || 'standard'
-                }, { onConflict: 'key' });
+        // 1. Batch Upsert Companies
+        if (data.companies && typeof data.companies === 'object') {
+            const companiesList = Object.entries(data.companies).map(([key, comp]) => ({
+                key: key,
+                official_name: comp.officialName || key,
+                logo: comp.logo || './logo.JPG',
+                name_card: comp.nameCard || '',
+                tier: comp.tier || 'standard'
+            }));
+            if (companiesList.length > 0) {
+                const { error } = await supabase.from('companies').upsert(companiesList, { onConflict: 'key' });
+                if (error) console.error('[DB] Supabase batch upsert companies error:', error.message);
             }
         }
 
-        // 2. Sync Users & Nested Entities
+        // 2. Prepare Batches for Users, Projects, Contracts, Notes, Replies
         if (data.users && Array.isArray(data.users)) {
+            const usersList = [];
+            const projectsList = [];
+            const contractsList = [];
+            const notesList = [];
+            const repliesList = [];
+
             for (const user of data.users) {
-                await supabase.from('users').upsert({
+                usersList.push({
                     username: user.username.toLowerCase(),
                     password: user.password,
                     fullname: user.fullname || user.username,
                     company: user.company || '',
                     role: user.role || 'user',
                     approved: user.approved !== false
-                }, { onConflict: 'username' });
+                });
 
                 if (user.folders && Array.isArray(user.folders)) {
                     for (const folder of user.folders) {
                         const folderIdStr = String(folder.id);
-                        await supabase.from('projects').upsert({
+                        projectsList.push({
                             id: folderIdStr,
                             username: user.username.toLowerCase(),
                             name: folder.name,
@@ -193,11 +217,11 @@ async function saveData(data) {
                             status: folder.status || 'Draft',
                             crew: folder.crew || null,
                             crews: folder.crews || []
-                        }, { onConflict: 'id' });
+                        });
 
                         if (folder.contracts && Array.isArray(folder.contracts)) {
                             for (const contract of folder.contracts) {
-                                await supabase.from('contracts').upsert({
+                                contractsList.push({
                                     id: String(contract.id),
                                     folder_id: folderIdStr,
                                     customer: contract.customer || '',
@@ -208,31 +232,31 @@ async function saveData(data) {
                                     phone: contract.phone || '',
                                     email: contract.email || '',
                                     signature: contract.signature || '',
-                                    token: contract.token || null,
+                                    token: contract.token || contract.signatureToken || null,
                                     signed: Boolean(contract.signed),
                                     company_official_name: contract.companyOfficialName || null,
                                     company_logo: contract.companyLogo || null,
                                     company_name_card: contract.companyNameCard || null,
                                     items: contract.items || []
-                                }, { onConflict: 'id' });
+                                });
                             }
                         }
 
                         if (folder.notes && Array.isArray(folder.notes)) {
                             for (const note of folder.notes) {
                                 const noteIdStr = String(note.id);
-                                await supabase.from('notes').upsert({
+                                notesList.push({
                                     id: noteIdStr,
                                     folder_id: folderIdStr,
                                     content: note.content || '',
                                     date: note.date || '',
                                     price: note.price ? Number(note.price) : null,
                                     photos: note.photos || []
-                                }, { onConflict: 'id' });
+                                });
 
                                 if (note.replies && Array.isArray(note.replies)) {
                                     for (const reply of note.replies) {
-                                        await supabase.from('note_replies').upsert({
+                                        repliesList.push({
                                             id: String(reply.id),
                                             note_id: noteIdStr,
                                             username: reply.username || '',
@@ -240,7 +264,7 @@ async function saveData(data) {
                                             role: reply.role || '',
                                             content: reply.content || '',
                                             date: reply.date || ''
-                                        }, { onConflict: 'id' });
+                                        });
                                     }
                                 }
                             }
@@ -248,9 +272,70 @@ async function saveData(data) {
                     }
                 }
             }
+
+            // Sequential table-level batch upserts (satisfying foreign key dependencies)
+            if (usersList.length > 0) {
+                const { error } = await supabase.from('users').upsert(usersList, { onConflict: 'username' });
+                if (error) console.error('[DB] Supabase batch upsert users error:', error.message);
+            }
+
+            if (projectsList.length > 0) {
+                const { error } = await supabase.from('projects').upsert(projectsList, { onConflict: 'id' });
+                if (error) console.error('[DB] Supabase batch upsert projects error:', error.message);
+            }
+
+            if (contractsList.length > 0) {
+                const { error } = await supabase.from('contracts').upsert(contractsList, { onConflict: 'id' });
+                if (error) console.error('[DB] Supabase batch upsert contracts error:', error.message);
+            }
+
+            if (notesList.length > 0) {
+                const { error } = await supabase.from('notes').upsert(notesList, { onConflict: 'id' });
+                if (error) console.error('[DB] Supabase batch upsert notes error:', error.message);
+            }
+
+            if (repliesList.length > 0) {
+                const { error } = await supabase.from('note_replies').upsert(repliesList, { onConflict: 'id' });
+                if (error) console.error('[DB] Supabase batch upsert note_replies error:', error.message);
+            }
         }
     } catch (err) {
         console.error('[DB] Error saving data to Supabase:', err);
+    }
+}
+
+async function testConnection() {
+    if (!isSupabaseConfigured) {
+        return {
+            connected: false,
+            mode: 'local_file',
+            message: 'SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables are missing on Vercel.'
+        };
+    }
+
+    try {
+        const { count, error } = await supabase.from('users').select('*', { count: 'exact', head: true });
+        if (error) {
+            return {
+                connected: false,
+                mode: 'supabase',
+                error: error.message,
+                message: 'Connected to Supabase client, but failed to query database table.'
+            };
+        }
+        return {
+            connected: true,
+            mode: 'supabase',
+            userCount: count,
+            message: 'Successfully connected to Supabase database!'
+        };
+    } catch (err) {
+        return {
+            connected: false,
+            mode: 'supabase',
+            error: err.message,
+            message: 'Exception connecting to Supabase.'
+        };
     }
 }
 
@@ -259,6 +344,7 @@ module.exports = {
     supabase,
     getData,
     saveData,
+    testConnection,
     readLocalData,
     writeLocalData
 };

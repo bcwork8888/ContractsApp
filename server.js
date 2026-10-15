@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const app = express();
-const PORT = 8888;
+const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 
@@ -19,6 +19,12 @@ app.use(express.static('public')); // Serves your HTML/JS
 // Logout route redirecting back to home/login
 app.get('/logout', (req, res) => {
     res.redirect('/');
+});
+
+// API: Health / Database Connection Check
+app.get('/api/health', async (req, res) => {
+    const status = await db.testConnection();
+    res.json(status);
 });
 
 const db = require('./db.js');
@@ -204,48 +210,96 @@ app.post('/api/signup', async (req, res) => {
 
     data.users.push(newUser);
     await saveData(data);
-    res.json({ success: true });
+    res.json({ success: true, pendingApproval: isManagerOrCrew });
 });
 
-// API: Get user folders
+// Universal Helper to find a folder across all users
+function findFolderById(data, folderId) {
+    if (!data || !data.users) return null;
+    for (const u of data.users) {
+        if (u.folders && Array.isArray(u.folders)) {
+            const found = u.folders.find(f => String(f.id) === String(folderId));
+            if (found) return { folder: found, owner: u };
+        }
+    }
+    return null;
+}
+
+// API: Get single folder by ID
+app.get('/api/folder', async (req, res) => {
+    const folderId = req.query.id || req.query.folderId;
+    if (!folderId) return res.status(400).json({ success: false, message: "Folder ID required" });
+    const data = await getData();
+    const result = findFolderById(data, folderId);
+    if (!result) return res.status(404).json({ success: false, message: "Folder not found" });
+    res.json({ success: true, folder: result.folder, owner: result.owner.username });
+});
+
+// API: Get user folders with proper role/company scoping
 app.get('/api/folders', async (req, res) => {
     const { username } = req.query;
+    if (!username) return res.status(400).json({ success: false, message: "Username required" });
     const data = await getData();
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
-    if (user) {
-        if (user.role === 'crew') {
-            const assignedFolders = [];
-            data.users.forEach(u => {
-                if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-                    u.folders.forEach(f => {
-                        const isAssigned = (f.crew && f.crew.toLowerCase() === username.toLowerCase()) || 
-                                           (f.crews && f.crews.some(c => c.toLowerCase() === username.toLowerCase()));
-                        if (isAssigned) {
-                            assignedFolders.push(f);
-                        }
-                    });
-                }
-            });
-            res.json(sortFolders(assignedFolders));
-        } else {
-            res.json(sortFolders(user.folders || []));
-        }
-    } else {
-        res.status(404).json({ success: false, message: "User not found" });
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
     }
+
+    if (user.role === 'super admin') {
+        const allFolders = [];
+        data.users.forEach(u => {
+            if (u.folders) {
+                u.folders.forEach(f => {
+                    if (!allFolders.some(existing => String(existing.id) === String(f.id))) {
+                        allFolders.push(f);
+                    }
+                });
+            }
+        });
+        return res.json(sortFolders(allFolders));
+    }
+
+    if (user.role === 'admin') {
+        const companyFolders = [];
+        const companyUsers = data.users.filter(u => u.company && u.company.toLowerCase() === (user.company || '').toLowerCase());
+        companyUsers.forEach(u => {
+            if (u.folders) {
+                u.folders.forEach(f => {
+                    if (!companyFolders.some(existing => String(existing.id) === String(f.id))) {
+                        companyFolders.push(f);
+                    }
+                });
+            }
+        });
+        return res.json(sortFolders(companyFolders));
+    }
+
+    if (user.role === 'crew') {
+        const assignedFolders = [];
+        data.users.forEach(u => {
+            if (u.folders) {
+                u.folders.forEach(f => {
+                    const isAssigned = (f.crew && f.crew.toLowerCase() === username.toLowerCase()) || 
+                                       (f.crews && f.crews.some(c => c.toLowerCase() === username.toLowerCase()));
+                    if (isAssigned && !assignedFolders.some(existing => String(existing.id) === String(f.id))) {
+                        assignedFolders.push(f);
+                    }
+                });
+            }
+        });
+        return res.json(sortFolders(assignedFolders));
+    }
+
+    // Default: manager's own folders
+    return res.json(sortFolders(user.folders || []));
 });
 
 app.post('/api/add-note', async (req, res) => {
     const { username, folderId, noteContent, price, photos, uncontract } = req.body;
     const data = await getData();
     
-    let folder = null;
-    data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-            const found = u.folders.find(f => f.id == folderId);
-            if (found) folder = found;
-        }
-    });
+    const folderResult = findFolderById(data, folderId);
+    const folder = folderResult ? folderResult.folder : null;
 
     if (!folder) {
         return res.status(404).json({ success: false, message: "Folder not found" });
@@ -307,13 +361,8 @@ app.post('/api/project/update-notes', async (req, res) => {
     }
 
     const data = await getData();
-    let folder = null;
-    data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-            const found = u.folders.find(f => f.id == folderId);
-            if (found) folder = found;
-        }
-    });
+    const folderResult = findFolderById(data, folderId);
+    const folder = folderResult ? folderResult.folder : null;
 
     if (!folder) {
         return res.status(404).json({ success: false, message: "Project not found" });
@@ -338,13 +387,8 @@ app.post('/api/add-contract', async (req, res) => {
     const { username, folderId, contractData } = req.body;
     const data = await getData();
 
-    let folder = null;
-    data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-            const found = u.folders.find(f => f.id == folderId);
-            if (found) folder = found;
-        }
-    });
+    const folderResult = findFolderById(data, folderId);
+    const folder = folderResult ? folderResult.folder : null;
 
     if (folder) {
         if (!folder.contracts) folder.contracts = [];
@@ -375,7 +419,9 @@ app.post('/api/add-contract', async (req, res) => {
             }
             const token = 'token_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
             newContract.signatureToken = token;
+            newContract.token = token;
             newContract.signature = ''; // empty signature for now
+            newContract.signed = false;
 
             // Update project folder status
             folder.status = "Sent to Client";
@@ -392,14 +438,15 @@ http://localhost:8888/sign.html?token=${token}
 `);
         } else {
             newContract.signature = contractData.signature || '';
+            newContract.signed = true;
             folder.status = "Signed";
         }
 
         folder.contracts.push(newContract);
         await saveData(data);
-        return res.json({ success: true });
+        return res.json({ success: true, contract: newContract });
     }
-    res.status(404).json({ success: false });
+    res.status(404).json({ success: false, message: "Folder not found" });
 });
 
 // API: Add Payment
@@ -410,14 +457,8 @@ app.post('/api/add-payment', async (req, res) => {
     }
 
     const data = await getData();
-    let folder = null;
-
-    data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-            const found = u.folders.find(f => f.id == folderId);
-            if (found) folder = found;
-        }
-    });
+    const folderResult = findFolderById(data, folderId);
+    const folder = folderResult ? folderResult.folder : null;
 
     if (!folder) {
         return res.status(404).json({ success: false, message: "Project not found" });
@@ -618,21 +659,10 @@ app.get('/api/view-pdf', async (req, res) => {
     const { username, folderId, contractId, termination } = req.query;
     const data = await getData();
 
-    let folder = null;
-    let managerUser = null;
-    
-    // Find the folder and the owner (manager/admin) user
-    data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-            const found = u.folders.find(f => f.id == folderId);
-            if (found) {
-                folder = found;
-                managerUser = u;
-            }
-        }
-    });
-
-    if (!folder) return res.status(404).send("Folder not found");
+    const folderResult = findFolderById(data, folderId);
+    if (!folderResult) return res.status(404).send("Folder not found");
+    const folder = folderResult.folder;
+    const managerUser = folderResult.owner;
 
     if (termination === 'true') {
         const termDoc = folder.terminationDoc;
@@ -950,8 +980,8 @@ app.get('/api/admin/company-data', async (req, res) => {
             });
         }
         
-        // Folders are stored physically under the manager's or admin's folders array
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
+        // Folders are stored physically under the user's folders array
+        if (u.folders && Array.isArray(u.folders)) {
             u.folders.forEach(f => {
                 projects.push({
                     id: f.id,
@@ -1094,10 +1124,10 @@ app.post('/api/add-reply', async (req, res) => {
 
     let note = null;
     data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
+        if (u.folders) {
             u.folders.forEach(f => {
                 if (f.notes) {
-                    const foundNote = f.notes.find(n => n.id == noteId);
+                    const foundNote = f.notes.find(n => String(n.id) === String(noteId));
                     if (foundNote) {
                         note = foundNote;
                     }
@@ -1215,17 +1245,32 @@ app.post('/api/super-admin/create-user', async (req, res) => {
         return res.status(400).json({ success: false, message: "Username already exists" });
     }
 
-    data.users.push({
+    const trimmedCompany = company ? company.trim() : '';
+    if (trimmedCompany) {
+        if (!data.companies) data.companies = {};
+        const compKey = trimmedCompany.toLowerCase();
+        if (!data.companies[compKey]) {
+            data.companies[compKey] = {
+                officialName: trimmedCompany,
+                logo: "./logo.JPG"
+            };
+        }
+    }
+
+    const newUser = {
         username: username.trim(),
         password: password,
         fullname: fullname ? fullname.trim() : username.trim(),
         role: role,
-        company: company ? company.trim() : '',
+        company: trimmedCompany,
+        approved: true,
         folders: []
-    });
+    };
+
+    data.users.push(newUser);
 
     await saveData(data);
-    res.json({ success: true });
+    res.json({ success: true, user: newUser });
 });
 
 // API: Get contract details by signature token
@@ -1239,10 +1284,10 @@ app.get('/api/contract-by-token', async (req, res) => {
     let projectName = "";
 
     data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
+        if (u.folders) {
             u.folders.forEach(f => {
                 if (f.contracts) {
-                    const c = f.contracts.find(c => c.signatureToken === token);
+                    const c = f.contracts.find(c => c.signatureToken === token || c.token === token);
                     if (c) {
                         foundContract = c;
                         managerUser = u;
@@ -1291,10 +1336,10 @@ app.post('/api/submit-signature', async (req, res) => {
     let foundFolder = null;
 
     data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
+        if (u.folders) {
             u.folders.forEach(f => {
                 if (f.contracts) {
-                    const c = f.contracts.find(c => c.signatureToken === token);
+                    const c = f.contracts.find(c => c.signatureToken === token || c.token === token);
                     if (c) {
                         foundContract = c;
                         foundFolder = f;
@@ -1309,7 +1354,9 @@ app.post('/api/submit-signature', async (req, res) => {
     }
 
     foundContract.signature = signature;
+    foundContract.signed = true;
     delete foundContract.signatureToken; // remove token once signed
+    foundContract.token = null;
 
     if (foundFolder) {
         foundFolder.status = "Signed";
@@ -1325,7 +1372,7 @@ app.get('/api/super-admin/customers', async (req, res) => {
     const customers = [];
 
     data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
+        if (u.folders) {
             u.folders.forEach(f => {
                 if (f.contracts) {
                     f.contracts.forEach(c => {
@@ -1358,18 +1405,11 @@ app.post('/api/project/update-status', async (req, res) => {
     }
 
     const data = await getData();
-    let folder = null;
-
-    data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-            const found = u.folders.find(f => f.id == folderId);
-            if (found) folder = found;
-        }
-    });
-
-    if (!folder) {
+    const folderResult = findFolderById(data, folderId);
+    if (!folderResult) {
         return res.status(404).json({ success: false, message: "Project not found" });
     }
+    const folder = folderResult.folder;
 
     folder.status = status;
 
@@ -1404,18 +1444,11 @@ app.post('/api/project/update-payment-status', async (req, res) => {
     }
 
     const data = await getData();
-    let folder = null;
-
-    data.users.forEach(u => {
-        if ((u.role === 'manager' || u.role === 'admin') && u.folders) {
-            const found = u.folders.find(f => f.id == folderId);
-            if (found) folder = found;
-        }
-    });
-
-    if (!folder) {
+    const folderResult = findFolderById(data, folderId);
+    if (!folderResult) {
         return res.status(404).json({ success: false, message: "Project not found" });
     }
+    const folder = folderResult.folder;
 
     folder.paymentStatus = paymentStatus;
     await saveData(data);
