@@ -29,6 +29,15 @@ app.get('/api/health', async (req, res) => {
 });
 
 const db = require('./db.js');
+const mailer = require('./mailer.js');
+
+// API: Email Configuration Status
+app.get('/api/email-status', (req, res) => {
+    res.json({
+        configured: !!process.env.RESEND_API_KEY,
+        sender: process.env.RESEND_FROM_EMAIL || mailer.DEFAULT_FROM
+    });
+});
 
 // Helper to read JSON / Database
 const getData = async () => await db.getData();
@@ -389,26 +398,20 @@ app.post('/api/request-password-reset', async (req, res) => {
         const protocol = req.protocol;
         const resetLink = `${protocol}://${host}/?token=${token}&username=${encodeURIComponent(user.username)}#reset-password`;
 
-        console.log(`
-======================================================================
-[MOCK EMAIL SENT - PASSWORD RESET]
-To: ${adminEmail}
-Subject: FieldSync Password Reset Link
-Body: Hello ${user.fullname || user.username},
-
-You requested a password reset for your FieldSync Admin account.
-Please click the link below to set a new password:
-${resetLink}
-
-This link will expire in 1 hour.
-======================================================================
-`);
+        // Dispatch via Resend email service
+        const emailDelivery = await mailer.sendPasswordResetEmail({
+            to: adminEmail,
+            username: user.username,
+            fullname: user.fullname,
+            resetLink
+        });
 
         return res.json({
             success: true,
             role: user.role,
             email: adminEmail,
             resetLink,
+            emailDelivery,
             message: `Password reset link sent to ${adminEmail}`
         });
     } else {
@@ -686,16 +689,19 @@ app.post('/api/add-contract', async (req, res) => {
             // Update project folder status
             folder.status = "Sent to Client";
 
-            // Log mock email sent
-            console.log(`
-======================================================================
-[MOCK EMAIL SENT]
-To: ${contractData.email}
-Subject: Sign your contract for project: ${folder.name}
-Body: Please sign your contract by clicking this link:
-http://localhost:8888/sign.html?token=${token}
-======================================================================
-`);
+            const host = req.get('host');
+            const protocol = req.protocol;
+            const signLink = `${protocol}://${host}/sign.html?token=${token}`;
+
+            // Dispatch signing link via Resend email service
+            const emailDelivery = await mailer.sendContractSignEmail({
+                to: contractData.email,
+                customerName: contractData.customer,
+                projectName: folder.name,
+                signLink,
+                companyName: folder.company || 'FieldSync'
+            });
+            newContract.emailDelivery = emailDelivery;
         } else {
             newContract.signature = contractData.signature || '';
             newContract.signed = true;
@@ -1430,19 +1436,13 @@ app.post('/api/admin/reset-user-password', async (req, res) => {
     if (user.email && user.email.trim()) {
         destination = user.email.trim();
         channel = 'email';
-        console.log(`
-======================================================================
-[MOCK EMAIL SENT - TEMPORARY PASSWORD ASSIGNED]
-To: ${destination}
-Subject: FieldSync Temporary Password Assigned
-Body: Hello ${user.fullname || user.username},
-
-Your administrator has assigned a temporary password to your account.
-Temporary Password: ${tempPassword}
-
-Please log in with this temporary password and update your credentials.
-======================================================================
-        `);
+        await mailer.sendTemporaryPasswordEmail({
+            to: destination,
+            username: user.username,
+            fullname: user.fullname,
+            tempPassword,
+            companyName: user.company || 'FieldSync'
+        });
     } else if (user.cellphone && user.cellphone.trim()) {
         destination = user.cellphone.trim();
         channel = 'cellphone';
