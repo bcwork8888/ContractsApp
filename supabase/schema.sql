@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
     company TEXT DEFAULT '',
     role TEXT DEFAULT 'crew',
     approved BOOLEAN DEFAULT true,
+    email TEXT,
+    cellphone TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -87,18 +89,18 @@ CREATE TABLE IF NOT EXISTS note_replies (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Enable Row Level Security (RLS) policies (Optional/Permissive for Serverless API)
-ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE contracts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE note_replies ENABLE ROW LEVEL SECURITY;
+-- Grant full table permissions to all API roles in public schema
+GRANT ALL ON TABLE companies TO anon, authenticated, service_role;
+GRANT ALL ON TABLE users TO anon, authenticated, service_role;
+GRANT ALL ON TABLE projects TO anon, authenticated, service_role;
+GRANT ALL ON TABLE contracts TO anon, authenticated, service_role;
+GRANT ALL ON TABLE notes TO anon, authenticated, service_role;
+GRANT ALL ON TABLE note_replies TO anon, authenticated, service_role;
 
--- Allow anon and service role full access (managed securely via Backend Service Role Key)
-CREATE POLICY "Public Read Access" ON companies FOR SELECT USING (true);
-CREATE POLICY "Public Read Access" ON users FOR SELECT USING (true);
-CREATE POLICY "Public Read Access" ON projects FOR SELECT USING (true);
-CREATE POLICY "Public Read Access" ON contracts FOR SELECT USING (true);
-CREATE POLICY "Public Read Access" ON notes FOR SELECT USING (true);
-CREATE POLICY "Public Read Access" ON note_replies FOR SELECT USING (true);
+-- Disable Row Level Security (RLS) to grant unrestricted API CRUD access
+ALTER TABLE companies DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE projects DISABLE ROW LEVEL SECURITY;
+ALTER TABLE contracts DISABLE ROW LEVEL SECURITY;
+ALTER TABLE notes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE note_replies DISABLE ROW LEVEL SECURITY;

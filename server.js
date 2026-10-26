@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const PDFDocument = require('pdfkit');
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -55,13 +56,53 @@ function sortFolders(folders) {
     });
 }
 
+function generateCompanyId(existingCompanies) {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let id = '';
+    const existingList = Object.values(existingCompanies || {});
+    do {
+        id = 'CID-';
+        for (let i = 0; i < 6; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+    } while (existingList.some(c => c && c.companyId === id));
+    return id;
+}
+
+function ensureCompanyIds(data) {
+    if (!data.companies) data.companies = {};
+    let modified = false;
+    for (const [key, comp] of Object.entries(data.companies)) {
+        if (!comp.companyId) {
+            comp.companyId = generateCompanyId(data.companies);
+            modified = true;
+        }
+    }
+    if (data.users && Array.isArray(data.users)) {
+        for (const user of data.users) {
+            if (user.company && !user.companyId) {
+                const compKey = user.company.trim().toLowerCase();
+                if (data.companies[compKey] && data.companies[compKey].companyId) {
+                    user.companyId = data.companies[compKey].companyId;
+                    modified = true;
+                }
+            }
+        }
+    }
+    return modified;
+}
+
 // API: Login
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     const data = await getData();
+    ensureCompanyIds(data);
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     
     if (user) {
+        if (user.active === false || user.deactivated === true || user.denied === true) {
+            return res.status(403).json({ success: false, message: "Your account has been deactivated (inactive). Please contact your company administrator." });
+        }
         if (user.approved === false) {
             return res.status(403).json({ success: false, message: "Your account is pending approval by your company administrator." });
         }
@@ -80,6 +121,7 @@ app.post('/api/login', async (req, res) => {
             username: user.username,
             fullname: user.fullname || user.username,
             company: user.company || '',
+            companyId: user.companyId || compInfo.companyId || '',
             role: user.role || 'user',
             folders: user.folders,
             companyOfficialName: compInfo.officialName,
@@ -187,7 +229,24 @@ app.post('/api/edit-folder', async (req, res) => {
 
 // API: Sign Up
 app.post('/api/signup', async (req, res) => {
-    const { username, password, fullname, company, role } = req.body;
+    const { username, password, fullname, company, companyId, isNewCompany, role, email, cellphone } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: "Username and password are required" });
+    }
+
+    const trimmedEmail = (email || '').trim();
+    const trimmedCellphone = (cellphone || '').trim();
+
+    if (role === 'admin') {
+        if (!trimmedEmail) {
+            return res.status(400).json({ success: false, message: "Email is mandatory for Admin role" });
+        }
+    } else if (role === 'manager' || role === 'crew') {
+        if (!trimmedEmail && !trimmedCellphone) {
+            return res.status(400).json({ success: false, message: "Either email or cell phone is mandatory for Manager and Crew roles" });
+        }
+    }
+
     const data = await getData();
 
     // Check if user already exists
@@ -196,21 +255,222 @@ app.post('/api/signup', async (req, res) => {
         return res.status(400).json({ success: false, message: "User already exists" });
     }
 
+    ensureCompanyIds(data);
+
+    let assignedCompany = '';
+    let assignedCompanyId = '';
+    let isPending = false;
+
+    // Determine if creating a new company or joining an existing one
+    const isCreatingCompany = Boolean(isNewCompany || (role === 'admin' && company && !companyId));
+
+    if (isCreatingCompany) {
+        const trimmedCompany = (company || '').trim();
+        if (!trimmedCompany) {
+            return res.status(400).json({ success: false, message: "Company name is required" });
+        }
+
+        const compKey = trimmedCompany.toLowerCase();
+        if (data.companies[compKey]) {
+            return res.status(400).json({
+                success: false,
+                message: "A company with this name already exists. If joining this company, please enter its Company ID."
+            });
+        }
+
+        const newCompanyId = generateCompanyId(data.companies);
+        data.companies[compKey] = {
+            companyId: newCompanyId,
+            officialName: trimmedCompany,
+            logo: "./logo.JPG",
+            nameCard: "",
+            tier: "standard"
+        };
+
+        assignedCompany = trimmedCompany;
+        assignedCompanyId = newCompanyId;
+        isPending = false;
+    } else {
+        // Manager, Crew, or Second Admin joining existing company via companyId (or fallback name for tests)
+        const inputIdOrName = (companyId || company || '').trim();
+        if (!inputIdOrName) {
+            return res.status(400).json({
+                success: false,
+                message: "Company ID is required. Please ask your company administrator for the Company ID."
+            });
+        }
+
+        let foundComp = null;
+        const upperSearch = inputIdOrName.toUpperCase();
+        const lowerSearch = inputIdOrName.toLowerCase();
+
+        // 1. Search by Company ID
+        for (const comp of Object.values(data.companies || {})) {
+            if (comp.companyId && comp.companyId.toUpperCase() === upperSearch) {
+                foundComp = comp;
+                break;
+            }
+        }
+
+        // 2. Fallback search by company key or official name
+        if (!foundComp) {
+            for (const [key, comp] of Object.entries(data.companies || {})) {
+                if (key.toLowerCase() === lowerSearch || (comp.officialName && comp.officialName.toLowerCase() === lowerSearch)) {
+                    foundComp = comp;
+                    break;
+                }
+            }
+        }
+
+        if (!foundComp) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Company ID. Please ask your company administrator for the correct Company ID."
+            });
+        }
+
+        assignedCompany = foundComp.officialName;
+        assignedCompanyId = foundComp.companyId;
+        isPending = (role === 'manager' || role === 'crew');
+    }
+
     // Create new user object
-    const isManagerOrCrew = (role === 'manager' || role === 'crew');
     const newUser = {
         username,
         password,
         fullname,
-        company,
+        company: assignedCompany,
+        companyId: assignedCompanyId,
         role,
+        email: trimmedEmail,
+        cellphone: trimmedCellphone,
         folders: [],
-        approved: isManagerOrCrew ? false : true
+        approved: !isPending
     };
 
     data.users.push(newUser);
     await saveData(data);
-    res.json({ success: true, pendingApproval: isManagerOrCrew });
+    res.json({
+        success: true,
+        companyId: assignedCompanyId,
+        companyName: assignedCompany,
+        pendingApproval: isPending
+    });
+});
+
+// API: Request Password Reset
+app.post('/api/request-password-reset', async (req, res) => {
+    const { username } = req.body;
+    if (!username) {
+        return res.status(400).json({ success: false, message: "Username is required" });
+    }
+
+    const data = await getData();
+    const user = data.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.role === 'admin' || user.role === 'super admin') {
+        const adminEmail = (user.email || '').trim();
+        if (!adminEmail) {
+            return res.status(400).json({
+                success: false,
+                message: "No email address is associated with this Admin account. Please contact system support."
+            });
+        }
+
+        const token = 'rst_' + Date.now() + '_' + Math.random().toString(36).substring(2, 12);
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + (60 * 60 * 1000); // 1 hour
+        await saveData(data);
+
+        const host = req.get('host');
+        const protocol = req.protocol;
+        const resetLink = `${protocol}://${host}/?token=${token}&username=${encodeURIComponent(user.username)}#reset-password`;
+
+        console.log(`
+======================================================================
+[MOCK EMAIL SENT - PASSWORD RESET]
+To: ${adminEmail}
+Subject: FieldSync Password Reset Link
+Body: Hello ${user.fullname || user.username},
+
+You requested a password reset for your FieldSync Admin account.
+Please click the link below to set a new password:
+${resetLink}
+
+This link will expire in 1 hour.
+======================================================================
+`);
+
+        return res.json({
+            success: true,
+            role: user.role,
+            email: adminEmail,
+            resetLink,
+            message: `Password reset link sent to ${adminEmail}`
+        });
+    } else {
+        // Crew or Manager
+        const companyKey = (user.company || '').trim().toLowerCase();
+        const companyAdmins = data.users.filter(u =>
+            (u.company || '').trim().toLowerCase() === companyKey &&
+            (u.role === 'admin' || u.role === 'super admin')
+        );
+
+        const adminDetails = companyAdmins.map(a => ({
+            username: a.username,
+            fullname: a.fullname || a.username,
+            email: (a.email || '').trim()
+        }));
+
+        const adminEmails = adminDetails.map(a => a.email).filter(Boolean);
+
+        let message = "Please contact your company administrator to reset your password.";
+        if (adminEmails.length > 0) {
+            message = `Please contact your company administrator (${adminEmails.join(', ')}) to reset your password.`;
+        }
+
+        return res.json({
+            success: true,
+            role: user.role,
+            company: user.company,
+            adminDetails,
+            adminEmails,
+            message
+        });
+    }
+});
+
+// API: Reset Password with Token
+app.post('/api/reset-password', async (req, res) => {
+    const { username, token, newPassword } = req.body;
+    if (!username || !token || !newPassword) {
+        return res.status(400).json({ success: false, message: "Username, token, and new password are required" });
+    }
+
+    const data = await getData();
+    const user = data.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (!user.resetPasswordToken || user.resetPasswordToken !== token) {
+        return res.status(400).json({ success: false, message: "Invalid or expired password reset token" });
+    }
+
+    if (user.resetPasswordExpires && Date.now() > user.resetPasswordExpires) {
+        return res.status(400).json({ success: false, message: "Password reset token has expired. Please request a new one." });
+    }
+
+    user.password = newPassword;
+    delete user.resetPasswordToken;
+    delete user.resetPasswordExpires;
+
+    await saveData(data);
+
+    res.json({ success: true, message: "Password updated successfully" });
 });
 
 // Universal Helper to find a folder across all users
@@ -670,35 +930,123 @@ app.get('/api/view-pdf', async (req, res) => {
 
         const doc = new PDFDocument({ margin: 40 });
         res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `inline; filename=termination_${folder.id}.pdf`);
+        res.setHeader('Content-Disposition', `inline; filename="Termination_Doc_${folder.id}.pdf"`);
         doc.pipe(res);
 
-        doc.fontSize(25).font('Helvetica-Bold').text('PROJECT TERMINATION DOCUMENT', { align: 'center' });
-        doc.moveDown();
-        doc.fontSize(14).font('Helvetica').text(`Project: ${folder.name}`);
-        doc.text(`Date of Termination: ${termDoc.date}`);
-        doc.moveDown();
+        // Fetch company info for branding
+        const companies = data.companies || {};
+        const companyKey = (managerUser && managerUser.company) ? managerUser.company.toLowerCase() : '';
+        const compInfo = companies[companyKey] || {
+            officialName: (managerUser && managerUser.company) || "FieldSync",
+            logo: "./logo.JPG",
+            nameCard: ""
+        };
 
-        doc.fontSize(12).text('------------------------------------------');
-        doc.fontSize(12).font('Helvetica-Bold').text('Termination Details / Reason:');
-        doc.font('Helvetica').text(termDoc.text || 'No details provided.');
-        doc.text('------------------------------------------');
-
-        if (termDoc.signature) {
-            doc.moveDown();
-            doc.fontSize(10).font('Helvetica-Bold').text('Authorized Signature:');
-
-            const base64Data = termDoc.signature.replace(/^data:image\/png;base64,/, "");
-            const imgBuffer = Buffer.from(base64Data, 'base64');
+        // Load company logo if available
+        let logoBuffer = null;
+        if (compInfo.logo) {
             try {
-                doc.image(imgBuffer, {
-                    width: 150,
-                    align: 'left'
-                });
+                if (compInfo.logo.startsWith('data:image')) {
+                    const base64Data = compInfo.logo.replace(/^data:image\/\w+;base64,/, "");
+                    logoBuffer = Buffer.from(base64Data, 'base64');
+                } else {
+                    const resolvedPath = compInfo.logo.startsWith('./') ? compInfo.logo.slice(2) : compInfo.logo;
+                    const possiblePaths = [
+                        path.join(__dirname, 'public', resolvedPath),
+                        path.join(__dirname, resolvedPath),
+                        compInfo.logo
+                    ];
+                    for (let p of possiblePaths) {
+                        if (fs.existsSync(p)) {
+                            logoBuffer = fs.readFileSync(p);
+                            break;
+                        }
+                    }
+                }
             } catch (err) {
-                console.error("PDFKit signature render error:", err);
+                console.error("Error loading logo image:", err);
             }
         }
+
+        if (logoBuffer) {
+            try {
+                doc.image(logoBuffer, 40, 40, { width: 80, height: 80 });
+            } catch (err) {
+                doc.rect(40, 40, 80, 80).stroke('#ccc');
+                doc.fontSize(8).text('Logo', 45, 75);
+            }
+        } else {
+            doc.rect(40, 40, 80, 80).stroke('#ccc');
+            doc.fontSize(8).text('No Logo', 45, 75);
+        }
+
+        // Company Name & Info Header
+        doc.fillColor('#000000');
+        doc.fontSize(16).font('Helvetica-Bold').text(compInfo.officialName || 'FieldSync', 135, 40);
+        doc.fontSize(9).font('Helvetica').fillColor('#4a5568').text(compInfo.nameCard || "", 135, 60, { width: 430, lineGap: 2 });
+
+        // Dividing Line
+        doc.moveTo(40, 130).lineTo(572, 130).strokeColor('#e2e8f0').lineWidth(1).stroke();
+
+        // Title Badge
+        doc.rect(40, 145, 532, 28).fill('#991b1b');
+        doc.fillColor('#ffffff').fontSize(13).font('Helvetica-Bold').text('PROJECT TERMINATION DOCUMENT', 40, 153, { align: 'center', width: 532 });
+
+        // Project Info Box
+        doc.rect(40, 185, 532, 85).fill('#f8fafc');
+        doc.rect(40, 185, 532, 85).stroke('#cbd5e0');
+
+        doc.fillColor('#1e293b').fontSize(10).font('Helvetica-Bold').text('Project Name:', 55, 195);
+        doc.font('Helvetica').text(folder.name || 'Untitled Project', 160, 195);
+
+        doc.font('Helvetica-Bold').text('Customer Name:', 55, 213);
+        doc.font('Helvetica').text(folder.customerName || 'N/A', 160, 213);
+
+        doc.font('Helvetica-Bold').text('Working Address:', 55, 231);
+        doc.font('Helvetica').text(folder.workingAddress || 'N/A', 160, 231);
+
+        const terminationDateTime = termDoc.dateTime || termDoc.date || new Date().toISOString();
+        doc.font('Helvetica-Bold').text('Date & Time:', 55, 249);
+        doc.fillColor('#991b1b').font('Helvetica-Bold').text(terminationDateTime, 160, 249);
+
+        // Termination Reason Box
+        const reasonY = 285;
+        doc.fillColor('#1e293b').fontSize(11).font('Helvetica-Bold').text('Termination Details / Reason:', 40, reasonY);
+        
+        const reasonBoxY = reasonY + 18;
+        const reasonText = termDoc.reason || termDoc.text || 'No details provided.';
+        doc.rect(40, reasonBoxY, 532, 90).fill('#ffffff');
+        doc.rect(40, reasonBoxY, 532, 90).stroke('#cbd5e0');
+        doc.fillColor('#334155').fontSize(10).font('Helvetica').text(reasonText, 52, reasonBoxY + 12, {
+            width: 508,
+            height: 68,
+            lineGap: 3
+        });
+
+        // Authorized Signature Section
+        const sigY = reasonBoxY + 105;
+        doc.fillColor('#1e293b').fontSize(11).font('Helvetica-Bold').text('Authorized Signature:', 40, sigY);
+
+        const sigBoxY = sigY + 18;
+        doc.rect(40, sigBoxY, 260, 90).fill('#f8fafc');
+        doc.rect(40, sigBoxY, 260, 90).stroke('#cbd5e0');
+
+        if (termDoc.signature) {
+            try {
+                const base64Data = termDoc.signature.replace(/^data:image\/png;base64,/, "");
+                const imgBuffer = Buffer.from(base64Data, 'base64');
+                doc.image(imgBuffer, 45, sigBoxY + 5, { width: 250, height: 80, fit: [250, 80] });
+            } catch (err) {
+                console.error("PDFKit signature render error:", err);
+                doc.fontSize(9).font('Helvetica').fillColor('#ef4444').text('[Signature Image Error]', 50, sigBoxY + 35);
+            }
+        }
+
+        doc.fillColor('#64748b').fontSize(9).font('Helvetica').text(`Signed Date & Time: ${terminationDateTime}`, 40, sigBoxY + 98);
+
+        // Footer
+        doc.fillColor('#94a3b8').fontSize(8).font('Helvetica').text('Official Project Termination Record - Generated by FieldSync', 40, 740, { align: 'center', width: 532 });
+
         doc.end();
         return;
     }
@@ -959,7 +1307,7 @@ app.get('/api/admin/company-data', async (req, res) => {
     const pendingUsers = [];
 
     companyUsers.forEach(u => {
-        if (u.approved === false) {
+        if (u.approved === false && !u.denied) {
             pendingUsers.push({
                 username: u.username,
                 fullname: u.fullname || u.username,
@@ -968,16 +1316,19 @@ app.get('/api/admin/company-data', async (req, res) => {
             return;
         }
 
-        if (u.role === 'manager' || u.role === 'admin') {
-            managers.push({
-                username: u.username,
-                fullname: u.fullname || u.username
-            });
-        } else if (u.role === 'crew') {
-            crews.push({
-                username: u.username,
-                fullname: u.fullname || u.username
-            });
+        const isUserActive = u.active !== false && u.deactivated !== true && !u.denied;
+        if (isUserActive) {
+            if (u.role === 'manager' || u.role === 'admin') {
+                managers.push({
+                    username: u.username,
+                    fullname: u.fullname || u.username
+                });
+            } else if (u.role === 'crew') {
+                crews.push({
+                    username: u.username,
+                    fullname: u.fullname || u.username
+                });
+            }
         }
         
         // Folders are stored physically under the user's folders array
@@ -1002,8 +1353,119 @@ app.get('/api/admin/company-data', async (req, res) => {
     const companies = data.companies || {};
     const compInfo = companies[company.toLowerCase()] || {};
     const tier = compInfo.tier || 'standard';
+    const companyId = compInfo.companyId || '';
 
-    res.json({ managers, crews, projects: sortFolders(projects), pendingUsers, tier });
+    const employees = companyUsers
+        .filter(u => u.approved !== false || u.denied === true)
+        .map(u => ({
+            username: u.username,
+            fullname: u.fullname || u.username,
+            role: u.role || 'crew',
+            email: u.email || '',
+            cellphone: u.cellphone || '',
+            approved: u.approved !== false,
+            active: u.active !== false && u.deactivated !== true && !u.denied,
+            denied: u.denied === true
+        }));
+
+    res.json({ managers, crews, projects: sortFolders(projects), pendingUsers, tier, companyId, employees });
+});
+
+// API: Toggle employee active / deactivated status
+app.post('/api/admin/toggle-user-status', async (req, res) => {
+    const { username, active } = req.body;
+    if (!username) {
+        return res.status(400).json({ success: false, message: "Username is required" });
+    }
+
+    const data = await getData();
+    const user = data.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const newActiveState = Boolean(active);
+    user.active = newActiveState;
+    if (!newActiveState) {
+        user.deactivated = true;
+    } else {
+        delete user.deactivated;
+        delete user.denied;
+        user.approved = true;
+    }
+
+    await saveData(data);
+    res.json({
+        success: true,
+        username: user.username,
+        active: user.active,
+        message: `User ${user.username} is now ${user.active ? 'active' : 'deactivated'}.`
+    });
+});
+
+// API: Admin resets employee password and assigns temporary password
+app.post('/api/admin/reset-user-password', async (req, res) => {
+    const { username } = req.body;
+    if (!username) {
+        return res.status(400).json({ success: false, message: "Username is required" });
+    }
+
+    const data = await getData();
+    const user = data.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+    if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let rand = '';
+    for (let i = 0; i < 6; i++) {
+        rand += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const tempPassword = `Temp-${rand}`;
+    user.password = tempPassword;
+
+    let destination = '';
+    let channel = 'none';
+
+    if (user.email && user.email.trim()) {
+        destination = user.email.trim();
+        channel = 'email';
+        console.log(`
+======================================================================
+[MOCK EMAIL SENT - TEMPORARY PASSWORD ASSIGNED]
+To: ${destination}
+Subject: FieldSync Temporary Password Assigned
+Body: Hello ${user.fullname || user.username},
+
+Your administrator has assigned a temporary password to your account.
+Temporary Password: ${tempPassword}
+
+Please log in with this temporary password and update your credentials.
+======================================================================
+        `);
+    } else if (user.cellphone && user.cellphone.trim()) {
+        destination = user.cellphone.trim();
+        channel = 'cellphone';
+        console.log(`
+======================================================================
+[MOCK SMS SENT - TEMPORARY PASSWORD ASSIGNED]
+To: ${destination}
+Body: FieldSync: Your administrator has reset your password. Your temporary password is: ${tempPassword}
+======================================================================
+        `);
+    }
+
+    await saveData(data);
+    res.json({
+        success: true,
+        username: user.username,
+        tempPassword,
+        channel,
+        destination,
+        message: destination
+            ? `Temporary password assigned and sent to ${channel === 'email' ? 'email' : 'cell phone'} (${destination}).`
+            : `Temporary password assigned: ${tempPassword} (No contact email or cell phone listed for user).`
+    });
 });
 
 // API: Reassign project (manager or crew)
@@ -1209,7 +1671,9 @@ app.post('/api/super-admin/create-company', async (req, res) => {
         return res.status(400).json({ success: false, message: "Company already exists" });
     }
 
+    const newCompanyId = generateCompanyId(data.companies);
     data.companies[key] = {
+        companyId: newCompanyId,
         officialName: companyName.trim(),
         logo: "./logo.JPG"
     };
@@ -1465,8 +1929,11 @@ app.post('/api/admin/approve-user', async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     user.approved = true;
+    user.active = true;
+    delete user.deactivated;
+    delete user.denied;
     await saveData(data);
-    res.json({ success: true });
+    res.json({ success: true, username: user.username, active: true });
 });
 
 // API: Deny pending user (Admin only)
@@ -1475,13 +1942,21 @@ app.post('/api/admin/deny-user', async (req, res) => {
     if (!username) return res.status(400).json({ success: false, message: "Username required" });
 
     const data = await getData();
-    const idx = data.users.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
-    if (idx === -1) return res.status(404).json({ success: false, message: "User not found" });
+    const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    // Remove the user from the database
-    data.users.splice(idx, 1);
+    // Mark as denied and inactive so they appear on the employee list with inactive status
+    user.approved = true;
+    user.active = false;
+    user.deactivated = true;
+    user.denied = true;
     await saveData(data);
-    res.json({ success: true });
+    res.json({
+        success: true,
+        username: user.username,
+        active: false,
+        message: `User ${user.username} was denied and added to employee list with inactive status.`
+    });
 });
 
 // API: Reassign multiple crews to project (Admin only)

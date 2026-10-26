@@ -66,9 +66,13 @@ async function getData() {
             return localData;
         }
 
+        const localData = readLocalData();
+
         const companies = {};
         (companiesData || []).forEach(c => {
+            const localComp = localData.companies && localData.companies[c.key];
             companies[c.key] = {
+                companyId: c.company_id || (localComp && localComp.companyId) || '',
                 officialName: c.official_name,
                 logo: c.logo,
                 nameCard: c.name_card,
@@ -77,9 +81,11 @@ async function getData() {
         });
 
         const users = (usersData || []).map(u => {
+            const localUser = (localData.users || []).find(lu => lu.username && lu.username.toLowerCase() === u.username.toLowerCase());
             const userProjects = (projectsData || []).filter(p => p.username && p.username.toLowerCase() === u.username.toLowerCase());
             
             const folders = userProjects.map(p => {
+                const localFolder = localUser && localUser.folders && localUser.folders.find(lf => String(lf.id) === String(p.id));
                 const projContracts = (contractsData || []).filter(c => String(c.folder_id) === String(p.id)).map(c => ({
                     id: isNaN(c.id) ? c.id : Number(c.id),
                     customer: c.customer,
@@ -136,19 +142,31 @@ async function getData() {
                     payments: p.payments || [],
                     paymentStatus: p.payment_status || 'N/A',
                     crewsViewContractPayment: Boolean(p.crews_view_contract_payment),
-                    terminationDoc: p.termination_doc || null,
+                    terminationDoc: p.termination_doc || (localFolder && localFolder.terminationDoc) || null,
                     contracts: projContracts,
                     notes: projNotes
                 };
             });
+
+            const userCompKey = (u.company || '').toLowerCase();
+            const compObj = companies[userCompKey] || (localData.companies && localData.companies[userCompKey]);
+            const resolvedCompanyId = u.company_id || (localUser && localUser.companyId) || (compObj && compObj.companyId) || '';
 
             return {
                 username: u.username,
                 password: u.password,
                 fullname: u.fullname,
                 company: u.company,
+                companyId: resolvedCompanyId,
                 role: u.role,
                 approved: u.approved,
+                email: u.email || (localUser && localUser.email) || '',
+                cellphone: u.cellphone || (localUser && localUser.cellphone) || '',
+                active: u.active !== undefined ? u.active : (localUser && localUser.active !== undefined ? localUser.active : true),
+                deactivated: u.deactivated !== undefined ? u.deactivated : (localUser && localUser.deactivated !== undefined ? localUser.deactivated : false),
+                denied: u.denied !== undefined ? u.denied : (localUser && localUser.denied !== undefined ? localUser.denied : false),
+                resetPasswordToken: (localUser && localUser.resetPasswordToken) || null,
+                resetPasswordExpires: (localUser && localUser.resetPasswordExpires) || null,
                 folders: folders
             };
         });
@@ -216,7 +234,8 @@ async function saveData(data) {
                             customer_email: folder.customerEmail || '',
                             status: folder.status || 'Draft',
                             crew: folder.crew || null,
-                            crews: folder.crews || []
+                            crews: folder.crews || [],
+                            termination_doc: folder.terminationDoc || null
                         });
 
                         if (folder.contracts && Array.isArray(folder.contracts)) {

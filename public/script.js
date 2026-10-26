@@ -14,6 +14,77 @@ window.fetch = function(input, init) {
     return ORIGINAL_FETCH(input, init);
 };
 
+// --- Global Button Double-Submission / In-Progress Guard ---
+let lastClickedButton = null;
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('button, input[type="submit"], input[type="button"], .btn');
+        if (btn) {
+            // Prevent second click if button is disabled, busy, or submitting
+            if (btn.disabled || btn.getAttribute('data-submitting') === 'true' || btn.classList.contains('btn-busy') || btn.getAttribute('data-sibling-disabled') === 'true') {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+            lastClickedButton = btn;
+        }
+    }, true); // capturing phase: runs before target inline onclick!
+}
+
+async function withButtonLock(triggerEl, actionFn) {
+    let btn = null;
+    if (triggerEl) {
+        if (triggerEl instanceof Element) {
+            btn = triggerEl.closest('button, input[type="submit"], input[type="button"], .btn');
+        } else if (triggerEl.target && triggerEl.target.closest) {
+            btn = triggerEl.target.closest('button, input[type="submit"], input[type="button"], .btn');
+        }
+    }
+    if (!btn && typeof document !== 'undefined') {
+        btn = lastClickedButton || (document.activeElement && (document.activeElement.tagName === 'BUTTON' || document.activeElement.type === 'submit') ? document.activeElement : null);
+    }
+
+    if (btn) {
+        if (btn.disabled || btn.getAttribute('data-submitting') === 'true' || btn.classList.contains('btn-busy')) {
+            console.warn('[ButtonGuard] Second apply prevented while call in progress');
+            return;
+        }
+        btn.setAttribute('data-submitting', 'true');
+        btn.disabled = true;
+        btn.classList.add('btn-busy');
+    }
+
+    // Disable sibling action buttons in the same container to avoid race conditions
+    let siblingButtons = [];
+    if (btn && btn.parentElement) {
+        siblingButtons = Array.from(btn.parentElement.querySelectorAll('button, input[type="submit"]')).filter(b => b !== btn && !b.disabled);
+        siblingButtons.forEach(b => {
+            b.setAttribute('data-sibling-disabled', 'true');
+            b.disabled = true;
+        });
+    }
+
+    try {
+        return await actionFn();
+    } finally {
+        if (btn) {
+            btn.removeAttribute('data-submitting');
+            btn.disabled = false;
+            btn.classList.remove('btn-busy');
+        }
+        if (siblingButtons && siblingButtons.length > 0) {
+            siblingButtons.forEach(b => {
+                if (b.getAttribute('data-sibling-disabled') === 'true') {
+                    b.removeAttribute('data-sibling-disabled');
+                    b.disabled = false;
+                }
+            });
+        }
+    }
+}
+
 const TRANSLATIONS = {
   "zh": {
     "login": "登录",
@@ -26,6 +97,41 @@ const TRANSLATIONS = {
     "full_name": "姓名",
     "company_name": "公司名称",
     "role": "角色：",
+    "role_signup_tooltip": "如果您是公司的第一位/唯一成员，请将自己添加为管理员 (Admin) 角色。",
+    "company_id": "公司 ID",
+    "enter_company_id": "公司 ID (例如 CID-XXXXXX)",
+    "ask_admin_for_company_id": "请向管理员索取公司ID。",
+    "create_new_company_option": "创建新公司 (首位管理员)",
+    "join_as_second_admin": "加入已有公司 (次要管理员)",
+    "company_id_required": "请输入公司 ID！",
+    "company_name_required": "请输入公司名称！",
+    "admin_signup_success_prefix": "账户创建成功！您的公司 ID 为：",
+    "your_company_id_is": "您的公司 ID 是：",
+    "share_company_id_instruction": "请将此公司 ID 提供给加入本公司的经理、员工或其他管理员。",
+    "copy_company_id": "复制公司 ID",
+    "company_id_copied": "公司 ID 已复制到剪贴板！",
+    "email_placeholder_admin": "电子邮箱 * (管理员必填)",
+    "email_placeholder_optional": "电子邮箱 (邮箱或手机选填其一)",
+    "cell_phone_optional": "手机号码 (选填)",
+    "cellphone_placeholder_crew": "手机号码 (邮箱或手机选填其一)",
+    "contact_hint_admin": "管理员角色必须填写电子邮箱，手机号码为选填。",
+    "contact_hint_crew": "经理与员工角色必须填写电子邮箱或手机号码其中之一。",
+    "email_required_admin": "管理员角色必须填写电子邮箱！",
+    "contact_required_manager_crew": "经理和员工角色必须填写电子邮箱或手机号码其中之一！",
+    "reset_password": "重置密码",
+    "enter_username_to_reset": "输入您的用户名以重置密码：",
+    "enter_username": "请输入您的用户名",
+    "submit": "提交",
+    "set_new_password": "设置新密码",
+    "new_password": "新密码",
+    "confirm_new_password": "确认新密码",
+    "save_new_password": "保存新密码",
+    "reset_password_for": "重置密码用户",
+    "reset_link_sent": "密码重置链接已发送至该账户绑定的电子邮箱：",
+    "contact_admin_for_reset": "请联系您所在公司的管理员以重置密码：",
+    "no_email_listed": "未列出邮箱",
+    "contact_company_admin": "请联系您所在公司的管理员。",
+    "password_reset_success": "密码重置成功！请使用新密码登录。",
     "manager": "经理",
     "admin": "管理员",
     "crew": "员工 (Crew)",
@@ -77,7 +183,13 @@ const TRANSLATIONS = {
     "change_order": "变更单 (Change Order)",
     "void_contract": "无效合同 (Void Contract)",
     "crews_can_view_contract_payment": "施工队可查看合同和付款",
-    "terminated_notes": "终止记录 (Terminated Notes)",
+    "terminated_notes": "终止文件 (Termination Doc)",
+    "termination_doc": "终止文件 (Termination Doc)",
+    "add_termination_document": "添加项目终止文件",
+    "termination_modal_desc": "请输入终止原因、绘制签名并选择日期和时间。",
+    "termination_reason": "终止详情 / 原因 *:",
+    "date_time": "日期与时间 *:",
+    "terminate_project": "确认终止项目",
     "contract_date": "合同日期:",
     "expiration_date": "失效日期:",
     "next_preview_change_order": "下一步: 预览变更单",
@@ -154,7 +266,40 @@ const TRANSLATIONS = {
     "select_project": "选择项目:",
     "select_crews": "选择员工:",
     "save_assignments": "保存指派",
-    "log_out": "退出登录"
+    "log_out": "退出登录",
+    "tab_projects": "项目 (Projects)",
+    "tab_company_info": "公司信息 (Company Info)",
+    "tab_people": "员工名单 (People)",
+    "company_employees": "公司员工列表",
+    "email": "电子邮箱",
+    "cell_phone": "手机号码",
+    "status": "状态",
+    "actions": "操作",
+    "active": "正常",
+    "inactive": "已停用",
+    "deactivated": "已禁用",
+    "activate": "启用",
+    "deactivate": "禁用",
+    "cannot_deactivate_self": "您不能禁用自己的管理员账户",
+    "confirm_deactivate_user": "确定要禁用该员工账户吗？禁用后该员工将无法登录。",
+    "confirm_activate_user": "确定要重新启用该员工账户吗？",
+    "confirm_reset_user_password": "确定要重置该用户的密码并为其分配临时密码吗？",
+    "temp_password_assigned": "临时密码已生成并发送！",
+    "note_content": "备注内容 *:",
+    "item_price_optional": "项目价格 (选填):",
+    "step1_review_add_notes": "审核与添加备注",
+    "step2_contract_details": "合同详情",
+    "step1_desc": "在进入合同详情之前，请审核现有备注或添加带单价的新备注。",
+    "step1_notes_instruction": "所有未标记为非合同的备注将作为明细项包含在合同中。",
+    "notes_summary": "合同包含的备注数：",
+    "estimated_contract_price": "预计合同金额：",
+    "project_notes": "项目备注",
+    "next_step": "下一步：合同详情 →",
+    "back_to_notes": "← 返回备注",
+    "included_in_contract": "已计入合同",
+    "uncontracted_badge": "非合同项",
+    "no_notes_for_project": "该项目暂无备注。您可以在左侧添加第一条备注！",
+    "no_data": "暂无数据"
   },
   "en": {
     "login": "Login",
@@ -167,6 +312,41 @@ const TRANSLATIONS = {
     "full_name": "Full Name",
     "company_name": "Company Name",
     "role": "Role:",
+    "role_signup_tooltip": "If you're the first/only member for the company, please add yourself as Admin role.",
+    "company_id": "Company ID",
+    "enter_company_id": "Company ID (e.g. CID-XXXXXX)",
+    "ask_admin_for_company_id": "Please ask the admin for company ID.",
+    "create_new_company_option": "Create New Company (First Admin)",
+    "join_as_second_admin": "Join Existing Company (Second Admin)",
+    "company_id_required": "Please enter the Company ID!",
+    "company_name_required": "Please enter Company Name!",
+    "admin_signup_success_prefix": "Account created successfully! Your Company ID is: ",
+    "your_company_id_is": "Your Company ID is: ",
+    "share_company_id_instruction": "Share this Company ID with Managers, Crew members, or other Admins to join your company.",
+    "copy_company_id": "Copy Company ID",
+    "company_id_copied": "Company ID copied to clipboard!",
+    "email_placeholder_admin": "Email Address * (Mandatory for Admin)",
+    "email_placeholder_optional": "Email Address (Email or Cell Phone required)",
+    "cell_phone_optional": "Cell Phone (Optional)",
+    "cellphone_placeholder_crew": "Cell Phone (Email or Cell Phone required)",
+    "contact_hint_admin": "Admin role requires an Email address. Cell phone is optional.",
+    "contact_hint_crew": "Manager and Crew roles require either Email or Cell Phone.",
+    "email_required_admin": "Email is mandatory for Admin role.",
+    "contact_required_manager_crew": "Either email or cell phone is mandatory for Manager and Crew roles.",
+    "reset_password": "Reset Password",
+    "enter_username_to_reset": "Enter your username to reset password:",
+    "enter_username": "Please enter your username",
+    "submit": "Submit",
+    "set_new_password": "Set New Password",
+    "new_password": "New Password",
+    "confirm_new_password": "Confirm New Password",
+    "save_new_password": "Save New Password",
+    "reset_password_for": "Reset password for",
+    "reset_link_sent": "A password reset link has been sent to your email:",
+    "contact_admin_for_reset": "Please contact your company administrator to reset your password:",
+    "no_email_listed": "No email listed",
+    "contact_company_admin": "Please contact your company administrator.",
+    "password_reset_success": "Password reset successfully! Please login with your new password.",
     "manager": "Manager",
     "admin": "Admin",
     "crew": "Crew",
@@ -218,7 +398,13 @@ const TRANSLATIONS = {
     "change_order": "Change Order",
     "void_contract": "Void Contract",
     "crews_can_view_contract_payment": "Crews can view contract and payment",
-    "terminated_notes": "Terminated Notes",
+    "terminated_notes": "Termination Doc",
+    "termination_doc": "Termination Doc",
+    "add_termination_document": "Add Termination Document",
+    "termination_modal_desc": "Please enter the termination details / reason, draw your signature, and select date & time.",
+    "termination_reason": "Termination Details / Reason *:",
+    "date_time": "Date & Time *:",
+    "terminate_project": "Terminate Project",
     "contract_date": "Contract Date:",
     "expiration_date": "Expiration Date:",
     "next_preview_change_order": "Next: Preview Change Order",
@@ -297,7 +483,38 @@ const TRANSLATIONS = {
     "select_project": "Select Project:",
     "select_crews": "Select Crews:",
     "save_assignments": "Save Assignments",
-    "log_out": "Log out"
+    "log_out": "Log out",
+    "tab_projects": "Projects",
+    "tab_company_info": "Company Info",
+    "tab_people": "People",
+    "company_employees": "Company Employees",
+    "email": "Email",
+    "cell_phone": "Cell Phone",
+    "status": "Status",
+    "actions": "Actions",
+    "active": "Active",
+    "inactive": "Inactive",
+    "deactivated": "Deactivated",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "cannot_deactivate_self": "You cannot deactivate your own admin account",
+    "confirm_deactivate_user": "Are you sure you want to deactivate this user? They will not be able to log in.",
+    "confirm_activate_user": "Are you sure you want to activate this user?",
+    "confirm_reset_user_password": "Are you sure you want to reset password for this user? A temporary password will be assigned and dispatched.",
+    "temp_password_assigned": "Temporary password assigned successfully!",
+    "step1_review_add_notes": "Review & Add Notes",
+    "step2_contract_details": "Contract Details",
+    "step1_desc": "Review existing notes or add new notes with line item prices before proceeding to contract details.",
+    "step1_notes_instruction": "All non-uncontracted notes will be included as line items in the contract.",
+    "notes_summary": "Notes Included in Contract:",
+    "estimated_contract_price": "Estimated Contract Price:",
+    "project_notes": "Project Notes",
+    "next_step": "Next: Contract Details →",
+    "back_to_notes": "← Back",
+    "included_in_contract": "Included in Contract",
+    "uncontracted_badge": "Uncontracted",
+    "no_notes_for_project": "No notes found for this project. You can add one using the form on the left!",
+    "no_data": "No data found"
   },
   "es": {
     "login": "Iniciar Sesión",
@@ -310,6 +527,41 @@ const TRANSLATIONS = {
     "full_name": "Nombre Completo",
     "company_name": "Nombre de la Empresa",
     "role": "Rol:",
+    "role_signup_tooltip": "Si usted es el primer/único miembro de la empresa, regístrese como Administrador.",
+    "company_id": "ID de la Empresa",
+    "enter_company_id": "ID de la Empresa (ej. CID-XXXXXX)",
+    "ask_admin_for_company_id": "Por favor solicite el ID de la empresa al administrador.",
+    "create_new_company_option": "Crear Nueva Empresa (Primer Admin)",
+    "join_as_second_admin": "Unirse a Empresa Existente (Segundo Admin)",
+    "company_id_required": "¡Por favor ingrese el ID de la empresa!",
+    "company_name_required": "¡Por favor ingrese el nombre de la empresa!",
+    "admin_signup_success_prefix": "¡Cuenta creada con éxito! El ID de su empresa es: ",
+    "your_company_id_is": "El ID de su empresa es: ",
+    "share_company_id_instruction": "Comparta este ID de Empresa con Gerentes, Personal u otros Admins para unirse a su empresa.",
+    "copy_company_id": "Copiar ID de Empresa",
+    "company_id_copied": "¡ID de Empresa copiado al portapapeles!",
+    "email_placeholder_admin": "Correo Electrónico * (Obligatorio para Admin)",
+    "email_placeholder_optional": "Correo Electrónico (Correo o Teléfono requerido)",
+    "cell_phone_optional": "Teléfono Móvil (Opcional)",
+    "cellphone_placeholder_crew": "Teléfono Móvil (Correo o Teléfono requerido)",
+    "contact_hint_admin": "El rol de Administrador requiere correo electrónico. El teléfono es opcional.",
+    "contact_hint_crew": "Los roles de Gerente y Personal requieren correo electrónico o teléfono móvil.",
+    "email_required_admin": "El correo electrónico es obligatorio para el rol de Administrador.",
+    "contact_required_manager_crew": "Se requiere correo electrónico o teléfono móvil para los roles de Gerente y Personal.",
+    "reset_password": "Restablecer Contraseña",
+    "enter_username_to_reset": "Ingrese su nombre de usuario para restablecer la contraseña:",
+    "enter_username": "Por favor ingrese su nombre de usuario",
+    "submit": "Enviar",
+    "set_new_password": "Establecer Nueva Contraseña",
+    "new_password": "Nueva Contraseña",
+    "confirm_new_password": "Confirmar Nueva Contraseña",
+    "save_new_password": "Guardar Nueva Contraseña",
+    "reset_password_for": "Restablecer contraseña para",
+    "reset_link_sent": "Se ha enviado un enlace de restablecimiento de contraseña a su correo:",
+    "contact_admin_for_reset": "Comuníquese con el administrador de su empresa para restablecer su contraseña:",
+    "no_email_listed": "Sin correo registrado",
+    "contact_company_admin": "Por favor contacte al administrador de su empresa.",
+    "password_reset_success": "¡Contraseña restablecida con éxito! Inicie sesión con su nueva contraseña.",
     "manager": "Gerente",
     "admin": "Administrador",
     "crew": "Personal (Crew)",
@@ -361,7 +613,13 @@ const TRANSLATIONS = {
     "signed_contract": "Contrato Firmado (Signed Contract)",
     "change_order": "Orden de Cambio (Change Order)",
     "void_contract": "Contrato Anulado (Void Contract)",
-    "terminated_notes": "Notas de Terminación (Terminated Notes)",
+    "terminated_notes": "Documento de Terminación",
+    "termination_doc": "Documento de Terminación",
+    "add_termination_document": "Añadir Documento de Terminación",
+    "termination_modal_desc": "Por favor ingrese el motivo de terminación, dibuje su firma y seleccione fecha y hora.",
+    "termination_reason": "Detalles / Motivo de Terminación *:",
+    "date_time": "Fecha y Hora *:",
+    "terminate_project": "Terminar Proyecto",
     "contract_date": "Fecha del Contrato:",
     "expiration_date": "Fecha de Vencimiento:",
     "next_preview_change_order": "Siguiente: Vista Previa de la Orden de Cambio",
@@ -440,7 +698,38 @@ const TRANSLATIONS = {
     "select_project": "Seleccionar Proyecto:",
     "select_crews": "Seleccionar Personal:",
     "save_assignments": "Guardar Asignaciones",
-    "log_out": "Cerrar Sesión"
+    "log_out": "Cerrar Sesión",
+    "tab_projects": "Proyectos (Projects)",
+    "tab_company_info": "Información de Empresa (Company Info)",
+    "tab_people": "Personal (People)",
+    "company_employees": "Lista de Empleados de la Empresa",
+    "email": "Correo Electrónico",
+    "cell_phone": "Teléfono Móvil",
+    "status": "Estado",
+    "actions": "Acciones",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "deactivated": "Desactivado",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "cannot_deactivate_self": "No puede desactivar su propia cuenta de administrador",
+    "confirm_deactivate_user": "¿Está seguro de que desea desactivar a este usuario? No podrá iniciar sesión.",
+    "confirm_activate_user": "¿Está seguro de que desea reactivar a este usuario?",
+    "confirm_reset_user_password": "¿Está seguro de que desea restablecer la contraseña de este usuario? Se asignará y enviará una contraseña temporal.",
+    "temp_password_assigned": "¡Contraseña temporal asignada y enviada exitosamente!",
+    "step1_review_add_notes": "Revisar y Agregar Notas",
+    "step2_contract_details": "Detalles del Contrato",
+    "step1_desc": "Revise las notas existentes o agregue nuevas notas con precios antes de continuar con los detalles del contrato.",
+    "step1_notes_instruction": "Todas las notas no descontractadas se incluirán como partidas en el contrato.",
+    "notes_summary": "Notas Incluidas en el Contrato:",
+    "estimated_contract_price": "Precio Estimado del Contrato:",
+    "project_notes": "Notas del Proyecto",
+    "next_step": "Siguiente: Detalles del Contrato →",
+    "back_to_notes": "← Volver",
+    "included_in_contract": "Incluido en Contrato",
+    "uncontracted_badge": "No Contractual",
+    "no_notes_for_project": "No se encontraron notas para este proyecto. ¡Puede agregar una usando el formulario de la izquierda!",
+    "no_data": "No se encontraron datos"
   }
 };
 
@@ -464,9 +753,64 @@ function applyTranslations(lang) {
         }
     });
 
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+            el.title = TRANSLATIONS[lang][key];
+        }
+    });
+
     const selector = document.getElementById('language-select');
     if (selector) {
         selector.value = lang;
+    }
+
+    updateSignupRoleHints();
+}
+
+function updateSignupRoleHints() {
+    const roleEl = document.getElementById('signup-role');
+    const emailEl = document.getElementById('signup-email');
+    const cellEl = document.getElementById('signup-cellphone');
+    const hintEl = document.getElementById('signup-role-contact-hint');
+    if (!roleEl || !emailEl || !cellEl) return;
+
+    const role = roleEl.value;
+    if (role === 'admin') {
+        emailEl.placeholder = t('email_placeholder_admin', 'Email Address * (Mandatory for Admin)');
+        cellEl.placeholder = t('cell_phone_optional', 'Cell Phone (Optional)');
+        if (hintEl) hintEl.innerText = t('contact_hint_admin', 'Admin role requires an Email address. Cell phone is optional.');
+    } else {
+        emailEl.placeholder = t('email_placeholder_optional', 'Email Address (Email or Cell Phone required)');
+        cellEl.placeholder = t('cellphone_placeholder_crew', 'Cell Phone (Email or Cell Phone required)');
+        if (hintEl) hintEl.innerText = t('contact_hint_crew', 'Manager and Crew roles require either Email or Cell Phone.');
+    }
+    updateCompanyInputMode();
+}
+
+function onSignupRoleChange() {
+    updateSignupRoleHints();
+}
+
+function updateCompanyInputMode() {
+    const roleEl = document.getElementById('signup-role');
+    const adminModeGroup = document.getElementById('admin-company-mode-group');
+    const companyNameContainer = document.getElementById('company-name-container');
+    const companyIdContainer = document.getElementById('company-id-container');
+    const adminModeNew = document.getElementById('admin-mode-new');
+
+    if (!roleEl) return;
+    const role = roleEl.value;
+
+    if (role === 'admin') {
+        if (adminModeGroup) adminModeGroup.style.display = 'flex';
+        const isNewCompany = !adminModeNew || adminModeNew.checked;
+        if (companyNameContainer) companyNameContainer.style.display = isNewCompany ? 'block' : 'none';
+        if (companyIdContainer) companyIdContainer.style.display = isNewCompany ? 'none' : 'block';
+    } else {
+        if (adminModeGroup) adminModeGroup.style.display = 'none';
+        if (companyNameContainer) companyNameContainer.style.display = 'none';
+        if (companyIdContainer) companyIdContainer.style.display = 'block';
     }
 }
 
@@ -532,83 +876,87 @@ function confirmFinalPreview() {
 }
 
 function cancelFinalPreview() {
+    currentAddContractStep = 2;
     navigate('add-contract');
 }
 
 function cancelSignatureView() {
+    currentAddContractStep = 2;
     navigate('add-contract');
 }
 
-async function finalSaveContract() {
-    const username = sessionStorage.getItem('username');
-    const canvas = document.getElementById('sig-canvas');
-    const signatureImage = canvas.toDataURL('image/png');
-    const sigMethod = document.getElementById('sig-method').value;
-    const signLater = sigMethod === 'link';
-    const email = document.getElementById('cust-email').value.trim();
+async function finalSaveContract(event) {
+    return withButtonLock(event, async () => {
+        const username = sessionStorage.getItem('username');
+        const canvas = document.getElementById('sig-canvas');
+        const signatureImage = canvas.toDataURL('image/png');
+        const sigMethod = document.getElementById('sig-method').value;
+        const signLater = sigMethod === 'link';
+        const email = document.getElementById('cust-email').value.trim();
 
-    if (signLater) {
-        if (!email) {
-            return alert("Customer email is required for Sign Later option");
+        if (signLater) {
+            if (!email) {
+                return alert("Customer email is required for Sign Later option");
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return alert("Please enter a valid email address");
+            }
         }
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return alert("Please enter a valid email address");
+
+        if (!signLater) {
+            // Validate that signature canvas is not blank
+            const ctx = canvas.getContext('2d');
+            const pixelBuffer = new Uint32Array(
+                ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+            );
+            const isBlank = !pixelBuffer.some(color => color !== 0);
+            if (isBlank) {
+                return alert("Please sign the contract on the signature pad before saving.");
+            }
         }
-    }
 
-    if (!signLater) {
-        // Validate that signature canvas is not blank
-        const ctx = canvas.getContext('2d');
-        const pixelBuffer = new Uint32Array(
-            ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer
-        );
-        const isBlank = !pixelBuffer.some(color => color !== 0);
-        if (isBlank) {
-            return alert("Please sign the contract on the signature pad before saving.");
+        const contractData = {
+            customer: document.getElementById('cust-name').value.trim(),
+            seller: document.getElementById('my-name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            price: document.getElementById('price').value,
+            date: document.getElementById('contract-date').value,
+            template: 'company_default',
+            signLater: signLater,
+            email: email,
+            signature: signatureImage,
+            items: contractItems || [],
+            voidExisting: shouldVoidExistingContracts,
+            isChangeOrder: isChangeOrderFlow,
+            expirationDate: document.getElementById('contract-expiration-date').value
+        };
+
+        if (!contractData.customer || !contractData.price) return alert("Please fill in the details");
+
+        const res = await fetch('/api/add-contract', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, folderId: currentFolderId, contractData })
+        });
+
+        if (res.ok) {
+            // Clear all inputs on success
+            document.getElementById('cust-name').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('price').value = '';
+            const emailInput = document.getElementById('cust-email');
+            if (emailInput) emailInput.value = '';
+            document.getElementById('contract-expiration-date').value = '';
+            clearCanvas();
+            
+            navigate('work');
+            loadWorkData();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || "Failed to save contract");
         }
-    }
-
-    const contractData = {
-        customer: document.getElementById('cust-name').value.trim(),
-        seller: document.getElementById('my-name').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        price: document.getElementById('price').value,
-        date: document.getElementById('contract-date').value,
-        template: 'company_default',
-        signLater: signLater,
-        email: email,
-        signature: signatureImage,
-        items: contractItems || [],
-        voidExisting: shouldVoidExistingContracts,
-        isChangeOrder: isChangeOrderFlow,
-        expirationDate: document.getElementById('contract-expiration-date').value
-    };
-
-    if (!contractData.customer || !contractData.price) return alert("Please fill in the details");
-
-    const res = await fetch('/api/add-contract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, folderId: currentFolderId, contractData })
     });
-
-    if (res.ok) {
-        // Clear all inputs on success
-        document.getElementById('cust-name').value = '';
-        document.getElementById('phone').value = '';
-        document.getElementById('price').value = '';
-        const emailInput = document.getElementById('cust-email');
-        if (emailInput) emailInput.value = '';
-        document.getElementById('contract-expiration-date').value = '';
-        clearCanvas();
-        
-        navigate('work');
-        loadWorkData();
-    } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message || "Failed to save contract");
-    }
 }
 
 async function loadWorkData() {
@@ -772,47 +1120,49 @@ async function loadPayments() {
     }
 }
 
-async function savePayment() {
-    const amount = document.getElementById('payment-amount').value;
-    const date = document.getElementById('payment-date').value;
-    const method = document.getElementById('payment-method').value;
-    const notes = document.getElementById('payment-notes').value;
-    const depositPaidFull = document.getElementById('payment-deposit-paid-full').checked;
+async function savePayment(event) {
+    return withButtonLock(event, async () => {
+        const amount = document.getElementById('payment-amount').value;
+        const date = document.getElementById('payment-date').value;
+        const method = document.getElementById('payment-method').value;
+        const notes = document.getElementById('payment-notes').value;
+        const depositPaidFull = document.getElementById('payment-deposit-paid-full').checked;
 
-    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-        alert("Please enter a valid positive payment amount.");
-        return;
-    }
-    if (!date) {
-        alert("Please select a date.");
-        return;
-    }
+        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            alert("Please enter a valid positive payment amount.");
+            return;
+        }
+        if (!date) {
+            alert("Please select a date.");
+            return;
+        }
 
-    const username = sessionStorage.getItem('username');
-    const res = await fetch('/api/add-payment', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            username: username,
-            folderId: currentFolderId,
-            amount: amount,
-            date: date,
-            method: method,
-            depositPaidFull: depositPaidFull,
-            notes: notes,
-            receipts: paymentReceiptsData
-        })
+        const username = sessionStorage.getItem('username');
+        const res = await fetch('/api/add-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                folderId: currentFolderId,
+                amount: amount,
+                date: date,
+                method: method,
+                depositPaidFull: depositPaidFull,
+                notes: notes,
+                receipts: paymentReceiptsData
+            })
+        });
+
+        if (res.ok) {
+            navigate('work');
+            loadWorkData();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || "Failed to save payment");
+        }
     });
-
-    if (res.ok) {
-        navigate('work');
-        loadWorkData();
-    } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message || "Failed to save payment");
-    }
 }
 
 async function updatePaymentStatus() {
@@ -839,7 +1189,23 @@ async function updatePaymentStatus() {
 function toggleView(viewId) {
     document.getElementById('login-section').classList.add('hidden');
     document.getElementById('signup-section').classList.add('hidden');
-    document.getElementById(viewId).classList.remove('hidden');
+    const forgotSection = document.getElementById('forgot-password-section');
+    if (forgotSection) forgotSection.classList.add('hidden');
+    const tokenSection = document.getElementById('reset-password-token-section');
+    if (tokenSection) tokenSection.classList.add('hidden');
+
+    const targetEl = document.getElementById(viewId);
+    if (targetEl) targetEl.classList.remove('hidden');
+
+    if (viewId === 'forgot-password-section') {
+        const resetUser = document.getElementById('reset-username');
+        if (resetUser) resetUser.value = '';
+        const msg = document.getElementById('reset-password-message');
+        if (msg) {
+            msg.style.display = 'none';
+            msg.innerHTML = '';
+        }
+    }
 
     if (viewId === 'signup-section') {
         // Clear signup fields
@@ -847,7 +1213,16 @@ function toggleView(viewId) {
         document.getElementById('new-pass').value = '';
         document.getElementById('signup-fullname').value = '';
         document.getElementById('signup-company').value = '';
-        document.getElementById('signup-role').value = 'manager';
+        const compIdEl = document.getElementById('signup-company-id');
+        if (compIdEl) compIdEl.value = '';
+        document.getElementById('signup-role').value = 'admin';
+        const adminModeNew = document.getElementById('admin-mode-new');
+        if (adminModeNew) adminModeNew.checked = true;
+        const emailEl = document.getElementById('signup-email');
+        if (emailEl) emailEl.value = '';
+        const cellEl = document.getElementById('signup-cellphone');
+        if (cellEl) cellEl.value = '';
+        updateSignupRoleHints();
         
         // Hide and clear suggestions
         const suggestionsDiv = document.getElementById('company-suggestions');
@@ -861,32 +1236,210 @@ function toggleView(viewId) {
     }
 }
 
-async function signup() {
-    const user = document.getElementById('new-user').value;
-    const pass = document.getElementById('new-pass').value;
-    const fullname = document.getElementById('signup-fullname').value;
-    const company = document.getElementById('signup-company').value;
-    const role = document.getElementById('signup-role').value;
+async function signup(event) {
+    return withButtonLock(event, async () => {
+        const user = document.getElementById('new-user').value.trim();
+        const pass = document.getElementById('new-pass').value.trim();
+        const fullname = document.getElementById('signup-fullname').value.trim();
+        const role = document.getElementById('signup-role').value;
+        const email = document.getElementById('signup-email') ? document.getElementById('signup-email').value.trim() : '';
+        const cellphone = document.getElementById('signup-cellphone') ? document.getElementById('signup-cellphone').value.trim() : '';
 
-    if (!user || !pass) return alert("Please fill in all fields");
+        if (!user || !pass) return alert("Please fill in all fields");
 
-    const res = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, password: pass, fullname, company, role })
-    });
-
-    const result = await res.json();
-
-    if (result.success) {
-        if (result.pendingApproval) {
-            alert("Account registered successfully! Your account is pending administrator approval before you can access projects.");
-        } else {
-            alert("Account created! Please login.");
+        if (role === 'admin') {
+            if (!email) {
+                return alert(t('email_required_admin', "Email is mandatory for Admin role."));
+            }
+        } else if (role === 'manager' || role === 'crew') {
+            if (!email && !cellphone) {
+                return alert(t('contact_required_manager_crew', "Either email or cell phone is mandatory for Manager and Crew roles."));
+            }
         }
-        toggleView('login-section');
+
+        let isNewCompany = false;
+        let company = '';
+        let companyId = '';
+
+        if (role === 'admin') {
+            const adminModeNew = document.getElementById('admin-mode-new');
+            if (!adminModeNew || adminModeNew.checked) {
+                isNewCompany = true;
+                company = document.getElementById('signup-company').value.trim();
+                if (!company) {
+                    return alert(t('company_name_required', "Please enter Company Name!"));
+                }
+            } else {
+                isNewCompany = false;
+                companyId = document.getElementById('signup-company-id') ? document.getElementById('signup-company-id').value.trim() : '';
+                if (!companyId) {
+                    return alert(t('company_id_required', "Please enter the Company ID!"));
+                }
+            }
+        } else {
+            isNewCompany = false;
+            companyId = document.getElementById('signup-company-id') ? document.getElementById('signup-company-id').value.trim() : '';
+            if (!companyId) {
+                return alert(t('company_id_required', "Please enter the Company ID!"));
+            }
+        }
+
+        const payload = {
+            username: user,
+            password: pass,
+            fullname,
+            role,
+            email,
+            cellphone,
+            isNewCompany
+        };
+        if (isNewCompany) {
+            payload.company = company;
+        } else {
+            payload.companyId = companyId;
+        }
+
+        const res = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            if (result.companyId && isNewCompany && role === 'admin') {
+                alert(`${t('admin_signup_success_prefix', 'Account created successfully! Your Company ID is: ')}${result.companyId}\n\n${t('share_company_id_instruction', 'Share this Company ID with Managers, Crew members, or other Admins to join your company.')}`);
+            } else if (result.pendingApproval) {
+                alert("Account registered successfully! Your account is pending administrator approval before you can access projects.");
+            } else {
+                alert("Account created! Please login.");
+            }
+            toggleView('login-section');
+        } else {
+            alert(result.message);
+        }
+    });
+}
+
+let currentResetToken = null;
+let currentResetUsername = null;
+
+async function requestPasswordReset(event) {
+    return withButtonLock(event, async () => {
+        const usernameInput = document.getElementById('reset-username');
+        const username = usernameInput ? usernameInput.value.trim() : '';
+        const msgEl = document.getElementById('reset-password-message');
+
+        if (!username) {
+            return alert(t('enter_username', 'Please enter your username'));
+        }
+
+        if (msgEl) {
+            msgEl.style.display = 'none';
+            msgEl.innerHTML = '';
+        }
+
+        try {
+            const res = await fetch('/api/request-password-reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+            const result = await res.json();
+
+            if (msgEl) {
+                msgEl.style.display = 'block';
+                if (res.ok) {
+                    if (result.role === 'admin' || result.role === 'super admin') {
+                        msgEl.style.backgroundColor = '#ecfdf5';
+                        msgEl.style.color = '#065f46';
+                        msgEl.style.border = '1px solid #a7f3d0';
+                        msgEl.innerHTML = `<strong>✓ ${t('reset_link_sent', 'A password reset link has been sent to your email:')}</strong><br><span style="color: #047857; word-break: break-all;">${result.email}</span>`;
+                    } else {
+                        // Crew or Manager
+                        msgEl.style.backgroundColor = '#eff6ff';
+                        msgEl.style.color = '#1e40af';
+                        msgEl.style.border = '1px solid #bfdbfe';
+                        let adminInfoHtml = '';
+                        if (result.adminDetails && result.adminDetails.length > 0) {
+                            adminInfoHtml = result.adminDetails.map(a => `• <strong>${a.fullname}</strong> (${a.username}): <a href="mailto:${a.email}?subject=FieldSync%20Password%20Reset%20Request%20for%20${encodeURIComponent(username)}" style="color: #2563eb; text-decoration: underline;">${a.email || t('no_email_listed', 'No email listed')}</a>`).join('<br>');
+                        } else if (result.adminEmails && result.adminEmails.length > 0) {
+                            adminInfoHtml = result.adminEmails.map(em => `<a href="mailto:${em}?subject=FieldSync%20Password%20Reset%20Request%20for%20${encodeURIComponent(username)}" style="color: #2563eb; text-decoration: underline;">${em}</a>`).join(', ');
+                        } else {
+                            adminInfoHtml = `<em>${t('contact_company_admin', 'Please contact your company administrator.')}</em>`;
+                        }
+                        msgEl.innerHTML = `<div><strong>ℹ️ ${t('contact_admin_for_reset', 'Please contact your company administrator to reset your password:')}</strong></div><div style="margin-top: 8px;">${adminInfoHtml}</div>`;
+                    }
+                } else {
+                    msgEl.style.backgroundColor = '#fef2f2';
+                    msgEl.style.color = '#991b1b';
+                    msgEl.style.border = '1px solid #fecaca';
+                    msgEl.innerHTML = `<strong>⚠️ ${result.message || 'Error processing password reset request'}</strong>`;
+                }
+            }
+        } catch (err) {
+            alert("Network error: " + err.message);
+        }
+    });
+}
+
+async function submitNewPassword(event) {
+    return withButtonLock(event, async () => {
+        const newPass = document.getElementById('new-reset-password').value;
+        const confirmPass = document.getElementById('confirm-reset-password').value;
+        const msgEl = document.getElementById('reset-token-message');
+
+        if (!newPass || !confirmPass) {
+            return alert("Please enter and confirm your new password");
+        }
+        if (newPass !== confirmPass) {
+            return alert("Passwords do not match");
+        }
+
+        try {
+            const res = await fetch('/api/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: currentResetUsername,
+                    token: currentResetToken,
+                    newPassword: newPass
+                })
+            });
+            const result = await res.json();
+            if (res.ok) {
+                alert(t('password_reset_success', "Password reset successfully! Please login with your new password."));
+                toggleView('login-section');
+            } else {
+                if (msgEl) {
+                    msgEl.style.display = 'block';
+                    msgEl.style.backgroundColor = '#fef2f2';
+                    msgEl.style.color = '#991b1b';
+                    msgEl.style.border = '1px solid #fecaca';
+                    msgEl.innerText = result.message || "Failed to reset password";
+                } else {
+                    alert(result.message);
+                }
+            }
+        } catch (err) {
+            alert("Error resetting password: " + err.message);
+        }
+    });
+}
+
+function updateAppLogoLink() {
+    const logoLink = document.getElementById('header-logo-link');
+    if (!logoLink) return;
+    const username = sessionStorage.getItem('username');
+    if (!username) {
+        logoLink.href = "https://www.fieldsynchq.com/";
+        logoLink.style.cursor = "pointer";
+        logoLink.onclick = null;
     } else {
-        alert(result.message);
+        logoLink.removeAttribute('href');
+        logoLink.style.cursor = "default";
+        logoLink.onclick = (e) => e.preventDefault();
     }
 }
 
@@ -903,6 +1456,7 @@ function navigate(view, pushState = true) {
 
     const currentLang = localStorage.getItem('lang') || 'zh';
     applyTranslations(currentLang);
+    updateAppLogoLink();
 
     // Show the requested view
     if (view === 'dashboard') {
@@ -913,14 +1467,17 @@ function navigate(view, pushState = true) {
         const roleText = t(role ? role.toLowerCase() : '', role);
         document.getElementById('welcome-msg').innerText = `${t('welcome')}, ${fullname} (${roleText})`;
         
+        const companyId = sessionStorage.getItem('companyId');
+        const companyIdDisplay = companyId ? ` (ID: ${companyId})` : '';
+
         if (role === 'super admin') {
             document.getElementById('company-msg').innerHTML = `Workspace: ${company || 'Global'} <a href="#" id="super-admin-link" onclick="navigate('super-admin'); return false;" style="margin-left: 15px; font-size: 14px; color: var(--brand-blue); text-decoration: underline;">[${t('super_admin_console')}]</a>`;
         } else if (role === 'admin') {
-            document.getElementById('company-msg').innerHTML = `Workspace: ${company} <a href="#" id="admin-link" onclick="navigate('admin'); return false;" style="margin-left: 15px; font-size: 14px; color: var(--brand-blue); text-decoration: underline;">[${t('admin_console')}]</a>`;
+            document.getElementById('company-msg').innerHTML = `Workspace: ${company}${companyIdDisplay} <a href="#" id="admin-link" onclick="navigate('admin'); return false;" style="margin-left: 15px; font-size: 14px; color: var(--brand-blue); text-decoration: underline;">[${t('admin_console')}]</a>`;
         } else if (role === 'manager') {
-            document.getElementById('company-msg').innerHTML = `Workspace: ${company} <a href="#" id="manager-link" onclick="navigate('manager-console'); return false;" style="margin-left: 15px; font-size: 14px; color: var(--brand-blue); text-decoration: underline;">[${t('project_console')}]</a>`;
+            document.getElementById('company-msg').innerHTML = `Workspace: ${company}${companyIdDisplay} <a href="#" id="manager-link" onclick="navigate('manager-console'); return false;" style="margin-left: 15px; font-size: 14px; color: var(--brand-blue); text-decoration: underline;">[${t('project_console')}]</a>`;
         } else {
-            document.getElementById('company-msg').innerText = `Workspace: ${company}`;
+            document.getElementById('company-msg').innerText = `Workspace: ${company}${companyIdDisplay}`;
         }
         
         const userNameSpan = document.querySelector('.user-name');
@@ -988,55 +1545,54 @@ function navigate(view, pushState = true) {
     } else if (view === 'add-contract') {
         document.getElementById('add-contract-view').classList.remove('hidden');
         
-        const viewTitle = document.querySelector('#add-contract-view h2');
-        if (viewTitle) {
-            viewTitle.innerText = isChangeOrderFlow ? "Add Change Order" : "Add New Contract";
+        const step2Title = document.getElementById('add-contract-step2-title');
+        if (step2Title) {
+            step2Title.innerText = isChangeOrderFlow ? (t('add_change_order') || "Add Change Order") : (t('create_new_contract') || "Add New Contract");
         }
 
         const nextBtn = document.querySelector('#add-contract-view button[onclick="startContractPreview()"]');
         if (nextBtn) {
             nextBtn.setAttribute('data-i18n', isChangeOrderFlow ? 'next_preview_change_order' : 'next_preview_contract');
         }
-        applyTranslations(localStorage.getItem('lang') || 'zh');
 
         if (!isChangeOrderFlow) {
-            document.getElementById('contract-date').valueAsDate = new Date();
-            document.getElementById('contract-expiration-date').value = '';
-            document.getElementById('my-name').value = sessionStorage.getItem('fullname');
+            if (!document.getElementById('contract-date').value) {
+                document.getElementById('contract-date').valueAsDate = new Date();
+            }
+            if (!document.getElementById('my-name').value) {
+                document.getElementById('my-name').value = sessionStorage.getItem('fullname') || '';
+            }
             
             // Default customer details from the current active folder
             if (currentFolder) {
-                document.getElementById('cust-name').value = currentFolder.customerName || '';
-                document.getElementById('phone').value = currentFolder.customerPhone || '';
+                if (!document.getElementById('cust-name').value) {
+                    document.getElementById('cust-name').value = currentFolder.customerName || '';
+                }
+                if (!document.getElementById('phone').value) {
+                    document.getElementById('phone').value = currentFolder.customerPhone || '';
+                }
                 const emailInput = document.getElementById('cust-email');
-                if (emailInput) emailInput.value = currentFolder.customerEmail || '';
+                if (emailInput && !emailInput.value) {
+                    emailInput.value = currentFolder.customerEmail || '';
+                }
             }
 
-            // Default price is the sum of all item prices from all notes (excluding uncontract notes)
-            let totalNotePrice = 0;
-            contractItems = []; // reset global items variable
-            if (currentFolder && currentFolder.notes) {
-                const contractNotes = currentFolder.notes.filter(note => !note.uncontract);
-                contractNotes.forEach(note => {
-                    const itemPrice = note.price ? parseFloat(note.price) || 0 : 0;
-                    totalNotePrice += itemPrice;
-                    contractItems.push({
-                        noteId: note.id,
-                        description: note.content || '',
-                        price: itemPrice
-                    });
-                });
-            }
-            document.getElementById('price').value = totalNotePrice > 0 ? totalNotePrice.toFixed(2) : '';
-
-            // Reset signature method and clear canvas
+            // Reset signature method and clear canvas if empty
             const methodSelect = document.getElementById('sig-method');
             if (methodSelect) {
                 methodSelect.value = 'draw';
                 toggleSigMethod();
             }
-            clearCanvas();
         }
+
+        if (currentAddContractStep === 2) {
+            goToContractStep2(false);
+        } else {
+            currentAddContractStep = 1;
+            goToContractStep1();
+        }
+
+        applyTranslations(localStorage.getItem('lang') || 'zh');
     } else if (view === 'add-payment') {
         document.getElementById('add-payment-view').classList.remove('hidden');
         document.getElementById('payment-amount').value = '';
@@ -1064,6 +1620,7 @@ function navigate(view, pushState = true) {
             return navigate('dashboard');
         }
         document.getElementById('admin-view').classList.remove('hidden');
+        switchAdminTab('projects');
         loadAdminConsole();
     } else if (view === 'company-info') {
         const role = sessionStorage.getItem('role');
@@ -1071,8 +1628,8 @@ function navigate(view, pushState = true) {
             alert("Unauthorized access");
             return navigate('dashboard');
         }
-        document.getElementById('company-info-view').classList.remove('hidden');
-        loadCompanyInfo();
+        document.getElementById('admin-view').classList.remove('hidden');
+        switchAdminTab('company-info');
     } else if (view === 'super-admin') {
         const role = sessionStorage.getItem('role');
         if (role !== 'super admin') {
@@ -1085,31 +1642,34 @@ function navigate(view, pushState = true) {
 }
 
 // Updated Login function to "redirect"
-async function login() {
-    const user = document.getElementById('user').value;
-    const pass = document.getElementById('pass').value;
+async function login(event) {
+    return withButtonLock(event, async () => {
+        const user = document.getElementById('user').value;
+        const pass = document.getElementById('pass').value;
 
-    const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, password: pass})
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass})
+        });
+
+        if (res.ok) {
+            const result = await res.json();
+            sessionStorage.setItem('username', result.username);
+            sessionStorage.setItem('fullname', result.fullname);
+            sessionStorage.setItem('company', result.company);
+            sessionStorage.setItem('role', result.role);
+            sessionStorage.setItem('companyId', result.companyId || '');
+            sessionStorage.setItem('companyOfficialName', result.companyOfficialName || "FieldSync Draft");
+            sessionStorage.setItem('companyLogo', result.companyLogo || "./logo.JPG");
+            sessionStorage.setItem('companyNameCard', result.companyNameCard || "");
+            updateHeaderBranding();
+            navigate('dashboard');
+        } else {
+            const errorData = await res.json().catch(() => ({}));
+            alert(errorData.message || "Login failed");
+        }
     });
-
-    if (res.ok) {
-        const result = await res.json();
-        sessionStorage.setItem('username', result.username);
-        sessionStorage.setItem('fullname', result.fullname);
-        sessionStorage.setItem('company', result.company);
-        sessionStorage.setItem('role', result.role);
-        sessionStorage.setItem('companyOfficialName', result.companyOfficialName || "FieldSync Draft");
-        sessionStorage.setItem('companyLogo', result.companyLogo || "./logo.JPG");
-        sessionStorage.setItem('companyNameCard', result.companyNameCard || "");
-        updateHeaderBranding();
-        navigate('dashboard');
-    } else {
-        const errorData = await res.json().catch(() => ({}));
-        alert(errorData.message || "Login failed");
-    }
 }
 
 // Fetch and display folders
@@ -1150,49 +1710,51 @@ async function loadFolders() {
     });
 }
 // Save the new project and go back
-async function saveNewProject() {
-    const projectName = document.getElementById('project-name').value.trim();
-    const workingAddress = document.getElementById('working-address').value.trim();
-    const customerName = document.getElementById('customer-name').value.trim();
-    const customerPhone = document.getElementById('customer-phone').value.trim();
-    const customerBillingAddress = document.getElementById('customer-billing').value.trim();
-    const customerEmail = document.getElementById('customer-email').value.trim();
-    const crewsViewContractPayment = document.getElementById('crews-view-contract-payment').checked;
+async function saveNewProject(event) {
+    return withButtonLock(event, async () => {
+        const projectName = document.getElementById('project-name').value.trim();
+        const workingAddress = document.getElementById('working-address').value.trim();
+        const customerName = document.getElementById('customer-name').value.trim();
+        const customerPhone = document.getElementById('customer-phone').value.trim();
+        const customerBillingAddress = document.getElementById('customer-billing').value.trim();
+        const customerEmail = document.getElementById('customer-email').value.trim();
+        const crewsViewContractPayment = document.getElementById('crews-view-contract-payment').checked;
 
-    if (!projectName || !workingAddress || !customerName || !customerPhone || !customerBillingAddress) {
-        return alert("Please fill in all mandatory fields (*)");
-    }
+        if (!projectName || !workingAddress || !customerName || !customerPhone || !customerBillingAddress) {
+            return alert("Please fill in all mandatory fields (*)");
+        }
 
-    const username = sessionStorage.getItem('username');
+        const username = sessionStorage.getItem('username');
 
-    const res = await fetch('/api/add-folder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            username, 
-            projectName, 
-            workingAddress, 
-            customerName, 
-            customerPhone, 
-            customerBillingAddress, 
-            customerEmail,
-            crewsViewContractPayment
-        })
+        const res = await fetch('/api/add-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username, 
+                projectName, 
+                workingAddress, 
+                customerName, 
+                customerPhone, 
+                customerBillingAddress, 
+                customerEmail,
+                crewsViewContractPayment
+            })
+        });
+
+        if (res.ok) {
+            document.getElementById('project-name').value = '';
+            document.getElementById('working-address').value = '';
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-phone').value = '';
+            document.getElementById('customer-billing').value = '';
+            document.getElementById('customer-email').value = '';
+            document.getElementById('crews-view-contract-payment').checked = false;
+            navigate('dashboard');
+        } else {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || "Failed to create project");
+        }
     });
-
-    if (res.ok) {
-        document.getElementById('project-name').value = '';
-        document.getElementById('working-address').value = '';
-        document.getElementById('customer-name').value = '';
-        document.getElementById('customer-phone').value = '';
-        document.getElementById('customer-billing').value = '';
-        document.getElementById('customer-email').value = '';
-        document.getElementById('crews-view-contract-payment').checked = false;
-        navigate('dashboard');
-    } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message || "Failed to create project");
-    }
 }
 
 let currentFolderId = null;
@@ -1214,39 +1776,41 @@ function openFolder(folderId, folderName) {
     navigate('work');
 }
 
-async function saveNote() {
-    const content = document.getElementById('note-text').value;
-    const price = document.getElementById('note-price').value.trim();
-    const uncontractEl = document.getElementById('note-uncontract');
-    const uncontract = uncontractEl ? uncontractEl.checked : false;
-    const username = sessionStorage.getItem('username');
+async function saveNote(event) {
+    return withButtonLock(event, async () => {
+        const content = document.getElementById('note-text').value;
+        const price = document.getElementById('note-price').value.trim();
+        const uncontractEl = document.getElementById('note-uncontract');
+        const uncontract = uncontractEl ? uncontractEl.checked : false;
+        const username = sessionStorage.getItem('username');
 
-    if (!content && notePhotosData.length === 0) return alert("Note content or photos cannot be empty");
+        if (!content && notePhotosData.length === 0) return alert("Note content or photos cannot be empty");
 
-    const res = await fetch('/api/add-note', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: username,
-            folderId: currentFolderId,
-            noteContent: content,
-            price: price || null,
-            uncontract: uncontract,
-            photos: notePhotosData
-        })
+        const res = await fetch('/api/add-note', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: username,
+                folderId: currentFolderId,
+                noteContent: content,
+                price: price || null,
+                uncontract: uncontract,
+                photos: notePhotosData
+            })
+        });
+
+        if (res.ok) {
+            document.getElementById('note-text').value = ''; // Clear input
+            document.getElementById('note-price').value = ''; // Clear input
+            const uncontractInput = document.getElementById('note-uncontract');
+            if (uncontractInput) uncontractInput.checked = false;
+            const previewContainer = document.getElementById('note-photos-preview-container');
+            if (previewContainer) previewContainer.innerHTML = '';
+            notePhotosData = [];
+            navigate('work');
+            loadWorkData();
+        }
     });
-
-    if (res.ok) {
-        document.getElementById('note-text').value = ''; // Clear input
-        document.getElementById('note-price').value = ''; // Clear input
-        const uncontractInput = document.getElementById('note-uncontract');
-        if (uncontractInput) uncontractInput.checked = false;
-        const previewContainer = document.getElementById('note-photos-preview-container');
-        if (previewContainer) previewContainer.innerHTML = '';
-        notePhotosData = [];
-        navigate('work');
-        loadWorkData();
-    }
 }
 
 async function loadNotes() {
@@ -1361,12 +1925,12 @@ async function loadContracts() {
                 });
             });
         }
-        if (folder.status === 'Terminated' && folder.terminationDoc) {
+        if ((folder.status === 'Terminated' || folder.terminationDoc) && folder.terminationDoc) {
             itemsToRender.push({
                 id: 'term-doc',
-                type: 'Terminated Notes',
-                translationKey: 'terminated_notes',
-                date: folder.terminationDoc.date || '',
+                type: 'Termination Doc',
+                translationKey: 'termination_doc',
+                date: folder.terminationDoc.dateTime || folder.terminationDoc.date || '',
                 isContract: false
             });
         }
@@ -1546,7 +2110,227 @@ const voiceObserver = new MutationObserver(() => {
 });
 voiceObserver.observe(document.body, { childList: true, subtree: true });
 
+function copyCompanyId() {
+    const compIdEl = document.getElementById('admin-company-id-display');
+    const compId = compIdEl ? compIdEl.innerText.trim() : (sessionStorage.getItem('companyId') || '');
+    if (!compId || compId === '-') {
+        return alert("No Company ID available to copy.");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(compId).then(() => {
+            alert(t('company_id_copied', "Company ID copied to clipboard!"));
+        }).catch(() => {
+            prompt("Company ID:", compId);
+        });
+    } else {
+        prompt("Company ID:", compId);
+    }
+}
+
 // --- Admin Console Functions ---
+let currentAdminTab = 'projects';
+let currentCompanyEmployees = [];
+
+function switchAdminTab(tabName) {
+    currentAdminTab = tabName;
+
+    const btnProjects = document.getElementById('admin-tab-btn-projects');
+    const btnCompanyInfo = document.getElementById('admin-tab-btn-company-info');
+    const btnPeople = document.getElementById('admin-tab-btn-people');
+
+    const panelProjects = document.getElementById('admin-tab-projects');
+    const panelCompanyInfo = document.getElementById('admin-tab-company-info');
+    const panelPeople = document.getElementById('admin-tab-people');
+
+    const activeStyle = { background: 'var(--primary-blue)', color: '#ffffff' };
+    const inactiveStyle = { background: '#f1f5f9', color: '#475569' };
+
+    [btnProjects, btnCompanyInfo, btnPeople].forEach(btn => {
+        if (btn) {
+            btn.style.background = inactiveStyle.background;
+            btn.style.color = inactiveStyle.color;
+        }
+    });
+
+    if (panelProjects) panelProjects.classList.add('hidden');
+    if (panelCompanyInfo) panelCompanyInfo.classList.add('hidden');
+    if (panelPeople) panelPeople.classList.add('hidden');
+
+    if (tabName === 'projects') {
+        if (btnProjects) {
+            btnProjects.style.background = activeStyle.background;
+            btnProjects.style.color = activeStyle.color;
+        }
+        if (panelProjects) panelProjects.classList.remove('hidden');
+    } else if (tabName === 'company-info') {
+        if (btnCompanyInfo) {
+            btnCompanyInfo.style.background = activeStyle.background;
+            btnCompanyInfo.style.color = activeStyle.color;
+        }
+        if (panelCompanyInfo) panelCompanyInfo.classList.remove('hidden');
+        loadCompanyInfo();
+    } else if (tabName === 'people') {
+        if (btnPeople) {
+            btnPeople.style.background = activeStyle.background;
+            btnPeople.style.color = activeStyle.color;
+        }
+        if (panelPeople) panelPeople.classList.remove('hidden');
+        loadCompanyPeople();
+    }
+
+    applyTranslations(localStorage.getItem('lang') || 'zh');
+}
+
+async function loadCompanyPeople() {
+    const company = sessionStorage.getItem('company');
+    if (!company) return;
+    try {
+        const res = await fetch(`/api/admin/company-data?company=${encodeURIComponent(company)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        currentCompanyEmployees = data.employees || [];
+        renderCompanyEmployees(currentCompanyEmployees);
+    } catch (err) {
+        console.error("Failed to load company employees:", err);
+    }
+}
+
+function renderCompanyEmployees(employees) {
+    const tbody = document.getElementById('admin-people-tbody');
+    const countEl = document.getElementById('admin-people-count');
+    if (!tbody) return;
+
+    if (countEl) {
+        countEl.innerText = `${(employees || []).length} ${t('company_employees', 'Employees')}`;
+    }
+
+    if (!employees || employees.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: #94a3b8;">${t('no_data', 'No employees found')}</td></tr>`;
+        return;
+    }
+
+    const currentLoggedInUser = (sessionStorage.getItem('username') || '').toLowerCase();
+
+    tbody.innerHTML = employees.map(emp => {
+        const isSelf = emp.username.toLowerCase() === currentLoggedInUser;
+        const isActive = emp.active !== false;
+
+        const statusBadge = isActive
+            ? `<span style="display: inline-block; background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('active', 'Active')}</span>`
+            : `<span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('inactive', 'Inactive')}</span>`;
+
+        let toggleBtnHtml = '';
+        if (isSelf) {
+            toggleBtnHtml = `
+                <button type="button" class="btn-primary" disabled title="${t('cannot_deactivate_self', 'You cannot deactivate your own admin account')}" style="padding: 5px 12px; font-size: 12.5px; opacity: 0.5; cursor: not-allowed; background: #94a3b8;">
+                    ${t('deactivate', 'Deactivate')}
+                </button>
+            `;
+        } else if (isActive) {
+            toggleBtnHtml = `
+                <button type="button" onclick="toggleUserActiveStatus('${emp.username.replace(/'/g, "\\'")}', false, event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #ef4444; border: 1px solid #dc2626;">
+                    ${t('deactivate', 'Deactivate')}
+                </button>
+            `;
+        } else {
+            toggleBtnHtml = `
+                <button type="button" onclick="toggleUserActiveStatus('${emp.username.replace(/'/g, "\\'")}', true, event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #10b981; border: 1px solid #059669;">
+                    ${t('activate', 'Activate')}
+                </button>
+            `;
+        }
+
+        const resetBtnHtml = `
+            <button type="button" onclick="adminResetUserPassword('${emp.username.replace(/'/g, "\\'")}', event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #2563eb; border: 1px solid #1d4ed8;">
+                ${t('reset_password', 'Reset Password')}
+            </button>
+        `;
+
+        const roleText = t(emp.role ? emp.role.toLowerCase() : '', emp.role || 'crew');
+
+        return `
+            <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
+                <td style="padding: 12px; font-weight: 600; color: #1e293b;">${emp.fullname || emp.username}</td>
+                <td style="padding: 12px; font-family: monospace; color: #475569;">${emp.username}</td>
+                <td style="padding: 12px; color: #334155;"><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">${roleText}</span></td>
+                <td style="padding: 12px; color: #475569;">${emp.email ? `<a href="mailto:${emp.email}" style="color: var(--brand-blue); text-decoration: none;">${emp.email}</a>` : '<span style="color: #cbd5e1;">-</span>'}</td>
+                <td style="padding: 12px; color: #475569;">${emp.cellphone ? `<a href="tel:${emp.cellphone}" style="color: var(--brand-blue); text-decoration: none;">${emp.cellphone}</a>` : '<span style="color: #cbd5e1;">-</span>'}</td>
+                <td style="padding: 12px;">${statusBadge}</td>
+                <td style="padding: 12px; text-align: right;">
+                    <div style="display: inline-flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                        ${toggleBtnHtml}
+                        ${resetBtnHtml}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function toggleUserActiveStatus(username, activate, event) {
+    const confirmMsg = activate
+        ? t('confirm_activate_user', 'Are you sure you want to activate this user?')
+        : t('confirm_deactivate_user', 'Are you sure you want to deactivate this user? They will not be able to log in.');
+
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+
+    const triggerBtn = event ? (event.target ? event.target.closest('button') : null) : null;
+
+    await withButtonLock(triggerBtn, async () => {
+        try {
+            const res = await fetch('/api/admin/toggle-user-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, active: activate })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                alert(data.message || "Failed to update user status");
+                return;
+            }
+
+            await loadCompanyPeople();
+        } catch (err) {
+            console.error("toggleUserActiveStatus error:", err);
+            alert("Network error updating user status");
+        }
+    });
+}
+
+async function adminResetUserPassword(username, event) {
+    const confirmMsg = t('confirm_reset_user_password', 'Are you sure you want to reset password for this user? A temporary password will be assigned and dispatched.');
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+
+    const triggerBtn = event ? (event.target ? event.target.closest('button') : null) : null;
+
+    await withButtonLock(triggerBtn, async () => {
+        try {
+            const res = await fetch('/api/admin/reset-user-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                alert(data.message || "Failed to reset password");
+                return;
+            }
+
+            const alertHeading = t('temp_password_assigned', 'Temporary password assigned successfully!');
+            alert(`${alertHeading}\n\n${data.message || ''}\n\nUser: ${data.username}\nTemporary Password: ${data.tempPassword}`);
+        } catch (err) {
+            console.error("adminResetUserPassword error:", err);
+            alert("Network error resetting password");
+        }
+    });
+}
+
 async function loadAdminConsole() {
     const company = sessionStorage.getItem('company');
     document.getElementById('admin-company-title').innerText = `Workspace Company: ${company}`;
@@ -1556,7 +2340,18 @@ async function loadAdminConsole() {
         alert("Failed to load admin data");
         return;
     }
-    const { managers, crews, projects, pendingUsers } = await res.json();
+    const { managers, crews, projects, pendingUsers, companyId, employees } = await res.json();
+    currentCompanyEmployees = employees || [];
+    renderCompanyEmployees(currentCompanyEmployees);
+
+    const resolvedCompanyId = companyId || sessionStorage.getItem('companyId') || '-';
+    if (companyId) {
+        sessionStorage.setItem('companyId', companyId);
+    }
+    const compIdDisplayEl = document.getElementById('admin-company-id-display');
+    if (compIdDisplayEl) {
+        compIdDisplayEl.innerText = resolvedCompanyId;
+    }
 
     // Render Pending User Approvals
     const pendingContainer = document.getElementById('admin-pending-container');
@@ -1572,8 +2367,8 @@ async function loadAdminConsole() {
                         <div style="font-size: 12.5px; color: #64748b; margin-top: 2px;">Role requested: <strong>${u.role}</strong></div>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button onclick="approveUser('${u.username}')" class="btn-primary" style="background: #10b981; padding: 6px 12px; font-size: 13px; border-radius: 6px;">Approve</button>
-                        <button onclick="denyUser('${u.username}')" class="btn-primary" style="background: #ef4444; padding: 6px 12px; font-size: 13px; border-radius: 6px;">Deny</button>
+                        <button onclick="approveUser('${u.username}', event)" class="btn-primary" style="background: #10b981; padding: 6px 12px; font-size: 13px; border-radius: 6px;">Approve</button>
+                        <button onclick="denyUser('${u.username}', event)" class="btn-primary" style="background: #ef4444; padding: 6px 12px; font-size: 13px; border-radius: 6px;">Deny</button>
                     </div>
                 </div>
             `).join('');
@@ -1640,27 +2435,29 @@ async function loadAdminConsole() {
     }).join('');
 }
 
-async function reassignProject(type, folderId) {
-    const selectEl = document.getElementById(`reassign-${type === 'manager' ? 'mgr' : 'crew'}-select-${folderId}`);
-    const toUser = selectEl.value;
+async function reassignProject(type, folderId, event) {
+    return withButtonLock(event, async () => {
+        const selectEl = document.getElementById(`reassign-${type === 'manager' ? 'mgr' : 'crew'}-select-${folderId}`);
+        const toUser = selectEl.value;
 
-    if (!confirm(`Are you sure you want to change the ${type} of this project?`)) {
-        return;
-    }
+        if (!confirm(`Are you sure you want to change the ${type} of this project?`)) {
+            return;
+        }
 
-    const res = await fetch('/api/admin/reassign-project', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, folderId, toUser })
+        const res = await fetch('/api/admin/reassign-project', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, folderId, toUser })
+        });
+
+        if (res.ok) {
+            alert(`${type.charAt(0).toUpperCase() + type.slice(1)} reassigned successfully!`);
+            loadAdminConsole();
+        } else {
+            const error = await res.json();
+            alert("Error: " + (error.message || "Failed to reassign"));
+        }
     });
-
-    if (res.ok) {
-        alert(`${type.charAt(0).toUpperCase() + type.slice(1)} reassigned successfully!`);
-        loadAdminConsole();
-    } else {
-        const error = await res.json();
-        alert("Error: " + (error.message || "Failed to reassign"));
-    }
 }
 
 // --- Company Branding & Information Functions ---
@@ -1674,6 +2471,8 @@ function updateHeaderBranding() {
     
     const logoImg = document.querySelector('.logo-image');
     if (logoImg) logoImg.src = logo;
+
+    updateAppLogoLink();
 
     const cardContainer = document.getElementById('company-card-container');
     const cardText = document.getElementById('company-card-text');
@@ -1747,27 +2546,29 @@ async function loadCompanyInfo() {
     updateLivePreview();
 }
 
-async function upgradeToPremium() {
-    const company = sessionStorage.getItem('company');
-    const msg = t('confirm_premium_upgrade', 'Confirm payment of $4.99/month to upgrade to Premium?');
-    if (!confirm(msg)) {
-        return;
-    }
-    
-    const res = await fetch('/api/company/upgrade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company })
+async function upgradeToPremium(event) {
+    return withButtonLock(event, async () => {
+        const company = sessionStorage.getItem('company');
+        const msg = t('confirm_premium_upgrade', 'Confirm payment of $4.99/month to upgrade to Premium?');
+        if (!confirm(msg)) {
+            return;
+        }
+        
+        const res = await fetch('/api/company/upgrade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ company })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            sessionStorage.setItem('companyTier', data.tier);
+            alert(t('premium_upgrade_success', 'Successfully upgraded to Premium membership!'));
+            loadCompanyInfo();
+        } else {
+            alert('Failed to upgrade to Premium');
+        }
     });
-    
-    if (res.ok) {
-        const data = await res.json();
-        sessionStorage.setItem('companyTier', data.tier);
-        alert(t('premium_upgrade_success', 'Successfully upgraded to Premium membership!'));
-        loadCompanyInfo();
-    } else {
-        alert('Failed to upgrade to Premium');
-    }
 }
 
 function previewCompanyLogo() {
@@ -1795,47 +2596,49 @@ function previewCompanyLogo() {
     }
 }
 
-async function saveCompanyInfo() {
-    const company = sessionStorage.getItem('company');
-    const officialName = document.getElementById('company-official-name').value;
-    const nameCard = document.getElementById('company-name-card').value;
-    const preview = document.getElementById('company-logo-preview');
+async function saveCompanyInfo(event) {
+    return withButtonLock(event, async () => {
+        const company = sessionStorage.getItem('company');
+        const officialName = document.getElementById('company-official-name').value;
+        const nameCard = document.getElementById('company-name-card').value;
+        const preview = document.getElementById('company-logo-preview');
 
-    if (!officialName) {
-        alert("Please enter an official company name.");
-        return;
-    }
-
-    let logoData = null;
-    if (preview.src && preview.src.startsWith('data:')) {
-        logoData = preview.src;
-    } else if (preview.src) {
-        logoData = preview.getAttribute('data-original-src');
-    }
-
-    const res = await fetch('/api/admin/company-info', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            company: company,
-            officialName: officialName,
-            logo: logoData,
-            nameCard: nameCard
-        })
-    });
-
-    if (res.ok) {
-        alert("Company Information saved successfully!");
-        sessionStorage.setItem('companyOfficialName', officialName);
-        sessionStorage.setItem('companyNameCard', nameCard);
-        if (logoData) {
-            sessionStorage.setItem('companyLogo', logoData);
+        if (!officialName) {
+            alert("Please enter an official company name.");
+            return;
         }
-        updateHeaderBranding();
-        navigate('admin');
-    } else {
-        alert("Failed to save company information");
-    }
+
+        let logoData = null;
+        if (preview.src && preview.src.startsWith('data:')) {
+            logoData = preview.src;
+        } else if (preview.src) {
+            logoData = preview.getAttribute('data-original-src');
+        }
+
+        const res = await fetch('/api/admin/company-info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                company: company,
+                officialName: officialName,
+                logo: logoData,
+                nameCard: nameCard
+            })
+        });
+
+        if (res.ok) {
+            alert("Company Information saved successfully!");
+            sessionStorage.setItem('companyOfficialName', officialName);
+            sessionStorage.setItem('companyNameCard', nameCard);
+            if (logoData) {
+                sessionStorage.setItem('companyLogo', logoData);
+            }
+            updateHeaderBranding();
+            navigate('admin');
+        } else {
+            alert("Failed to save company information");
+        }
+    });
 }
 
 // --- Note Photos Upload & Lightbox Helpers ---
@@ -2008,36 +2811,38 @@ function toggleReplyForm(noteId) {
     }
 }
 
-async function submitReply(noteId) {
-    const input = document.getElementById(`reply-input-${noteId}`);
-    if (!input) return;
+async function submitReply(noteId, event) {
+    return withButtonLock(event, async () => {
+        const input = document.getElementById(`reply-input-${noteId}`);
+        if (!input) return;
 
-    const content = input.value.trim();
-    if (!content) {
-        alert("Reply cannot be empty");
-        return;
-    }
+        const content = input.value.trim();
+        if (!content) {
+            alert("Reply cannot be empty");
+            return;
+        }
 
-    const username = sessionStorage.getItem('username');
-    const res = await fetch('/api/add-reply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: username,
-            folderId: currentFolderId,
-            noteId: noteId,
-            replyContent: content
-        })
+        const username = sessionStorage.getItem('username');
+        const res = await fetch('/api/add-reply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: username,
+                folderId: currentFolderId,
+                noteId: noteId,
+                replyContent: content
+            })
+        });
+
+        if (res.ok) {
+            input.value = '';
+            const form = document.getElementById(`reply-form-${noteId}`);
+            if (form) form.style.display = 'none';
+            loadNotes();
+        } else {
+            alert("Failed to submit reply");
+        }
     });
-
-    if (res.ok) {
-        input.value = '';
-        const form = document.getElementById(`reply-form-${noteId}`);
-        if (form) form.style.display = 'none';
-        loadNotes();
-    } else {
-        alert("Failed to submit reply");
-    }
 }
 
 // --- Super Admin Console Functions ---
@@ -2091,77 +2896,83 @@ async function loadSuperAdminConsole() {
     }).join('');
 }
 
-async function superCreateCompany() {
-    const nameInput = document.getElementById('super-company-name');
-    const companyName = nameInput.value.trim();
-    if (!companyName) {
-        alert("Please enter a company name");
-        return;
-    }
-    
-    const res = await fetch('/api/super-admin/create-company', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companyName })
+async function superCreateCompany(event) {
+    return withButtonLock(event, async () => {
+        const nameInput = document.getElementById('super-company-name');
+        const companyName = nameInput.value.trim();
+        if (!companyName) {
+            alert("Please enter a company name");
+            return;
+        }
+        
+        const res = await fetch('/api/super-admin/create-company', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ companyName })
+        });
+        
+        if (res.ok) {
+            alert(`Company "${companyName}" created successfully!`);
+            nameInput.value = '';
+            loadSuperAdminConsole();
+        } else {
+            const error = await res.json();
+            alert("Error: " + (error.message || "Failed to create company"));
+        }
     });
-    
-    if (res.ok) {
-        alert(`Company "${companyName}" created successfully!`);
-        nameInput.value = '';
-        loadSuperAdminConsole();
-    } else {
-        const error = await res.json();
-        alert("Error: " + (error.message || "Failed to create company"));
-    }
 }
 
-async function superAssignCompany(username) {
-    const select = document.getElementById(`super-assign-select-${username}`);
-    if (!select) return;
-    
-    const company = select.value;
-    const res = await fetch('/api/super-admin/assign-user-company', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, company })
+async function superAssignCompany(username, event) {
+    return withButtonLock(event, async () => {
+        const select = document.getElementById(`super-assign-select-${username}`);
+        if (!select) return;
+        
+        const company = select.value;
+        const res = await fetch('/api/super-admin/assign-user-company', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, company })
+        });
+        
+        if (res.ok) {
+            alert("User company reassigned successfully!");
+            loadSuperAdminConsole();
+        } else {
+            alert("Failed to reassign user");
+        }
     });
-    
-    if (res.ok) {
-        alert("User company reassigned successfully!");
-        loadSuperAdminConsole();
-    } else {
-        alert("Failed to reassign user");
-    }
 }
 
-async function superCreateUser() {
-    const username = document.getElementById('super-new-user').value.trim();
-    const password = document.getElementById('super-new-pass').value;
-    const fullname = document.getElementById('super-new-fullname').value.trim();
-    const role = document.getElementById('super-new-role').value;
-    const company = document.getElementById('super-new-company').value;
+async function superCreateUser(event) {
+    return withButtonLock(event, async () => {
+        const username = document.getElementById('super-new-user').value.trim();
+        const password = document.getElementById('super-new-pass').value;
+        const fullname = document.getElementById('super-new-fullname').value.trim();
+        const role = document.getElementById('super-new-role').value;
+        const company = document.getElementById('super-new-company').value;
 
-    if (!username || !password || !role) {
-        alert("Please fill in username, password and role");
-        return;
-    }
+        if (!username || !password || !role) {
+            alert("Please fill in username, password and role");
+            return;
+        }
 
-    const res = await fetch('/api/super-admin/create-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, fullname, role, company })
+        const res = await fetch('/api/super-admin/create-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password, fullname, role, company })
+        });
+
+        if (res.ok) {
+            alert(`User "${username}" created successfully!`);
+            document.getElementById('super-new-user').value = '';
+            document.getElementById('super-new-pass').value = '';
+            document.getElementById('super-new-fullname').value = '';
+            loadSuperAdminConsole();
+        } else {
+            const error = await res.json();
+            alert("Error: " + (error.message || "Failed to create user"));
+        }
     });
-
-    if (res.ok) {
-        alert(`User "${username}" created successfully!`);
-        document.getElementById('super-new-user').value = '';
-        document.getElementById('super-new-pass').value = '';
-        document.getElementById('super-new-fullname').value = '';
-        loadSuperAdminConsole();
-    } else {
-        const error = await res.json();
-        alert("Error: " + (error.message || "Failed to create user"));
-    }
 }
 
 function updateLivePreview() {
@@ -2270,7 +3081,20 @@ async function updateProjectStatus() {
         // Open Termination Modal
         document.getElementById('status-termination-modal').classList.remove('hidden');
         document.getElementById('status-term-text').value = '';
-        document.getElementById('status-term-date').valueAsDate = new Date();
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const currentLocalIso = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+        const dtInput = document.getElementById('status-term-datetime');
+        if (dtInput) dtInput.value = currentLocalIso;
+        const dateInput = document.getElementById('status-term-date');
+        if (dateInput) dateInput.value = `${year}-${month}-${day}`;
+
         initStatusSignatureCanvases();
         if (statusTermHandler) statusTermHandler.clear();
         return; // wait for user confirmation inside modal
@@ -2393,52 +3217,58 @@ document.addEventListener('click', (e) => {
     }
 });
 
-async function approveUser(username) {
-    const res = await fetch('/api/admin/approve-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username })
+async function approveUser(username, event) {
+    return withButtonLock(event, async () => {
+        const res = await fetch('/api/admin/approve-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        if (res.ok) {
+            alert(`User ${username} approved successfully!`);
+            loadAdminConsole();
+        } else {
+            alert("Failed to approve user");
+        }
     });
-    if (res.ok) {
-        alert(`User ${username} approved successfully!`);
-        loadAdminConsole();
-    } else {
-        alert("Failed to approve user");
-    }
 }
 
-async function denyUser(username) {
+async function denyUser(username, event) {
     if (!confirm(`Are you sure you want to deny registration for ${username}?`)) return;
-    const res = await fetch('/api/admin/deny-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username })
+    return withButtonLock(event, async () => {
+        const res = await fetch('/api/admin/deny-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+        if (res.ok) {
+            alert(`User ${username} denied. The user has been added to the employee list with inactive status.`);
+            loadAdminConsole();
+        } else {
+            alert("Failed to deny user");
+        }
     });
-    if (res.ok) {
-        alert(`User ${username} denied successfully!`);
-        loadAdminConsole();
-    } else {
-        alert("Failed to deny user");
-    }
 }
-async function updateProjectCrews(folderId) {
-    const checkboxes = document.querySelectorAll(`.crew-checkbox-${folderId}`);
-    const selectedCrews = Array.from(checkboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
+async function updateProjectCrews(folderId, event) {
+    return withButtonLock(event, async () => {
+        const checkboxes = document.querySelectorAll(`.crew-checkbox-${folderId}`);
+        const selectedCrews = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
 
-    const res = await fetch('/api/admin/reassign-project-crews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folderId, crews: selectedCrews })
+        const res = await fetch('/api/admin/reassign-project-crews', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folderId, crews: selectedCrews })
+        });
+
+        if (res.ok) {
+            alert("Project crews updated successfully!");
+            loadAdminConsole();
+        } else {
+            alert("Failed to update project crews");
+        }
     });
-
-    if (res.ok) {
-        alert("Project crews updated successfully!");
-        loadAdminConsole();
-    } else {
-        alert("Failed to update project crews");
-    }
 }
 
 function editProject() {
@@ -2457,42 +3287,44 @@ function editProject() {
     navigate('edit-project');
 }
 
-async function saveEditProject() {
-    const projectName = document.getElementById('edit-project-name').value.trim();
-    const workingAddress = document.getElementById('edit-working-address').value.trim();
-    const customerName = document.getElementById('edit-customer-name').value.trim();
-    const customerPhone = document.getElementById('edit-customer-phone').value.trim();
-    const customerBillingAddress = document.getElementById('edit-customer-billing').value.trim();
-    const customerEmail = document.getElementById('edit-customer-email').value.trim();
-    const crewsViewContractPayment = document.getElementById('edit-crews-view-contract-payment').checked;
+async function saveEditProject(event) {
+    return withButtonLock(event, async () => {
+        const projectName = document.getElementById('edit-project-name').value.trim();
+        const workingAddress = document.getElementById('edit-working-address').value.trim();
+        const customerName = document.getElementById('edit-customer-name').value.trim();
+        const customerPhone = document.getElementById('edit-customer-phone').value.trim();
+        const customerBillingAddress = document.getElementById('edit-customer-billing').value.trim();
+        const customerEmail = document.getElementById('edit-customer-email').value.trim();
+        const crewsViewContractPayment = document.getElementById('edit-crews-view-contract-payment').checked;
 
-    if (!projectName || !workingAddress || !customerName || !customerPhone || !customerBillingAddress) {
-        return alert("Please fill in all mandatory fields (*)");
-    }
+        if (!projectName || !workingAddress || !customerName || !customerPhone || !customerBillingAddress) {
+            return alert("Please fill in all mandatory fields (*)");
+        }
 
-    const res = await fetch('/api/edit-folder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            folderId: currentFolderId,
-            projectName,
-            workingAddress,
-            customerName,
-            customerPhone,
-            customerBillingAddress,
-            customerEmail,
-            crewsViewContractPayment
-        })
+        const res = await fetch('/api/edit-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                folderId: currentFolderId,
+                projectName,
+                workingAddress,
+                customerName,
+                customerPhone,
+                customerBillingAddress,
+                customerEmail,
+                crewsViewContractPayment
+            })
+        });
+
+        if (res.ok) {
+            alert("Project information updated successfully!");
+            navigate('work');
+            loadWorkData();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || "Failed to update project information");
+        }
     });
-
-    if (res.ok) {
-        alert("Project information updated successfully!");
-        navigate('work');
-        loadWorkData();
-    } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message || "Failed to update project information");
-    }
 }
 
 function cancelEditProject() {
@@ -2565,27 +3397,29 @@ async function loadManagerConsole() {
     }).join('');
 }
 
-async function updateManagerProjectCrews(folderId) {
-    const checkboxes = document.querySelectorAll(`.manager-crew-checkbox-${folderId}`);
-    const selectedCrews = Array.from(checkboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
+async function updateManagerProjectCrews(folderId, event) {
+    return withButtonLock(event, async () => {
+        const checkboxes = document.querySelectorAll(`.manager-crew-checkbox-${folderId}`);
+        const selectedCrews = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
 
-    const username = sessionStorage.getItem('username');
+        const username = sessionStorage.getItem('username');
 
-    const res = await fetch('/api/manager/reassign-project-crews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folderId, crews: selectedCrews, username })
+        const res = await fetch('/api/manager/reassign-project-crews', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folderId, crews: selectedCrews, username })
+        });
+
+        if (res.ok) {
+            alert("Project crews updated successfully!");
+            loadManagerConsole();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || "Failed to update project crews");
+        }
     });
-
-    if (res.ok) {
-        alert("Project crews updated successfully!");
-        loadManagerConsole();
-    } else {
-        const err = await res.json().catch(() => ({}));
-        alert(err.message || "Failed to update project crews");
-    }
 }
 
 function previewContractItems() {
@@ -2671,11 +3505,399 @@ function confirmPreviewItems() {
         }
     });
 
+    currentAddContractStep = 2;
     navigate('add-contract');
 }
 
 function cancelPreviewItems() {
+    currentAddContractStep = 2;
     navigate('add-contract');
+}
+
+// --- Step 1 (Review & Add Notes) Controller for Add Contract Wizard ---
+let currentAddContractStep = 1;
+let step1NotePhotosData = [];
+
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function previewStep1NotePhotos() {
+    const fileInput = document.getElementById('step1-note-photos-input');
+    const container = document.getElementById('step1-note-photos-preview');
+    if (!fileInput || !container) return;
+
+    const files = Array.from(fileInput.files);
+    
+    // Check max files in one note (2 max)
+    if (step1NotePhotosData.length + files.length > 2) {
+        alert("You can upload a maximum of 2 attachments per note.");
+        fileInput.value = '';
+        return;
+    }
+
+    // Check max files in project (20 max)
+    let totalProjectPhotos = 0;
+    if (currentFolder && currentFolder.notes) {
+        currentFolder.notes.forEach(note => {
+            if (note.photos) totalProjectPhotos += note.photos.length;
+        });
+    }
+
+    if (totalProjectPhotos + step1NotePhotosData.length + files.length > 20) {
+        alert(`Adding these attachments would exceed the project maximum of 20 attachments (currently has ${totalProjectPhotos}).`);
+        fileInput.value = '';
+        return;
+    }
+
+    files.forEach(file => {
+        const isVideo = file.type.startsWith('video/');
+        const MAX_SIZE = isVideo ? 100 * 1024 * 1024 : 5 * 1024 * 1024;
+        
+        if (file.size > MAX_SIZE) {
+            alert(`File "${file.name}" exceeds the maximum size limit of ${isVideo ? '100MB' : '5MB'}.`);
+            return;
+        }
+
+        if (isVideo) {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = function() {
+                window.URL.revokeObjectURL(video.src);
+                const duration = video.duration;
+                const companyTier = sessionStorage.getItem('companyTier') || 'standard';
+                const maxDuration = companyTier === 'premium' ? 420 : 60;
+                
+                if (duration > maxDuration) {
+                    if (companyTier === 'premium') {
+                        alert(`File "${file.name}" exceeds the 7 minutes limit for Premium members.`);
+                    } else {
+                        alert(`File "${file.name}" exceeds the 1 minute limit. Please upgrade to Premium in Company Information to upload up to 7 minutes.`);
+                    }
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    addStep1AttachmentPreview(e.target.result, true);
+                };
+                reader.readAsDataURL(file);
+            };
+            video.src = URL.createObjectURL(file);
+        } else {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                addStep1AttachmentPreview(e.target.result, false);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    fileInput.value = '';
+}
+
+function addStep1AttachmentPreview(dataUrl, isVideo) {
+    const container = document.getElementById('step1-note-photos-preview');
+    if (!container) return;
+
+    step1NotePhotosData.push(dataUrl);
+
+    const div = document.createElement('div');
+    div.style.position = 'relative';
+    div.style.display = 'inline-block';
+
+    let previewEl;
+    if (isVideo) {
+        previewEl = document.createElement('video');
+        previewEl.src = dataUrl;
+        previewEl.style.width = '70px';
+        previewEl.style.height = '70px';
+        previewEl.style.objectFit = 'cover';
+        previewEl.style.borderRadius = '4px';
+        previewEl.style.border = '1px solid #ddd';
+    } else {
+        previewEl = document.createElement('img');
+        previewEl.src = dataUrl;
+        previewEl.style.width = '70px';
+        previewEl.style.height = '70px';
+        previewEl.style.objectFit = 'cover';
+        previewEl.style.borderRadius = '4px';
+        previewEl.style.border = '1px solid #ddd';
+    }
+
+    const removeBtn = document.createElement('button');
+    removeBtn.innerHTML = '×';
+    removeBtn.style.position = 'absolute';
+    removeBtn.style.top = '-5px';
+    removeBtn.style.right = '-5px';
+    removeBtn.style.background = 'red';
+    removeBtn.style.color = 'white';
+    removeBtn.style.border = 'none';
+    removeBtn.style.borderRadius = '50%';
+    removeBtn.style.width = '20px';
+    removeBtn.style.height = '20px';
+    removeBtn.style.cursor = 'pointer';
+    removeBtn.style.fontSize = '12px';
+    removeBtn.style.fontWeight = 'bold';
+    removeBtn.style.lineHeight = '18px';
+    removeBtn.style.padding = '0';
+    removeBtn.style.textAlign = 'center';
+
+    removeBtn.onclick = function() {
+        const idx = step1NotePhotosData.indexOf(dataUrl);
+        if (idx > -1) {
+            step1NotePhotosData.splice(idx, 1);
+        }
+        div.remove();
+    };
+
+    div.appendChild(previewEl);
+    div.appendChild(removeBtn);
+    container.appendChild(div);
+}
+
+async function saveStep1Note(event) {
+    return withButtonLock(event, async () => {
+        const content = document.getElementById('step1-note-text').value.trim();
+        const price = document.getElementById('step1-note-price').value.trim();
+        const uncontract = document.getElementById('step1-note-uncontract').checked;
+        const username = sessionStorage.getItem('username');
+
+        if (!content && step1NotePhotosData.length === 0) {
+            return alert("Note content or photos cannot be empty");
+        }
+
+        const res = await fetch('/api/add-note', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: username,
+                folderId: currentFolderId,
+                noteContent: content,
+                price: price || null,
+                uncontract: uncontract,
+                photos: step1NotePhotosData
+            })
+        });
+
+        if (res.ok) {
+            document.getElementById('step1-note-text').value = '';
+            document.getElementById('step1-note-price').value = '';
+            document.getElementById('step1-note-uncontract').checked = false;
+            const previewContainer = document.getElementById('step1-note-photos-preview');
+            if (previewContainer) previewContainer.innerHTML = '';
+            const fileInput = document.getElementById('step1-note-photos-input');
+            if (fileInput) fileInput.value = '';
+            step1NotePhotosData = [];
+
+            // Refresh current folder
+            const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+            if (directRes.ok) {
+                const data = await directRes.json();
+                currentFolder = data.folder;
+            }
+
+            await renderContractNotesReview();
+            loadWorkData();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || "Failed to add note");
+        }
+    });
+}
+
+async function renderContractNotesReview() {
+    if (!currentFolder && currentFolderId) {
+        const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+        if (directRes.ok) {
+            const data = await directRes.json();
+            currentFolder = data.folder;
+        }
+    }
+
+    const container = document.getElementById('step1-notes-container');
+    const countEl = document.getElementById('step1-notes-count');
+    const includedCountEl = document.getElementById('step1-summary-included-count');
+    const totalPriceEl = document.getElementById('step1-summary-total-price');
+
+    if (!container) return;
+
+    const notes = (currentFolder && currentFolder.notes) ? currentFolder.notes : [];
+
+    let latestContractId = 0;
+    if (isChangeOrderFlow && currentFolder && currentFolder.contracts && currentFolder.contracts.length > 0) {
+        const latestContract = currentFolder.contracts[currentFolder.contracts.length - 1];
+        latestContractId = latestContract ? latestContract.id : 0;
+    }
+
+    let includedCount = 0;
+    let totalPrice = 0;
+
+    notes.forEach(note => {
+        const noteTime = note.modifiedAt || note.id;
+        const isEligible = isChangeOrderFlow ? (noteTime > latestContractId) : true;
+        const isIncluded = isEligible && !note.uncontract;
+        if (isIncluded) {
+            includedCount++;
+            totalPrice += parseFloat(note.price) || 0;
+        }
+    });
+
+    if (includedCountEl) includedCountEl.innerText = includedCount;
+    if (totalPriceEl) totalPriceEl.innerText = `$${totalPrice.toFixed(2)}`;
+    if (countEl) countEl.innerText = `${notes.length} ${t('notes_summary', 'Notes')}`;
+
+    if (notes.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 40px 10px; font-size: 14px;">${t('no_notes_for_project', 'No notes found for this project. You can add one using the form on the left!')}</div>`;
+        return;
+    }
+
+    container.innerHTML = notes.slice().reverse().map(note => {
+        const noteTime = note.modifiedAt || note.id;
+        const isEligible = isChangeOrderFlow ? (noteTime > latestContractId) : true;
+        const isIncluded = isEligible && !note.uncontract;
+
+        const priceBadge = note.price ? `
+            <span style="background: #dbeafe; color: #1e40af; font-weight: 700; font-size: 13px; padding: 3px 8px; border-radius: 6px; white-space: nowrap;">
+                $${parseFloat(note.price).toFixed(2)}
+            </span>
+        ` : '';
+
+        let statusBadge = '';
+        if (note.uncontract) {
+            statusBadge = `<span style="background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px;">${t('uncontracted_badge', 'Uncontracted')}</span>`;
+        } else if (isIncluded) {
+            statusBadge = `<span style="background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px;">✓ ${t('included_in_contract', 'Included in Contract')}</span>`;
+        } else if (isChangeOrderFlow && !isEligible) {
+            statusBadge = `<span style="background: #f3f4f6; color: #9ca3af; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px;">Prior Contract Note</span>`;
+        }
+
+        const photosHtml = (note.photos && note.photos.length > 0) ? `
+            <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                ${note.photos.map(p => {
+                    if (p.startsWith('data:video/')) {
+                        return `<video src="${p}" controls style="width: 70px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1;"></video>`;
+                    } else {
+                        return `<img src="${p}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer;" onclick="viewFullImage('${p}')">`;
+                    }
+                }).join('')}
+            </div>
+        ` : '';
+
+        return `
+            <div style="border: 1px solid ${isIncluded ? '#bfdbfe' : '#e2e8f0'}; background: ${isIncluded ? '#f8fafc' : '#ffffff'}; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                    <div style="font-size: 13.5px; color: #1e293b; line-height: 1.4; word-break: break-word; flex: 1;">
+                        ${escapeHtml(note.content)}
+                    </div>
+                    ${priceBadge}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 4px;">
+                    ${statusBadge}
+                    <span style="font-size: 11px; color: #94a3b8;">${note.date || ''}</span>
+                </div>
+                ${photosHtml}
+            </div>
+        `;
+    }).join('');
+}
+
+function recalculateContractItemsFromNotes() {
+    let totalNotePrice = 0;
+    contractItems = [];
+    if (currentFolder && currentFolder.notes) {
+        if (isChangeOrderFlow) {
+            const latestContract = (currentFolder.contracts && currentFolder.contracts.length > 0)
+                ? currentFolder.contracts[currentFolder.contracts.length - 1]
+                : null;
+            const latestContractId = latestContract ? latestContract.id : 0;
+            const changeOrderNotes = currentFolder.notes.filter(note => {
+                const noteTime = note.modifiedAt || note.id;
+                return noteTime > latestContractId && !note.uncontract;
+            });
+            changeOrderNotes.forEach(note => {
+                const itemPrice = note.price ? parseFloat(note.price) || 0 : 0;
+                totalNotePrice += itemPrice;
+                contractItems.push({
+                    noteId: note.id,
+                    description: note.content || '',
+                    price: itemPrice
+                });
+            });
+        } else {
+            const contractNotes = currentFolder.notes.filter(note => !note.uncontract);
+            contractNotes.forEach(note => {
+                const itemPrice = note.price ? parseFloat(note.price) || 0 : 0;
+                totalNotePrice += itemPrice;
+                contractItems.push({
+                    noteId: note.id,
+                    description: note.content || '',
+                    price: itemPrice
+                });
+            });
+        }
+    }
+    document.getElementById('price').value = totalNotePrice > 0 ? totalNotePrice.toFixed(2) : '';
+}
+
+function goToContractStep1() {
+    currentAddContractStep = 1;
+    const step1El = document.getElementById('add-contract-step-1');
+    const step2El = document.getElementById('add-contract-step-2');
+    if (step1El) step1El.classList.remove('hidden');
+    if (step2El) step2El.classList.add('hidden');
+
+    const pill1 = document.getElementById('contract-step-pill-1');
+    const badge1 = document.getElementById('contract-step-badge-1');
+    const pill2 = document.getElementById('contract-step-pill-2');
+    const badge2 = document.getElementById('contract-step-badge-2');
+    if (pill1 && badge1 && pill2 && badge2) {
+        pill1.style.color = 'var(--primary-blue)';
+        badge1.style.background = 'var(--primary-blue)';
+        badge1.style.color = 'white';
+        badge1.innerText = '1';
+
+        pill2.style.color = '#94a3b8';
+        badge2.style.background = '#e2e8f0';
+        badge2.style.color = '#64748b';
+        badge2.innerText = '2';
+    }
+
+    renderContractNotesReview();
+}
+
+function goToContractStep2(updatePrice = true) {
+    currentAddContractStep = 2;
+    const step1El = document.getElementById('add-contract-step-1');
+    const step2El = document.getElementById('add-contract-step-2');
+    if (step1El) step1El.classList.add('hidden');
+    if (step2El) step2El.classList.remove('hidden');
+
+    const pill1 = document.getElementById('contract-step-pill-1');
+    const badge1 = document.getElementById('contract-step-badge-1');
+    const pill2 = document.getElementById('contract-step-pill-2');
+    const badge2 = document.getElementById('contract-step-badge-2');
+    if (pill1 && badge1 && pill2 && badge2) {
+        pill1.style.color = '#10b981';
+        badge1.style.background = '#10b981';
+        badge1.style.color = 'white';
+        badge1.innerHTML = '&#10003;';
+
+        pill2.style.color = 'var(--primary-blue)';
+        badge2.style.background = 'var(--primary-blue)';
+        badge2.style.color = 'white';
+        badge2.innerText = '2';
+    }
+
+    if (updatePrice) {
+        recalculateContractItemsFromNotes();
+    }
 }
 
 async function lookupCustomer(mode) {
@@ -2718,12 +3940,35 @@ window.onpopstate = function(event) {
 
 // Initial page load hash routing setup
 window.addEventListener('DOMContentLoaded', () => {
-    const username = sessionStorage.getItem('username');
-    let hash = window.location.hash.substring(1);
-    
+    // Check for password reset token in URL parameters or hash
+    const searchParams = new URLSearchParams(window.location.search || '');
+    let tokenParam = searchParams.get('token');
+    let userParam = searchParams.get('username');
+
+    if (!tokenParam && window.location.hash.includes('?')) {
+        const hashQuery = window.location.hash.split('?')[1];
+        const hashParams = new URLSearchParams(hashQuery);
+        tokenParam = hashParams.get('token');
+        userParam = hashParams.get('username');
+    }
+
     // Load translation pref
     const lang = localStorage.getItem('lang') || 'zh';
     applyTranslations(lang);
+
+    if (tokenParam && userParam) {
+        currentResetToken = tokenParam;
+        currentResetUsername = userParam;
+        toggleView('reset-password-token-section');
+        const welcomeEl = document.getElementById('reset-token-welcome');
+        if (welcomeEl) {
+            welcomeEl.innerText = `${t('reset_password_for', 'Reset password for')}: ${userParam}`;
+        }
+        return;
+    }
+
+    const username = sessionStorage.getItem('username');
+    let hash = window.location.hash.substring(1);
     
     // Sub-views requiring project folder context (fall back to dashboard if refreshed)
     const contextViews = ['work', 'add-note', 'add-contract', 'contract-preview', 'final-contract-preview', 'contract-signature', 'edit-project'];
@@ -2943,52 +4188,67 @@ function closeStatusTerminationModal() {
     if (select) select.value = currentFolder.status || 'Draft';
 }
 
-async function saveStatusSignature() {
-    if (statusSigHandler && statusSigHandler.isEmpty()) {
-        alert("Please sign the signature pad before saving.");
-        return;
-    }
-    const signature = statusSigHandler.canvas.toDataURL('image/png');
-    const date = document.getElementById('status-sig-date').value;
-    if (!date) {
-        alert("Please select a date.");
-        return;
-    }
+async function saveStatusSignature(event) {
+    return withButtonLock(event, async () => {
+        if (statusSigHandler && statusSigHandler.isEmpty()) {
+            alert("Please sign the signature pad before saving.");
+            return;
+        }
+        const signature = statusSigHandler.canvas.toDataURL('image/png');
+        const date = document.getElementById('status-sig-date').value;
+        if (!date) {
+            alert("Please select a date.");
+            return;
+        }
 
-    await sendStatusUpdate('Signed', { signature, date });
-    document.getElementById('status-signature-modal').classList.add('hidden');
+        await sendStatusUpdate('Signed', { signature, date });
+        document.getElementById('status-signature-modal').classList.add('hidden');
+    });
 }
 
-async function saveStatusTermination() {
-    const text = document.getElementById('status-term-text').value.trim();
-    if (!text) {
-        alert("Please enter the termination details / reason.");
-        return;
-    }
-    if (statusTermHandler && statusTermHandler.isEmpty()) {
-        alert("Please sign the signature pad before terminating.");
-        return;
-    }
-    const signature = statusTermHandler.canvas.toDataURL('image/png');
-    const date = document.getElementById('status-term-date').value;
-    if (!date) {
-        alert("Please select a date.");
-        return;
-    }
-
-    await sendStatusUpdate('Terminated', {
-        terminationDoc: {
-            text: text,
-            signature: signature,
-            date: date
+async function saveStatusTermination(event) {
+    return withButtonLock(event, async () => {
+        const text = document.getElementById('status-term-text').value.trim();
+        if (!text) {
+            alert("Please enter the termination details / reason.");
+            return;
         }
+        if (statusTermHandler && statusTermHandler.isEmpty()) {
+            alert("Please sign the signature pad before terminating.");
+            return;
+        }
+        const signature = statusTermHandler.canvas.toDataURL('image/png');
+        
+        const dtInput = document.getElementById('status-term-datetime');
+        const rawDateTime = dtInput && dtInput.value ? dtInput.value : '';
+        const dateFallback = document.getElementById('status-term-date') ? document.getElementById('status-term-date').value : '';
+
+        if (!rawDateTime && !dateFallback) {
+            alert("Please select a date and time.");
+            return;
+        }
+
+        const displayDateTime = rawDateTime ? rawDateTime.replace('T', ' ') : dateFallback;
+
+        await sendStatusUpdate('Terminated', {
+            terminationDoc: {
+                text: text,
+                reason: text,
+                signature: signature,
+                date: displayDateTime.split(' ')[0] || displayDateTime,
+                dateTime: displayDateTime,
+                timestamp: Date.now()
+            }
+        });
+        document.getElementById('status-termination-modal').classList.add('hidden');
     });
-    document.getElementById('status-termination-modal').classList.add('hidden');
 }
 
 let shouldVoidExistingContracts = false;
 
 function handleNewContractClick() {
+    isChangeOrderFlow = false;
+    currentAddContractStep = 1;
     if (currentFolder && currentFolder.status === 'Signed_Unpaid') {
         shouldVoidExistingContracts = false; // reset
         document.getElementById('void-warning-modal').classList.remove('hidden');
@@ -2999,6 +4259,8 @@ function handleNewContractClick() {
 }
 
 function confirmVoidAndCreateContract() {
+    isChangeOrderFlow = false;
+    currentAddContractStep = 1;
     shouldVoidExistingContracts = true;
     document.getElementById('void-warning-modal').classList.add('hidden');
     navigate('add-contract');
@@ -3031,6 +4293,7 @@ function handleAddChangeOrderClick() {
     }
 
     isChangeOrderFlow = true;
+    currentAddContractStep = 1;
 
     // Prefill contract details from the latest contract
     document.getElementById('cust-name').value = latestContract.customer || '';

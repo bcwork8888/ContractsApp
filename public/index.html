@@ -31,7 +31,9 @@
 <body>
 <header class="main-header">
     <div class="header-left">
-        <img src="./logo.JPG" class="logo-image" alt="FieldSync Logo">
+        <a id="header-logo-link" href="https://www.fieldsynchq.com/" style="display: inline-flex; align-items: center; text-decoration: none;">
+            <img src="./logo.JPG" class="logo-image" alt="FieldSync Logo">
+        </a>
     </div>
     <div class="header-center">
         <span class="site-title">FieldSync Draft</span>
@@ -51,8 +53,32 @@
     <h2 data-i18n="login">Login</h2>
     <input type="text" id="user" data-i18n-placeholder="username" placeholder="Username">
     <input type="password" id="pass" data-i18n-placeholder="password" placeholder="Password">
-    <button onclick="login()" data-i18n="login">Login</button>
+    <button onclick="login(event)" data-i18n="login">Login</button>
     <button onclick="toggleView('signup-section')" data-i18n="signup">Sign Up</button>
+    <button onclick="toggleView('forgot-password-section')" data-i18n="reset_password">Reset Password</button>
+</div>
+
+<div id="forgot-password-section" class="hidden">
+    <h2 data-i18n="reset_password">Reset Password</h2>
+    <p style="font-size: 13.5px; color: #64748b; margin-top: 0; margin-bottom: 12px;" data-i18n="enter_username_to_reset">Enter your username to reset password:</p>
+    <input type="text" id="reset-username" data-i18n-placeholder="username" placeholder="Username">
+    <div id="reset-password-message" style="display: none; padding: 12px 14px; border-radius: 8px; font-size: 13.5px; margin-top: 10px; margin-bottom: 12px; line-height: 1.5; word-break: break-word;"></div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button onclick="requestPasswordReset(event)" data-i18n="submit">Submit</button>
+        <button onclick="toggleView('login-section')" data-i18n="back_to_login">Back to Login</button>
+    </div>
+</div>
+
+<div id="reset-password-token-section" class="hidden">
+    <h2 data-i18n="set_new_password">Set New Password</h2>
+    <p style="font-size: 13.5px; color: #64748b; margin-top: 0; margin-bottom: 12px;" id="reset-token-welcome"></p>
+    <input type="password" id="new-reset-password" data-i18n-placeholder="new_password" placeholder="New Password">
+    <input type="password" id="confirm-reset-password" data-i18n-placeholder="confirm_new_password" placeholder="Confirm New Password">
+    <div id="reset-token-message" style="display: none; padding: 12px 14px; border-radius: 8px; font-size: 13.5px; margin-top: 10px; margin-bottom: 12px; line-height: 1.5;"></div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button onclick="submitNewPassword(event)" data-i18n="save_new_password">Save New Password</button>
+        <button onclick="toggleView('login-section')" data-i18n="back_to_login">Back to Login</button>
+    </div>
 </div>
 
 <div id="signup-section" class="hidden">
@@ -60,18 +86,50 @@
     <input type="text" id="new-user" data-i18n-placeholder="choose_username" placeholder="Choose Username">
     <input type="password" id="new-pass" data-i18n-placeholder="choose_password" placeholder="Choose Password">
     <input type="text" id="signup-fullname" data-i18n-placeholder="full_name" placeholder="Full Name">
-    <div style="position: relative; width: 100%; margin-bottom: 10px;">
+
+    <div style="display: flex; align-items: center; gap: 6px; margin-top: 5px; margin-bottom: 2px;">
+        <label for="signup-role" style="font-weight: 600; margin-bottom: 0;" data-i18n="role">Role:</label>
+        <span class="tooltip-wrap" tabindex="0" title="If you're the first/only member for the company, please add yourself as Admin role." data-i18n-title="role_signup_tooltip">
+            <span style="font-size: 14px; cursor: pointer; user-select: none;">ℹ️</span>
+            <span class="tooltip-box" data-i18n="role_signup_tooltip">If you're the first/only member for the company, please add yourself as Admin role.</span>
+        </span>
+    </div>
+    <select id="signup-role" onchange="onSignupRoleChange()" title="If you're the first/only member for the company, please add yourself as Admin role." data-i18n-title="role_signup_tooltip">
+        <option value="admin" data-i18n="admin">Admin</option>
+        <option value="manager" data-i18n="manager">Manager</option>
+        <option value="crew" data-i18n="crew">Crew</option>
+    </select>
+
+    <div id="admin-company-mode-group" style="margin-top: 6px; margin-bottom: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 6px; background: #f8fafc; padding: 8px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; font-weight: 500;">
+            <input type="radio" name="admin-company-mode" id="admin-mode-new" value="new" checked onchange="updateCompanyInputMode()" style="width: auto; margin: 0;">
+            <span data-i18n="create_new_company_option">Create New Company (First Admin)</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; margin: 0; font-weight: 500;">
+            <input type="radio" name="admin-company-mode" id="admin-mode-existing" value="existing" onchange="updateCompanyInputMode()" style="width: auto; margin: 0;">
+            <span data-i18n="join_as_second_admin">Join Existing Company (Second Admin)</span>
+        </label>
+    </div>
+
+    <div id="company-name-container" style="position: relative; width: 100%; margin-bottom: 10px;">
         <input type="text" id="signup-company" data-i18n-placeholder="company_name" placeholder="Company Name" oninput="onCompanyInput()" autocomplete="off" style="margin-bottom: 0;">
         <div id="company-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border-blue, #bfdbfe); border-top: none; z-index: 1000; max-height: 150px; overflow-y: auto; border-radius: 0 0 8px 8px; display: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);"></div>
     </div>
 
-    <label for="signup-role" data-i18n="role">Role:</label>
-    <select id="signup-role">
-        <option value="manager" data-i18n="manager">Manager</option>
-        <option value="admin" data-i18n="admin">Admin</option>
-        <option value="crew" data-i18n="crew">Crew</option>
-    </select>
-    <button onclick="signup()" data-i18n="create_account_btn">Register</button>
+    <div id="company-id-container" style="width: 100%; margin-bottom: 10px; display: none;">
+        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <label for="signup-company-id" style="font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 0;" data-i18n="company_id">Company ID</label>
+            <span class="tooltip-wrap" tabindex="0" title="Please ask the admin for company ID." data-i18n-title="ask_admin_for_company_id">
+                <span style="font-size: 14px; cursor: pointer; user-select: none;">ℹ️</span>
+                <span class="tooltip-box" data-i18n="ask_admin_for_company_id">Please ask the admin for company ID.</span>
+            </span>
+        </div>
+        <input type="text" id="signup-company-id" data-i18n-placeholder="enter_company_id" placeholder="Company ID (e.g. CID-XXXXXX)" autocomplete="off" style="text-transform: uppercase;">
+    </div>
+    <div id="signup-role-contact-hint" style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 8px;"></div>
+    <input type="email" id="signup-email" data-i18n-placeholder="email_placeholder_admin" placeholder="Email Address * (Mandatory for Admin)">
+    <input type="tel" id="signup-cellphone" data-i18n-placeholder="cell_phone_optional" placeholder="Cell Phone (Optional)">
+    <button onclick="signup(event)" data-i18n="create_account_btn">Register</button>
     <button onclick="toggleView('login-section')" data-i18n="back_to_login">Back to Login</button>
 </div>
 
@@ -125,7 +183,7 @@
             <label for="crews-view-contract-payment" style="font-weight: 600; cursor: pointer;" data-i18n="crews_can_view_contract_payment">Crews can view contract and payment</label>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="saveNewProject()" class="btn-primary" data-i18n="save_project">Save Project</button>
+            <button onclick="saveNewProject(event)" class="btn-primary" data-i18n="save_project">Save Project</button>
             <button onclick="navigate('dashboard')" class="btn-primary" data-i18n="cancel" style="background: #64748b;">Cancel</button>
         </div>
     </div>
@@ -166,7 +224,7 @@
             <label for="edit-crews-view-contract-payment" style="font-weight: 600; cursor: pointer;" data-i18n="crews_can_view_contract_payment">Crews can view contract and payment</label>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="saveEditProject()" class="btn-primary" data-i18n="update_project">Update Project</button>
+            <button onclick="saveEditProject(event)" class="btn-primary" data-i18n="update_project">Update Project</button>
             <button onclick="cancelEditProject()" class="btn-primary" data-i18n="cancel" style="background: #64748b;">Cancel</button>
         </div>
     </div>
@@ -186,133 +244,182 @@
 <div id="admin-view" class="hidden">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <button onclick="navigate('dashboard')" class="btn-primary" data-i18n="back_to_dashboard">← Back to Dashboard</button>
-        <a href="#" onclick="navigate('company-info'); return false;" data-i18n="company_info_tab" style="font-weight: 600; color: var(--brand-blue); text-decoration: underline;">Company Information</a>
     </div>
     <h2 data-i18n="admin_console">Admin Console</h2>
     
-    <!-- Pending User Approvals -->
-    <div id="admin-pending-container" style="margin-bottom: 25px; display: none; background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-blue); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-        <h3 style="margin-top: 0; color: var(--primary-blue);" data-i18n="pending_approvals">Pending User Approvals</h3>
-        <div id="admin-pending-list" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
-            <!-- Dynamically populated -->
-        </div>
+    <!-- Admin Console Tabs: Projects (default), Company Info, People -->
+    <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+        <button id="admin-tab-btn-projects" onclick="switchAdminTab('projects')" class="admin-tab-btn" data-i18n="tab_projects" style="background: var(--primary-blue); color: white; padding: 8px 18px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Projects</button>
+        <button id="admin-tab-btn-company-info" onclick="switchAdminTab('company-info')" class="admin-tab-btn" data-i18n="tab_company_info" style="background: #f1f5f9; color: #475569; padding: 8px 18px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Company Info</button>
+        <button id="admin-tab-btn-people" onclick="switchAdminTab('people')" class="admin-tab-btn" data-i18n="tab_people" style="background: #f1f5f9; color: #475569; padding: 8px 18px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">People</button>
     </div>
 
-    <h3 id="admin-company-title" data-i18n="company_projects">Company Projects</h3>
-    <div id="admin-projects-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
-    </div>
-</div>
-
-<div id="company-info-view" class="hidden">
-    <button onclick="navigate('admin')" class="btn-primary" data-i18n="back_to_admin_console" style="margin-bottom: 20px;">← Back to Admin Console</button>
-    <h2 data-i18n="company_branding_info">Company Information</h2>
-    
-    <div style="display: flex; gap: 30px; margin-top: 20px; align-items: flex-start; flex-wrap: wrap;">
-        <!-- Left Column: Form -->
-        <div style="flex: 1; max-width: 400px; background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-blue); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 15px;">
+    <!-- Tab 1: Projects (Default) -->
+    <div id="admin-tab-projects">
+        <!-- Company ID Banner -->
+        <div id="admin-company-id-banner" style="display: flex; align-items: center; justify-content: space-between; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <div>
-                <label style="font-weight: 600; display: block; margin-bottom: 8px;" data-i18n="company_official_name">Official Company Name:</label>
-                <input type="text" id="company-official-name" data-i18n-placeholder="company_official_name" placeholder="Enter official name..." oninput="updateLivePreview()">
-            </div>
-            <div>
-                <label style="font-weight: 600; display: block; margin-bottom: 8px;" data-i18n="company_logo_image">Company Logo:</label>
-                <input type="file" id="company-logo-input" accept="image/*" onchange="previewCompanyLogo()" style="border: none; padding: 0;">
-                <div id="company-logo-preview-container" style="margin-top: 15px; display: none;">
-                    <span style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Preview:</span>
-                    <img id="company-logo-preview" style="max-height: 80px; max-width: 100%; object-fit: contain; border-radius: 4px; border: 1px solid #ddd;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 13.5px; color: #1e40af; font-weight: 700;" data-i18n="company_id">Company ID:</span>
+                    <span id="admin-company-id-display" style="font-family: monospace; font-size: 16px; font-weight: 700; color: #1e3a8a; background: #dbeafe; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px;">-</span>
                 </div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 4px;" data-i18n="share_company_id_instruction">Share this Company ID with Managers, Crew members, or other Admins to join your company.</div>
             </div>
-            <div>
-                <label style="font-weight: 600; display: block; margin-bottom: 8px;" data-i18n="company_name_card">Company Name Card:</label>
-                <textarea id="company-name-card" rows="4" style="width: 100%;" data-i18n-placeholder="company_name_card" placeholder="Enter company details/description card..." oninput="updateLivePreview()"></textarea>
-            </div>
-            <button onclick="saveCompanyInfo()" class="btn-primary" data-i18n="save_branding_info" style="margin-top: 10px;">Save Company Information</button>
-            
-            <!-- Premium Membership Section -->
-            <div id="premium-upgrade-container" style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
-                <label style="font-weight: 600; display: block;" data-i18n="premium_membership">Premium Membership</label>
-                <div id="premium-status-message" style="font-size: 13.5px; color: #475569;">
-                    <!-- Dynamically populated in script.js -->
-                </div>
-                <button id="premium-upgrade-btn" onclick="upgradeToPremium()" class="btn-primary" style="background: #10b981; display: none;">Upgrade to Premium ($4.99/month)</button>
-            </div>
+            <button type="button" onclick="copyCompanyId()" class="btn-primary" style="background: #2563eb; padding: 6px 14px; font-size: 13px;" data-i18n="copy_company_id">Copy Company ID</button>
         </div>
         
-        <!-- Right Column: Contract Template Live Preview -->
-        <div style="flex: 1.5; background: white; padding: 30px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); min-width: 550px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-            <h3 style="margin-top: 0; color: var(--primary-blue); margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;" data-i18n="company_branding_info">Contract PDF Template Preview</h3>
-            
-            <div style="border: 1px solid #cbd5e0; padding: 25px; border-radius: 6px; position: relative; background: #fff; min-height: 450px; box-shadow: inset 0 0 10px rgba(0,0,0,0.02);">
-                <!-- Header: Logo & Name Card -->
-                <div style="display: flex; gap: 20px; align-items: flex-start;">
-                    <div id="preview-pdf-logo-wrapper" style="width: 80px; height: 80px; border: 1px dashed #cbd5e0; display: flex; justify-content: center; align-items: center; background: #f7fafc; flex-shrink: 0; border-radius: 4px; overflow: hidden;">
-                        <img id="preview-pdf-logo" style="width: 100%; height: 100%; object-fit: contain; display: none;">
-                        <span id="preview-pdf-logo-placeholder" style="font-size: 11px; color: #a0aec0; text-align: center; padding: 5px;">No Logo</span>
-                    </div>
-                    <div style="flex: 1;">
-                        <div id="preview-pdf-company-name" style="font-size: 18px; font-weight: bold; color: #000; margin-bottom: 5px;">Company Name</div>
-                        <div id="preview-pdf-namecard" style="font-size: 10px; color: #4a5568; line-height: 1.4; white-space: pre-wrap;">Company Name Card Description</div>
+        <!-- Pending User Approvals -->
+        <div id="admin-pending-container" style="margin-bottom: 25px; display: none; background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-blue); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <h3 style="margin-top: 0; color: var(--primary-blue);" data-i18n="pending_approvals">Pending User Approvals</h3>
+            <div id="admin-pending-list" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <h3 id="admin-company-title" data-i18n="company_projects">Company Projects</h3>
+        <div id="admin-projects-list" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+        </div>
+    </div>
+
+    <!-- Tab 2: Company Info -->
+    <div id="admin-tab-company-info" class="hidden">
+        <div style="display: flex; gap: 30px; margin-top: 10px; align-items: flex-start; flex-wrap: wrap;">
+            <!-- Left Column: Form -->
+            <div style="flex: 1; max-width: 400px; background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-blue); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 15px;">
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 8px;" data-i18n="company_official_name">Official Company Name:</label>
+                    <input type="text" id="company-official-name" data-i18n-placeholder="company_official_name" placeholder="Enter official name..." oninput="updateLivePreview()">
+                </div>
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 8px;" data-i18n="company_logo_image">Company Logo:</label>
+                    <input type="file" id="company-logo-input" accept="image/*" onchange="previewCompanyLogo()" style="border: none; padding: 0;">
+                    <div id="company-logo-preview-container" style="margin-top: 15px; display: none;">
+                        <span style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 5px;">Preview:</span>
+                        <img id="company-logo-preview" style="max-height: 80px; max-width: 100%; object-fit: contain; border-radius: 4px; border: 1px solid #ddd;">
                     </div>
                 </div>
+                <div>
+                    <label style="font-weight: 600; display: block; margin-bottom: 8px;" data-i18n="company_name_card">Company Name Card:</label>
+                    <textarea id="company-name-card" rows="4" style="width: 100%;" data-i18n-placeholder="company_name_card" placeholder="Enter company details/description card..." oninput="updateLivePreview()"></textarea>
+                </div>
+                <button onclick="saveCompanyInfo(event)" class="btn-primary" data-i18n="save_branding_info" style="margin-top: 10px;">Save Company Information</button>
                 
-                <!-- Divider -->
-                <div style="height: 1px; background: #e2e8f0; margin: 20px 0;"></div>
+                <!-- Premium Membership Section -->
+                <div id="premium-upgrade-container" style="border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-weight: 600; display: block;" data-i18n="premium_membership">Premium Membership</label>
+                    <div id="premium-status-message" style="font-size: 13.5px; color: #475569;">
+                        <!-- Dynamically populated in script.js -->
+                    </div>
+                    <button id="premium-upgrade-btn" onclick="upgradeToPremium(event)" class="btn-primary" style="background: #10b981; display: none;">Upgrade to Premium ($4.99/month)</button>
+                </div>
+            </div>
+            
+            <!-- Right Column: Contract Template Live Preview -->
+            <div style="flex: 1.5; background: white; padding: 30px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); min-width: 550px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                <h3 style="margin-top: 0; color: var(--primary-blue); margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;" data-i18n="company_branding_info">Contract PDF Template Preview</h3>
                 
-                <!-- Recipient & Quote Grid -->
-                <div style="display: flex; gap: 20px; justify-content: space-between; margin-bottom: 25px;">
-                    <!-- Recipient -->
-                    <div style="flex: 1;">
-                        <div style="font-size: 9px; font-weight: bold; color: #718096; margin-bottom: 4px; letter-spacing: 0.05em;">RECIPIENT:</div>
-                        <div style="font-size: 14px; font-weight: bold; color: #1a202c; margin-bottom: 4px;">John Doe</div>
-                        <div style="font-size: 11px; color: #4a5568; line-height: 1.3;">123 Customer Address Court<br>Pittsburgh, Pennsylvania 15212</div>
+                <div style="border: 1px solid #cbd5e0; padding: 25px; border-radius: 6px; position: relative; background: #fff; min-height: 450px; box-shadow: inset 0 0 10px rgba(0,0,0,0.02);">
+                    <!-- Header: Logo & Name Card -->
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div id="preview-pdf-logo-wrapper" style="width: 80px; height: 80px; border: 1px dashed #cbd5e0; display: flex; justify-content: center; align-items: center; background: #f7fafc; flex-shrink: 0; border-radius: 4px; overflow: hidden;">
+                            <img id="preview-pdf-logo" style="width: 100%; height: 100%; object-fit: contain; display: none;">
+                            <span id="preview-pdf-logo-placeholder" style="font-size: 11px; color: #a0aec0; text-align: center; padding: 5px;">No Logo</span>
+                        </div>
+                        <div style="flex: 1;">
+                            <div id="preview-pdf-company-name" style="font-size: 18px; font-weight: bold; color: #000; margin-bottom: 5px;">Company Name</div>
+                            <div id="preview-pdf-namecard" style="font-size: 10px; color: #4a5568; line-height: 1.4; white-space: pre-wrap;">Company Name Card Description</div>
+                        </div>
                     </div>
                     
-                    <!-- Quote Box -->
-                    <div style="width: 200px; display: flex; flex-direction: column; font-size: 10.5px; border-radius: 4px; overflow: hidden; border: 1px solid #cbd5e0;">
-                        <div style="background: #4a5568; color: white; padding: 6px 10px; font-weight: bold;">Quote #0</div>
-                        <div style="display: flex; justify-content: space-between; padding: 6px 10px; background: white; border-bottom: 1px solid #cbd5e0;">
-                            <span style="color: #718096;">Sent on</span>
-                            <span style="font-weight: bold; color: #1a202c;">Jul 6, 2026</span>
+                    <!-- Divider -->
+                    <div style="height: 1px; background: #e2e8f0; margin: 20px 0;"></div>
+                    
+                    <!-- Recipient & Quote Grid -->
+                    <div style="display: flex; gap: 20px; justify-content: space-between; margin-bottom: 25px;">
+                        <!-- Recipient -->
+                        <div style="flex: 1;">
+                            <div style="font-size: 9px; font-weight: bold; color: #718096; margin-bottom: 4px; letter-spacing: 0.05em;">RECIPIENT:</div>
+                            <div style="font-size: 14px; font-weight: bold; color: #1a202c; margin-bottom: 4px;">John Doe</div>
+                            <div style="font-size: 11px; color: #4a5568; line-height: 1.3;">123 Customer Address Court<br>Pittsburgh, Pennsylvania 15212</div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #718096; color: white; font-weight: bold; font-size: 11px;">
-                            <span>Total</span>
-                            <span>$3,950.00</span>
+                        
+                        <!-- Quote Box -->
+                        <div style="width: 200px; display: flex; flex-direction: column; font-size: 10.5px; border-radius: 4px; overflow: hidden; border: 1px solid #cbd5e0;">
+                            <div style="background: #4a5568; color: white; padding: 6px 10px; font-weight: bold;">Quote #0</div>
+                            <div style="display: flex; justify-content: space-between; padding: 6px 10px; background: white; border-bottom: 1px solid #cbd5e0;">
+                                <span style="color: #718096;">Sent on</span>
+                                <span style="font-weight: bold; color: #1a202c;">Jul 6, 2026</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: #718096; color: white; font-weight: bold; font-size: 11px;">
+                                <span>Total</span>
+                                <span>$3,950.00</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Table -->
-                <div style="border-radius: 4px; overflow: hidden; border: 1px solid #cbd5e0; font-size: 10px; margin-bottom: 20px;">
-                    <!-- Header -->
-                    <div style="display: flex; background: #4a5568; color: white; font-weight: bold; padding: 6px 8px;">
-                        <div style="width: 25%;">Product/Service</div>
-                        <div style="width: 45%;">Description</div>
-                        <div style="width: 10%; text-align: center;">Qty.</div>
-                        <div style="width: 10%; text-align: right;">Unit Price</div>
-                        <div style="width: 10%; text-align: right;">Total</div>
+                    
+                    <!-- Table -->
+                    <div style="border-radius: 4px; overflow: hidden; border: 1px solid #cbd5e0; font-size: 10px; margin-bottom: 20px;">
+                        <!-- Header -->
+                        <div style="display: flex; background: #4a5568; color: white; font-weight: bold; padding: 6px 8px;">
+                            <div style="width: 25%;">Product/Service</div>
+                            <div style="width: 45%;">Description</div>
+                            <div style="width: 10%; text-align: center;">Qty.</div>
+                            <div style="width: 10%; text-align: right;">Unit Price</div>
+                            <div style="width: 10%; text-align: right;">Total</div>
+                        </div>
+                        <!-- Empty Template Row -->
+                        <div style="display: flex; padding: 8px; border-top: 1px solid #cbd5e0; min-height: 40px; color: #2d3748; background: #fff;">
+                            <div style="width: 25%;"></div>
+                            <div style="width: 45%;"></div>
+                            <div style="width: 10%; text-align: center; font-weight: bold;">1</div>
+                            <div style="width: 10%; text-align: right;"></div>
+                            <div style="width: 10%; text-align: right; font-weight: bold;">$3,950.00</div>
+                        </div>
                     </div>
-                    <!-- Empty Template Row -->
-                    <div style="display: flex; padding: 8px; border-top: 1px solid #cbd5e0; min-height: 40px; color: #2d3748; background: #fff;">
-                        <div style="width: 25%;"></div>
-                        <div style="width: 45%;"></div>
-                        <div style="width: 10%; text-align: center; font-weight: bold;">1</div>
-                        <div style="width: 10%; text-align: right;"></div>
-                        <div style="width: 10%; text-align: right; font-weight: bold;">$3,950.00</div>
+                    
+                    <!-- Bottom total -->
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; font-size: 11px; margin-bottom: 25px;">
+                        <strong style="color: #1a202c;">Total</strong>
+                        <div style="border: 1px solid #cbd5e0; padding: 4px 10px; font-weight: bold; border-radius: 4px; background: #fff; min-width: 80px; text-align: right;">$3,950.00</div>
                     </div>
+                    
+                    <!-- Notice -->
+                    <div style="font-size: 9px; color: #718096; margin-bottom: 10px;">This quote is valid for the next 30 days, after which values may be subject to change.</div>
                 </div>
-                
-                <!-- Bottom total -->
-                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; font-size: 11px; margin-bottom: 25px;">
-                    <strong style="color: #1a202c;">Total</strong>
-                    <div style="border: 1px solid #cbd5e0; padding: 4px 10px; font-weight: bold; border-radius: 4px; background: #fff; min-width: 80px; text-align: right;">$3,950.00</div>
-                </div>
-                
-                <!-- Notice -->
-                <div style="font-size: 9px; color: #718096; margin-bottom: 10px;">This quote is valid for the next 30 days, after which values may be subject to change.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: People -->
+    <div id="admin-tab-people" class="hidden">
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid var(--border-blue); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin: 0; color: var(--primary-blue);" data-i18n="company_employees">Company Employees</h3>
+                <span id="admin-people-count" style="font-size: 13px; color: #64748b; font-weight: 500;"></span>
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                            <th style="padding: 10px 12px; font-weight: 600; color: #475569;" data-i18n="full_name">Full Name</th>
+                            <th style="padding: 10px 12px; font-weight: 600; color: #475569;" data-i18n="username">Username</th>
+                            <th style="padding: 10px 12px; font-weight: 600; color: #475569;" data-i18n="role">Role</th>
+                            <th style="padding: 10px 12px; font-weight: 600; color: #475569;" data-i18n="email">Email</th>
+                            <th style="padding: 10px 12px; font-weight: 600; color: #475569;" data-i18n="cell_phone">Cell Phone</th>
+                            <th style="padding: 10px 12px; font-weight: 600; color: #475569;" data-i18n="status">Status</th>
+                            <th style="padding: 10px 12px; font-weight: 600; color: #475569; text-align: right;" data-i18n="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-people-tbody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+
+<div id="company-info-view" class="hidden"></div>
 
 <div id="super-admin-view" class="hidden">
     <button onclick="navigate('dashboard')" class="btn-primary" data-i18n="back_to_dashboard" style="margin-bottom: 20px;">← Back to Dashboard</button>
@@ -333,7 +440,7 @@
                     <h3 data-i18n="company_name">Create Company</h3>
                     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
                         <input type="text" id="super-company-name" data-i18n-placeholder="company_name" placeholder="Enter company name...">
-                        <button onclick="superCreateCompany()" class="btn-primary" data-i18n="company_name">Create Company</button>
+                        <button onclick="superCreateCompany(event)" class="btn-primary" data-i18n="company_name">Create Company</button>
                     </div>
                 </div>
                 
@@ -358,7 +465,7 @@
                             <!-- Dynamically populated from companies list -->
                         </select>
                         
-                        <button onclick="superCreateUser()" class="btn-primary" data-i18n="create_account_btn" style="margin-top: 5px;">Create User</button>
+                        <button onclick="superCreateUser(event)" class="btn-primary" data-i18n="create_account_btn" style="margin-top: 5px;">Create User</button>
                     </div>
                 </div>
             </div>
@@ -506,7 +613,7 @@
             <div id="payment-receipt-preview-container" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
         </div>
     </div>
-    <button onclick="savePayment()" data-i18n="save_payment" class="btn-primary">Save Payment</button>
+    <button onclick="savePayment(event)" data-i18n="save_payment" class="btn-primary">Save Payment</button>
     <button onclick="navigate('work')" data-i18n="cancel">Cancel</button>
 </div>
 
@@ -527,34 +634,115 @@
         <input type="file" id="note-photos-input" accept="image/*,video/*" multiple onchange="previewNotePhotos()" style="border: none; padding: 0;">
         <div id="note-photos-preview-container" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
     </div>
-    <button onclick="saveNote()" data-i18n="save_note">Save Note</button>
+    <button onclick="saveNote(event)" data-i18n="save_note">Save Note</button>
     <button onclick="navigate('work')" data-i18n="cancel">Cancel</button>
 </div>
 
 
 <div id="add-contract-view" class="hidden">
-    <h2 data-i18n="create_new_contract">Create New Contract</h2>
-    <div style="display: flex; flex-direction: column; gap: 10px; max-width: 300px;">
-        <input type="text" id="cust-name" data-i18n-placeholder="customer_name" placeholder="Customer's Name">
-        <input type="text" id="my-name" data-i18n-placeholder="seller_name" placeholder="Your Name">
-        <input type="text" id="phone" data-i18n-placeholder="customer_phone" placeholder="Phone Number (Optional)">
-        
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <input type="number" id="price" data-i18n-placeholder="price" placeholder="Price" style="flex: 1; min-width: 0;">
-            <button type="button" id="preview-items-btn" onclick="previewContractItems()" class="btn-primary" data-i18n="preview_contract_items" style="padding: 6px 12px; font-size: 12.5px; border-radius: 6px; background: #475569; white-space: nowrap; flex-shrink: 0;">Preview Items</button>
+    <!-- Step Indicator Tabs -->
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px; font-size: 14px; font-weight: 600; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+        <div id="contract-step-pill-1" style="display: flex; align-items: center; gap: 8px; color: var(--primary-blue); cursor: pointer;" onclick="goToContractStep1()">
+            <span id="contract-step-badge-1" style="background: var(--primary-blue); color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">1</span>
+            <span data-i18n="step1_review_add_notes">Review & Add Notes</span>
+        </div>
+        <span style="color: #94a3b8; font-size: 16px;">→</span>
+        <div id="contract-step-pill-2" style="display: flex; align-items: center; gap: 8px; color: #94a3b8; cursor: pointer;" onclick="goToContractStep2()">
+            <span id="contract-step-badge-2" style="background: #e2e8f0; color: #64748b; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">2</span>
+            <span data-i18n="step2_contract_details">Contract Details</span>
+        </div>
+    </div>
+
+    <!-- Step 1: Review and Add Notes -->
+    <div id="add-contract-step-1">
+        <h2 id="add-contract-step1-title" data-i18n="step1_review_add_notes">Review & Add Notes</h2>
+        <p style="color: #64748b; font-size: 14px; margin-top: -6px; margin-bottom: 20px;" data-i18n="step1_desc">Review existing notes or add new notes with line item prices before proceeding to contract details.</p>
+
+        <!-- Summary Banner -->
+        <div id="step1-notes-summary-banner" style="display: flex; justify-content: space-between; align-items: center; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 20px; margin-bottom: 25px; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <div style="font-weight: 700; color: #1e40af; font-size: 15px;">
+                    <span data-i18n="notes_summary">Notes Included in Contract:</span> <span id="step1-summary-included-count" style="color: #2563eb; font-size: 16px;">0</span>
+                </div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 3px;" data-i18n="step1_notes_instruction">All non-uncontracted notes will be included as line items in the contract.</div>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 12px; color: #64748b;" data-i18n="estimated_contract_price">Estimated Contract Price:</span>
+                <div id="step1-summary-total-price" style="font-size: 22px; font-weight: 800; color: #1e3a8a;">$0.00</div>
+            </div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 600; color: #475569;" data-i18n="contract_date">Contract Date:</label>
-            <input type="date" id="contract-date" style="width: 100%;">
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 600; color: #475569;" data-i18n="expiration_date">Expiration Date (Optional):</label>
-            <input type="date" id="contract-expiration-date" style="width: 100%;">
+        <div style="display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;">
+            <!-- Left Column: Add Note Form -->
+            <div style="flex: 1; min-width: 300px; max-width: 400px; background: white; padding: 22px; border-radius: 8px; border: 1px solid var(--border-blue); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 15px;">
+                <h3 style="margin: 0; font-size: 16px; color: var(--primary-blue);" data-i18n="add_new_note">+ Add Note</h3>
+                <div>
+                    <label style="font-size: 12.5px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;" data-i18n="note_content">Note Content *:</label>
+                    <textarea id="step1-note-text" rows="4" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 13.5px; border-radius: 6px; border: 1px solid var(--border-blue); font-family: inherit;" data-i18n-placeholder="note_content" placeholder="Write your note or line item description here..."></textarea>
+                </div>
+                <div>
+                    <label style="font-size: 12.5px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;" data-i18n="item_price_optional">Item Price (Optional):</label>
+                    <input type="number" id="step1-note-price" step="0.01" style="width: 100%; box-sizing: border-box; padding: 8px 12px; font-size: 13.5px; border-radius: 6px; border: 1px solid var(--border-blue);" placeholder="e.g. 150.00">
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="step1-note-uncontract" style="width: 16px; height: 16px; cursor: pointer;">
+                    <label for="step1-note-uncontract" style="font-size: 13px; font-weight: 600; color: #475569; cursor: pointer;" data-i18n="uncontract_notes">Uncontract Notes (Exclude from contract)</label>
+                </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 6px;" data-i18n="upload_attachments">Upload Photos/Videos:</label>
+                    <input type="file" id="step1-note-photos-input" accept="image/*,video/*" multiple onchange="previewStep1NotePhotos()" style="border: none; padding: 0; font-size: 12px;">
+                    <div id="step1-note-photos-preview" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                </div>
+                <button type="button" onclick="saveStep1Note(event)" class="btn-primary" data-i18n="add_note_btn" style="padding: 9px 16px; font-weight: 600;">+ Add Note</button>
+            </div>
+
+            <!-- Right Column: Reviewed Notes List -->
+            <div style="flex: 1.5; min-width: 320px; background: white; padding: 22px; border-radius: 8px; border: 1px solid var(--border-blue); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 16px; color: var(--primary-blue);" data-i18n="project_notes">Project Notes</h3>
+                    <span id="step1-notes-count" style="font-size: 13px; color: #64748b; font-weight: 500;"></span>
+                </div>
+                <div id="step1-notes-container" style="display: flex; flex-direction: column; gap: 12px; max-height: 480px; overflow-y: auto; padding-right: 6px;">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
         </div>
 
-        <button onclick="startContractPreview()" data-i18n="next_preview_contract" style="margin-top: 10px;">Next: Preview Contract</button>
-        <button onclick="navigate('work')" data-i18n="cancel">Cancel</button>
+        <!-- Navigation Buttons at bottom of Step 1 -->
+        <div style="display: flex; gap: 12px; margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+            <button type="button" onclick="goToContractStep2()" class="btn-primary" style="background: var(--primary-blue); padding: 10px 22px; font-size: 14px; font-weight: 600;" data-i18n="next_step">Next: Contract Details →</button>
+            <button type="button" onclick="navigate('work')" class="btn-primary" style="background: #64748b; padding: 10px 18px; font-size: 14px; font-weight: 600;" data-i18n="cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Step 2: The Contract Details Form (Current Page) -->
+    <div id="add-contract-step-2" class="hidden">
+        <h2 id="add-contract-step2-title" data-i18n="create_new_contract">Create New Contract</h2>
+        <div style="display: flex; flex-direction: column; gap: 10px; max-width: 320px;">
+            <input type="text" id="cust-name" data-i18n-placeholder="customer_name" placeholder="Customer's Name">
+            <input type="text" id="my-name" data-i18n-placeholder="seller_name" placeholder="Your Name">
+            <input type="text" id="phone" data-i18n-placeholder="customer_phone" placeholder="Phone Number (Optional)">
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="number" id="price" data-i18n-placeholder="price" placeholder="Price" style="flex: 1; min-width: 0;">
+                <button type="button" id="preview-items-btn" onclick="previewContractItems()" class="btn-primary" data-i18n="preview_contract_items" style="padding: 6px 12px; font-size: 12.5px; border-radius: 6px; background: #475569; white-space: nowrap; flex-shrink: 0;">Preview Items</button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;" data-i18n="contract_date">Contract Date:</label>
+                <input type="date" id="contract-date" style="width: 100%;">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;" data-i18n="expiration_date">Expiration Date (Optional):</label>
+                <input type="date" id="contract-expiration-date" style="width: 100%;">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="startContractPreview()" class="btn-primary" data-i18n="next_preview_contract" style="flex: 1;">Next: Preview Contract</button>
+                <button type="button" onclick="goToContractStep1()" class="btn-primary" data-i18n="back_to_notes" style="background: #64748b; padding: 8px 14px;">← Back</button>
+            </div>
+            <button onclick="navigate('work')" class="btn-primary" data-i18n="cancel" style="background: #94a3b8; margin-top: 5px;">Cancel</button>
+        </div>
     </div>
 </div>
 
@@ -594,7 +782,7 @@
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-            <button onclick="finalSaveContract()" class="btn-primary" data-i18n="save_contract" style="background: #10b981;">Final Save Contract</button>
+            <button onclick="finalSaveContract(event)" class="btn-primary" data-i18n="save_contract" style="background: #10b981;">Final Save Contract</button>
             <button onclick="cancelSignatureView()" class="btn-primary" data-i18n="cancel" style="background: #64748b;">Cancel</button>
         </div>
     </div>
@@ -668,7 +856,7 @@
             </div>
             
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                <button onclick="saveStatusSignature()" style="padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; background: #10b981; color: white; border: none; cursor: pointer;">Save & Sign</button>
+                <button onclick="saveStatusSignature(event)" style="padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; background: #10b981; color: white; border: none; cursor: pointer;">Save & Sign</button>
                 <button onclick="closeStatusSignatureModal()" style="padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; background: #64748b; color: white; border: none; cursor: pointer;">Cancel</button>
             </div>
         </div>
@@ -676,28 +864,29 @@
 
     <div id="status-termination-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
         <div style="background: white; padding: 25px; border-radius: 12px; max-width: 420px; width: 90%; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
-            <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #991b1b;">Add Termination Document</h3>
-            <p style="margin: 0; font-size: 13.5px; color: #64748b;">Please enter the termination details, draw your signature, and select a date.</p>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #991b1b;" data-i18n="add_termination_document">Add Termination Document</h3>
+            <p style="margin: 0; font-size: 13.5px; color: #64748b;" data-i18n="termination_modal_desc">Please enter the termination details / reason, draw your signature, and select date & time.</p>
             
             <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Termination Details / Reason:</label>
+                <label style="font-size: 12px; font-weight: 600; color: #475569;" data-i18n="termination_reason">Termination Details / Reason *:</label>
                 <textarea id="status-term-text" rows="3" style="padding: 8px 12px; font-size: 13.5px; border-radius: 6px; border: 1px solid var(--border-blue); font-family: inherit; width: 100%; box-sizing: border-box;" placeholder="Enter reason for termination..."></textarea>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Date:</label>
-                <input type="date" id="status-term-date" style="padding: 8px 12px; font-size: 13.5px; border-radius: 6px; border: 1px solid var(--border-blue);">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;" data-i18n="date_time">Date & Time *:</label>
+                <input type="datetime-local" id="status-term-datetime" style="padding: 8px 12px; font-size: 13.5px; border-radius: 6px; border: 1px solid var(--border-blue);">
+                <input type="hidden" id="status-term-date">
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Signature:</label>
+                <label style="font-size: 12px; font-weight: 600; color: #475569;" data-i18n="signature">Signature *:</label>
                 <canvas id="status-term-canvas" width="370" height="120" style="border: 1px solid #cbd5e0; background: #f8fafc; border-radius: 6px; cursor: crosshair; touch-action: none; width: 100%; height: 120px;"></canvas>
-                <button type="button" onclick="clearStatusTermCanvas()" style="padding: 4px 8px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; color: #475569; cursor: pointer; align-self: flex-start;">Clear Signature</button>
+                <button type="button" onclick="clearStatusTermCanvas()" style="padding: 4px 8px; font-size: 11px; background: #e2e8f0; border: none; border-radius: 4px; color: #475569; cursor: pointer; align-self: flex-start;" data-i18n="clear">Clear Signature</button>
             </div>
             
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 15px;">
-                <button onclick="saveStatusTermination()" style="padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; background: #ef4444; color: white; border: none; cursor: pointer;">Terminate Project</button>
-                <button onclick="closeStatusTerminationModal()" style="padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; background: #64748b; color: white; border: none; cursor: pointer;">Cancel</button>
+                <button onclick="saveStatusTermination(event)" class="btn-primary" style="padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; background: #ef4444; color: white; border: none; cursor: pointer;" data-i18n="terminate_project">Terminate Project</button>
+                <button onclick="closeStatusTerminationModal()" class="btn-primary" style="padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; background: #64748b; color: white; border: none; cursor: pointer;" data-i18n="cancel">Cancel</button>
             </div>
         </div>
     </div>
