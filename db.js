@@ -139,9 +139,9 @@ async function getData() {
                     status: p.status,
                     crew: p.crew,
                     crews: p.crews || [],
-                    payments: p.payments || [],
-                    paymentStatus: p.payment_status || 'N/A',
-                    crewsViewContractPayment: Boolean(p.crews_view_contract_payment),
+                    payments: (p.payments && Array.isArray(p.payments)) ? p.payments : ((localFolder && localFolder.payments) || []),
+                    paymentStatus: p.payment_status || (localFolder && localFolder.paymentStatus) || 'N/A',
+                    crewsViewContractPayment: p.crews_view_contract_payment !== undefined ? Boolean(p.crews_view_contract_payment) : Boolean(localFolder && localFolder.crewsViewContractPayment),
                     terminationDoc: p.termination_doc || (localFolder && localFolder.terminationDoc) || null,
                     contracts: projContracts,
                     notes: projNotes
@@ -234,8 +234,7 @@ async function saveData(data) {
                             customer_email: folder.customerEmail || '',
                             status: folder.status || 'Draft',
                             crew: folder.crew || null,
-                            crews: folder.crews || [],
-                            termination_doc: folder.terminationDoc || null
+                            crews: folder.crews || []
                         });
 
                         if (folder.contracts && Array.isArray(folder.contracts)) {
