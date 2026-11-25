@@ -1,6 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const DATA_FILE = path.join(__dirname, 'data.json');
@@ -18,13 +19,51 @@ if (isSupabaseConfigured) {
     console.log('[DB] Running in local file mode (data.json)');
 }
 
+// Stable & Deterministic Company ID Generator
+function generateCompanyId(companyKey, existingCompanies) {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    if (companyKey && typeof companyKey === 'string' && companyKey.trim().length > 0) {
+        const cleanKey = companyKey.trim().toLowerCase();
+        // If this company already has an assigned ID, preserve it
+        if (existingCompanies && existingCompanies[cleanKey] && existingCompanies[cleanKey].companyId) {
+            return existingCompanies[cleanKey].companyId;
+        }
+        let salt = 0;
+        let id = '';
+        const existingList = Object.entries(existingCompanies || {});
+        do {
+            const hashInput = 'COMPANY_ID_V1:' + cleanKey + (salt > 0 ? (':' + salt) : '');
+            const hash = crypto.createHash('sha256').update(hashInput).digest();
+            id = 'CID-';
+            for (let i = 0; i < 6; i++) {
+                id += chars.charAt(hash[i] % chars.length);
+            }
+            salt++;
+        } while (existingList.some(([k, c]) => k !== cleanKey && c && c.companyId === id));
+        return id;
+    }
+
+    let id = '';
+    const existingList = Object.values(existingCompanies || {});
+    do {
+        id = 'CID-';
+        for (let i = 0; i < 6; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+    } while (existingList.some(c => c && c.companyId === id));
+    return id;
+}
+
 // Local File Helpers
 function readLocalData() {
     try {
         if (!fs.existsSync(DATA_FILE)) {
             return { users: [], companies: {} };
         }
-        return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        if (!data.companies) data.companies = {};
+        if (!data.users) data.users = [];
+        return data;
     } catch (err) {
         console.error('[DB] Error reading local data.json:', err);
         return { users: [], companies: {} };
@@ -71,14 +110,50 @@ async function getData() {
         const companies = {};
         (companiesData || []).forEach(c => {
             const localComp = localData.companies && localData.companies[c.key];
+            const resolvedCompanyId = c.company_id || (localComp && localComp.companyId) || generateCompanyId(c.key, localData.companies);
             companies[c.key] = {
-                companyId: c.company_id || (localComp && localComp.companyId) || '',
-                officialName: c.official_name,
-                logo: c.logo,
-                nameCard: c.name_card,
-                tier: c.tier
+                companyId: resolvedCompanyId,
+                officialName: c.official_name || c.key,
+                logo: c.logo || './logo.JPG',
+                nameCard: c.name_card || '',
+                tier: c.tier || 'standard'
             };
         });
+
+        // Merge any local companies not present in Supabase
+        if (localData.companies) {
+            for (const [k, v] of Object.entries(localData.companies)) {
+                if (!companies[k]) {
+                    companies[k] = {
+                        ...v,
+                        companyId: v.companyId || generateCompanyId(k, localData.companies)
+                    };
+                }
+            }
+        }
+
+        // Keep localData in sync with resolved companies so local cache always has company IDs
+        let localUpdated = false;
+        if (!localData.companies) {
+            localData.companies = {};
+            localUpdated = true;
+        }
+        for (const [k, comp] of Object.entries(companies)) {
+            if (!localData.companies[k] || localData.companies[k].companyId !== comp.companyId) {
+                localData.companies[k] = {
+                    ...(localData.companies[k] || {}),
+                    companyId: comp.companyId,
+                    officialName: comp.officialName || k,
+                    logo: comp.logo || './logo.JPG',
+                    nameCard: comp.nameCard || '',
+                    tier: comp.tier || 'standard'
+                };
+                localUpdated = true;
+            }
+        }
+        if (localUpdated) {
+            writeLocalData(localData);
+        }
 
         const users = (usersData || []).map(u => {
             const localUser = (localData.users || []).find(lu => lu.username && lu.username.toLowerCase() === u.username.toLowerCase());
@@ -150,7 +225,7 @@ async function getData() {
 
             const userCompKey = (u.company || '').toLowerCase();
             const compObj = companies[userCompKey] || (localData.companies && localData.companies[userCompKey]);
-            const resolvedCompanyId = u.company_id || (localUser && localUser.companyId) || (compObj && compObj.companyId) || '';
+            const resolvedCompanyId = u.company_id || (localUser && localUser.companyId) || (compObj && compObj.companyId) || (userCompKey ? generateCompanyId(userCompKey, companies) : '');
 
             return {
                 username: u.username,
@@ -364,5 +439,6 @@ module.exports = {
     saveData,
     testConnection,
     readLocalData,
-    writeLocalData
+    writeLocalData,
+    generateCompanyId
 };

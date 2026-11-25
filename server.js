@@ -65,17 +65,8 @@ function sortFolders(folders) {
     });
 }
 
-function generateCompanyId(existingCompanies) {
-    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-    let id = '';
-    const existingList = Object.values(existingCompanies || {});
-    do {
-        id = 'CID-';
-        for (let i = 0; i < 6; i++) {
-            id += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-    } while (existingList.some(c => c && c.companyId === id));
-    return id;
+function generateCompanyId(companyKey, existingCompanies) {
+    return db.generateCompanyId(companyKey, existingCompanies);
 }
 
 function ensureCompanyIds(data) {
@@ -83,16 +74,18 @@ function ensureCompanyIds(data) {
     let modified = false;
     for (const [key, comp] of Object.entries(data.companies)) {
         if (!comp.companyId) {
-            comp.companyId = generateCompanyId(data.companies);
+            comp.companyId = generateCompanyId(key, data.companies);
             modified = true;
         }
     }
     if (data.users && Array.isArray(data.users)) {
         for (const user of data.users) {
-            if (user.company && !user.companyId) {
+            if (user.company) {
                 const compKey = user.company.trim().toLowerCase();
-                if (data.companies[compKey] && data.companies[compKey].companyId) {
-                    user.companyId = data.companies[compKey].companyId;
+                const compObj = data.companies[compKey];
+                const expectedCompId = (compObj && compObj.companyId) || generateCompanyId(compKey, data.companies);
+                if (user.companyId !== expectedCompId) {
+                    user.companyId = expectedCompId;
                     modified = true;
                 }
             }
@@ -105,7 +98,10 @@ function ensureCompanyIds(data) {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     const data = await getData();
-    ensureCompanyIds(data);
+    const modified = ensureCompanyIds(data);
+    if (modified) {
+        await saveData(data);
+    }
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     
     if (user) {
@@ -287,7 +283,7 @@ app.post('/api/signup', async (req, res) => {
             });
         }
 
-        const newCompanyId = generateCompanyId(data.companies);
+        const newCompanyId = generateCompanyId(compKey, data.companies);
         data.companies[compKey] = {
             companyId: newCompanyId,
             officialName: trimmedCompany,
@@ -1304,8 +1300,13 @@ app.get('/api/admin/company-data', async (req, res) => {
     if (!company) return res.status(400).json({ success: false, message: "Company parameter required" });
 
     const data = await getData();
+    const modified = ensureCompanyIds(data);
+    if (modified) {
+        await saveData(data);
+    }
+    const compKey = company.trim().toLowerCase();
     // Filter users belonging to this company (case-insensitive)
-    const companyUsers = data.users.filter(u => u.company && u.company.toLowerCase() === company.toLowerCase());
+    const companyUsers = data.users.filter(u => u.company && u.company.toLowerCase() === compKey);
 
     const managers = [];
     const crews = [];
@@ -1357,9 +1358,9 @@ app.get('/api/admin/company-data', async (req, res) => {
     });
 
     const companies = data.companies || {};
-    const compInfo = companies[company.toLowerCase()] || {};
+    const compInfo = companies[compKey] || {};
     const tier = compInfo.tier || 'standard';
-    const companyId = compInfo.companyId || '';
+    const companyId = compInfo.companyId || generateCompanyId(compKey, companies);
 
     const employees = companyUsers
         .filter(u => u.approved !== false || u.denied === true)
@@ -1564,10 +1565,16 @@ app.post('/api/admin/company-info', async (req, res) => {
     const data = await getData();
     if (!data.companies) data.companies = {};
 
-    data.companies[company.toLowerCase()] = {
+    const compKey = company.toLowerCase().trim();
+    const existingComp = data.companies[compKey] || {};
+
+    data.companies[compKey] = {
+        ...existingComp,
+        companyId: existingComp.companyId || generateCompanyId(compKey, data.companies),
         officialName: officialName,
-        logo: logo || "./logo.JPG",
-        nameCard: nameCard || ""
+        logo: logo || existingComp.logo || "./logo.JPG",
+        nameCard: nameCard !== undefined ? nameCard : (existingComp.nameCard || ""),
+        tier: existingComp.tier || "standard"
     };
 
     await saveData(data);
@@ -1671,11 +1678,13 @@ app.post('/api/super-admin/create-company', async (req, res) => {
         return res.status(400).json({ success: false, message: "Company already exists" });
     }
 
-    const newCompanyId = generateCompanyId(data.companies);
+    const newCompanyId = generateCompanyId(key, data.companies);
     data.companies[key] = {
         companyId: newCompanyId,
         officialName: companyName.trim(),
-        logo: "./logo.JPG"
+        logo: "./logo.JPG",
+        nameCard: "",
+        tier: "standard"
     };
 
     await saveData(data);
@@ -1715,8 +1724,11 @@ app.post('/api/super-admin/create-user', async (req, res) => {
         const compKey = trimmedCompany.toLowerCase();
         if (!data.companies[compKey]) {
             data.companies[compKey] = {
+                companyId: generateCompanyId(compKey, data.companies),
                 officialName: trimmedCompany,
-                logo: "./logo.JPG"
+                logo: "./logo.JPG",
+                nameCard: "",
+                tier: "standard"
             };
         }
     }
@@ -2072,9 +2084,11 @@ app.post('/api/company/upgrade', async (req, res) => {
     const companyKey = company.toLowerCase();
     if (!data.companies[companyKey]) {
         data.companies[companyKey] = {
+            companyId: generateCompanyId(companyKey, data.companies),
             officialName: company,
             logo: "./logo.JPG",
-            nameCard: ""
+            nameCard: "",
+            tier: "standard"
         };
     }
 
