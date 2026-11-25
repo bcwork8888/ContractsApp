@@ -175,6 +175,12 @@ const TRANSLATIONS = {
     "edit_project_info_btn": "编辑项目信息",
     "contracts": "合同",
     "notes": "备注",
+    "reply": "回复",
+    "replies": "回复",
+    "write_a_reply": "写下回复...",
+    "send": "发送",
+    "reply_cannot_be_empty": "回复内容不能为空",
+    "failed_to_submit_reply": "提交回复失败",
     "add_contract_btn": "+ 新增合同",
     "add_change_order_btn": "+ 新增变更单",
     "uncontract_notes": "非合同备注 (Uncontract Notes)",
@@ -280,6 +286,9 @@ const TRANSLATIONS = {
     "deactivated": "已禁用",
     "activate": "启用",
     "deactivate": "禁用",
+    "pending_approval": "待审批",
+    "approve": "批准",
+    "deny": "拒绝",
     "cannot_deactivate_self": "您不能禁用自己的管理员账户",
     "confirm_deactivate_user": "确定要禁用该员工账户吗？禁用后该员工将无法登录。",
     "confirm_activate_user": "确定要重新启用该员工账户吗？",
@@ -390,6 +399,12 @@ const TRANSLATIONS = {
     "edit_project_info_btn": "Edit Project Info",
     "contracts": "Contracts",
     "notes": "Notes",
+    "reply": "Reply",
+    "replies": "Replies",
+    "write_a_reply": "Write a reply...",
+    "send": "Send",
+    "reply_cannot_be_empty": "Reply cannot be empty",
+    "failed_to_submit_reply": "Failed to submit reply",
     "add_contract_btn": "+ Add Contract",
     "add_change_order_btn": "+ Add Change Order",
     "uncontract_notes": "Uncontract Notes",
@@ -497,6 +512,9 @@ const TRANSLATIONS = {
     "deactivated": "Deactivated",
     "activate": "Activate",
     "deactivate": "Deactivate",
+    "pending_approval": "Pending Approval",
+    "approve": "Approve",
+    "deny": "Deny",
     "cannot_deactivate_self": "You cannot deactivate your own admin account",
     "confirm_deactivate_user": "Are you sure you want to deactivate this user? They will not be able to log in.",
     "confirm_activate_user": "Are you sure you want to activate this user?",
@@ -605,6 +623,12 @@ const TRANSLATIONS = {
     "edit_project_info_btn": "Editar Información del Proyecto",
     "contracts": "Contratos",
     "notes": "Notas",
+    "reply": "Responder",
+    "replies": "Respuestas",
+    "write_a_reply": "Escribe una respuesta...",
+    "send": "Enviar",
+    "reply_cannot_be_empty": "La respuesta no puede estar vacía",
+    "failed_to_submit_reply": "Error al enviar la respuesta",
     "add_contract_btn": "+ Añadir Contrato",
     "add_change_order_btn": "+ Añadir Orden de Cambio",
     "uncontract_notes": "Notas sin Contrato (Uncontract Notes)",
@@ -712,6 +736,9 @@ const TRANSLATIONS = {
     "deactivated": "Desactivado",
     "activate": "Activar",
     "deactivate": "Desactivar",
+    "pending_approval": "Pendiente de Aprobación",
+    "approve": "Aprobar",
+    "deny": "Denegar",
     "cannot_deactivate_self": "No puede desactivar su propia cuenta de administrador",
     "confirm_deactivate_user": "¿Está seguro de que desea desactivar a este usuario? No podrá iniciar sesión.",
     "confirm_activate_user": "¿Está seguro de que desea reactivar a este usuario?",
@@ -962,15 +989,18 @@ async function finalSaveContract(event) {
 async function loadWorkData() {
     const username = sessionStorage.getItem('username');
     const role = sessionStorage.getItem('role');
-    const res = await fetch(`/api/folders?username=${username}`);
-    const folders = await res.json().catch(() => []);
-    let folder = folders.find(f => String(f.id) === String(currentFolderId));
-    if (!folder && currentFolderId) {
+    let folder = null;
+    if (currentFolderId) {
         const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
         if (directRes.ok) {
             const data = await directRes.json();
             folder = data.folder;
         }
+    }
+    if (!folder) {
+        const res = await fetch(`/api/folders?username=${username}`);
+        const folders = await res.json().catch(() => []);
+        folder = folders.find(f => String(f.id) === String(currentFolderId));
     }
     currentFolder = folder;
 
@@ -1006,11 +1036,20 @@ async function loadWorkData() {
             paymentSelect.disabled = (role !== 'manager' && role !== 'admin');
         }
 
-        let totalNotesPrice = 0;
-        if (folder.notes) {
+        let totalProjectPrice = 0;
+        // 1. Calculate from active contracts (non-void base contract + change orders)
+        if (folder.contracts && folder.contracts.length > 0) {
+            folder.contracts.forEach(c => {
+                if (!c.void) {
+                    totalProjectPrice += parseFloat(c.price) || 0;
+                }
+            });
+        }
+        // 2. If no active contracts exist, calculate from contracted notes
+        if (totalProjectPrice === 0 && folder.notes) {
             folder.notes.forEach(note => {
                 if (!note.uncontract) {
-                    totalNotesPrice += parseFloat(note.price) || 0;
+                    totalProjectPrice += parseFloat(note.price) || 0;
                 }
             });
         }
@@ -1022,7 +1061,7 @@ async function loadWorkData() {
             });
         }
 
-        const remainingBalance = totalNotesPrice - totalPayments;
+        const remainingBalance = Math.max(0, totalProjectPrice - totalPayments);
         const remainingBalanceEl = document.getElementById('remaining-balance-value');
         if (remainingBalanceEl) {
             remainingBalanceEl.innerText = `$${remainingBalance.toFixed(2)}`;
@@ -1058,25 +1097,29 @@ async function loadWorkData() {
     loadContracts();
 
     // Render Payments
-    loadPayments();
+    loadPayments(true);
 
     // Call your existing loadNotes logic here or merge them
-    loadNotes();
+    loadNotes(true);
 }
 
-async function loadPayments() {
+async function loadPayments(forceFetch = false) {
     const username = sessionStorage.getItem('username');
-    let folder = (currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
+    let folder = (!forceFetch && currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
     if (!folder) {
-        const res = await fetch(`/api/folders?username=${username}`);
-        const folders = await res.json().catch(() => []);
-        folder = folders.find(f => String(f.id) === String(currentFolderId));
-        if (!folder && currentFolderId) {
+        if (currentFolderId) {
             const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
             if (directRes.ok) {
                 const data = await directRes.json();
                 folder = data.folder;
+                currentFolder = folder;
             }
+        }
+        if (!folder) {
+            const res = await fetch(`/api/folders?username=${username}`);
+            const folders = await res.json().catch(() => []);
+            folder = folders.find(f => String(f.id) === String(currentFolderId));
+            if (folder) currentFolder = folder;
         }
     }
     const container = document.getElementById('payments-list');
@@ -1122,11 +1165,17 @@ async function loadPayments() {
 
 async function savePayment(event) {
     return withButtonLock(event, async () => {
-        const amount = document.getElementById('payment-amount').value;
-        const date = document.getElementById('payment-date').value;
-        const method = document.getElementById('payment-method').value;
-        const notes = document.getElementById('payment-notes').value;
-        const depositPaidFull = document.getElementById('payment-deposit-paid-full').checked;
+        const amountEl = document.getElementById('payment-amount');
+        const dateEl = document.getElementById('payment-date');
+        const methodEl = document.getElementById('payment-method');
+        const notesEl = document.getElementById('payment-notes');
+        const depositPaidFullEl = document.getElementById('payment-deposit-paid-full');
+
+        const amount = amountEl ? amountEl.value.trim() : '';
+        const date = dateEl ? dateEl.value : '';
+        const method = methodEl ? methodEl.value : '';
+        const notes = notesEl ? notesEl.value.trim() : '';
+        const depositPaidFull = depositPaidFullEl ? depositPaidFullEl.checked : false;
 
         if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
             alert("Please enter a valid positive payment amount.");
@@ -1156,8 +1205,32 @@ async function savePayment(event) {
         });
 
         if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+
+            // Clear inputs
+            if (amountEl) amountEl.value = '';
+            if (dateEl) dateEl.value = '';
+            if (notesEl) notesEl.value = '';
+            if (depositPaidFullEl) depositPaidFullEl.checked = false;
+            const previewContainer = document.getElementById('payment-receipt-preview-container');
+            if (previewContainer) previewContainer.innerHTML = '';
+            const receiptInput = document.getElementById('payment-receipt-input');
+            if (receiptInput) receiptInput.value = '';
+            paymentReceiptsData = [];
+
+            // Optimistically update currentFolder
+            if (currentFolder) {
+                if (!currentFolder.payments) currentFolder.payments = [];
+                if (data.payment && !currentFolder.payments.some(p => String(p.id) === String(data.payment.id))) {
+                    currentFolder.payments.push(data.payment);
+                }
+                if (depositPaidFull) {
+                    currentFolder.paymentStatus = 'Paid in Full';
+                }
+            }
+
             navigate('work');
-            loadWorkData();
+            await loadWorkData();
         } else {
             const err = await res.json().catch(() => ({}));
             alert(err.message || "Failed to save payment");
@@ -1761,7 +1834,7 @@ let currentFolderId = null;
 let currentFolder = null;
 
 // Called when a folder card is clicked
-function openFolder(folderId, folderName) {
+async function openFolder(folderId, folderName) {
     // 1. Store the current folder context
     currentFolderId = folderId;
 
@@ -1769,11 +1842,11 @@ function openFolder(folderId, folderName) {
     const title = document.getElementById('folder-title');
     if (title) title.innerText = `Project: ${folderName}`;
 
-    // 3. Load notes/contracts/status
-    loadWorkData();
-
-    // 4. Trigger the navigation
+    // 3. Trigger the navigation
     navigate('work');
+
+    // 4. Load notes/contracts/status
+    await loadWorkData();
 }
 
 async function saveNote(event) {
@@ -1813,29 +1886,39 @@ async function saveNote(event) {
     });
 }
 
-async function loadNotes() {
+async function loadNotes(forceFetch = false) {
     const username = sessionStorage.getItem('username');
-    // Fetch folders to get the latest notes for the current folder
-    let folder = (currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
+    // Fetch folder to get the latest notes for the current folder
+    let folder = (!forceFetch && currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
     if (!folder) {
-        const res = await fetch(`/api/folders?username=${username}`);
-        const folders = await res.json().catch(() => []);
-        folder = folders.find(f => String(f.id) === String(currentFolderId));
-        if (!folder && currentFolderId) {
+        if (currentFolderId) {
             const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
             if (directRes.ok) {
                 const data = await directRes.json();
                 folder = data.folder;
+                currentFolder = folder;
             }
+        }
+        if (!folder) {
+            const res = await fetch(`/api/folders?username=${username}`);
+            const folders = await res.json().catch(() => []);
+            folder = folders.find(f => String(f.id) === String(currentFolderId));
+            if (folder) currentFolder = folder;
         }
     }
     const container = document.getElementById('notes-list');
 
     if (folder && folder.notes && folder.notes.length > 0) {
-        container.innerHTML = folder.notes.map(note => `
+        container.innerHTML = folder.notes.map(note => {
+            const noteIdStr = String(note.id);
+            const replies = Array.isArray(note.replies) ? note.replies : [];
+            const replyCount = replies.length;
+            const replyBadgeText = replyCount > 0 ? ` (${replyCount})` : '';
+
+            return `
             <div style="border-bottom: 1px solid #ddd; padding: 15px 10px; margin-bottom: 10px; background: #fafafa; border-radius: 6px;">
                 <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 500;">
-                    ${note.content}
+                    ${escapeHtml(note.content)}
                     ${note.price ? `<span style="margin-left: 10px; font-size: 12px; padding: 2px 6px; background: #e0f2fe; color: #0369a1; border-radius: 4px; font-weight: bold; white-space: nowrap;">$${note.price}</span>` : ''}
                     ${note.uncontract ? `<span style="margin-left: 8px; font-size: 10px; padding: 2px 6px; background: #f1f5f9; color: #475569; border-radius: 4px; font-weight: bold; white-space: nowrap;">Uncontracted</span>` : ''}
                 </p>
@@ -1851,32 +1934,55 @@ async function loadNotes() {
                     </div>
                 ` : ''}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <small style="color: #888;">${note.date}</small>
-                    <button onclick="toggleReplyForm(${note.id})" style="padding: 2px 8px; font-size: 12px; background: transparent; border: 1px solid var(--border-blue); color: var(--brand-blue); border-radius: 4px; cursor: pointer;">Reply</button>
+                    <small style="color: #888;">${escapeHtml(note.date)}</small>
+                    <button onclick="toggleReplyForm('${noteIdStr}')" style="padding: 3px 10px; font-size: 12px; background: white; border: 1px solid var(--border-blue); color: var(--brand-blue); border-radius: 4px; cursor: pointer; font-weight: 500;">
+                        💬 ${t('reply', 'Reply')}${replyBadgeText}
+                    </button>
                 </div>
                 
                 <!-- Replies Thread -->
-                <div id="replies-container-${note.id}" style="margin-left: 20px; border-left: 2px solid #e2e8f0; padding-left: 12px; margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
-                    ${note.replies && note.replies.length > 0 ? note.replies.map(reply => `
-                        <div style="background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13.5px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <strong style="color: #4a5568;">${reply.fullname || reply.username} (${reply.role})</strong>
-                                <small style="color: #a0aec0;">${reply.date}</small>
+                <div id="replies-container-${noteIdStr}" style="margin-left: 15px; border-left: 3px solid #cbd5e1; padding-left: 12px; margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                    ${replies.map(reply => {
+                        const roleBadgeColor = (reply.role === 'admin' || reply.role === 'super admin') 
+                            ? 'background: #fef2f2; color: #991b1b; border: 1px solid #fecaca;'
+                            : (reply.role === 'manager' 
+                                ? 'background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;' 
+                                : 'background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0;');
+                        const roleLabel = t(reply.role || 'crew', reply.role || 'crew');
+                        return `
+                        <div style="background: white; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13.5px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <strong style="color: #334155;">${escapeHtml(reply.fullname || reply.username)}</strong>
+                                    <span style="font-size: 11px; padding: 1px 6px; border-radius: 4px; font-weight: 600; ${roleBadgeColor}">
+                                        ${escapeHtml(roleLabel)}
+                                    </span>
+                                </div>
+                                <small style="color: #94a3b8; font-size: 11.5px;">${escapeHtml(reply.date)}</small>
                             </div>
-                            <p style="margin: 0; color: #2d3748;">${reply.content}</p>
+                            <p style="margin: 0; color: #1e293b; line-height: 1.4; word-break: break-word;">${escapeHtml(reply.content)}</p>
                         </div>
-                    `).join('') : ''}
+                        `;
+                    }).join('')}
                 </div>
                 
                 <!-- Inline Reply Form -->
-                <div id="reply-form-${note.id}" style="display: none; margin-left: 20px; margin-top: 10px; gap: 8px; align-items: center;">
-                    <input type="text" id="reply-input-${note.id}" placeholder="Write a reply..." style="flex: 1; padding: 6px 12px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-blue);">
-                    <button onclick="submitReply(${note.id})" class="btn-primary" style="padding: 6px 12px; font-size: 13px; border-radius: 6px;">Send</button>
+                <div id="reply-form-${noteIdStr}" style="display: none; margin-left: 15px; margin-top: 10px; gap: 8px; align-items: center;">
+                    <input type="text" id="reply-input-${noteIdStr}" placeholder="${t('write_a_reply', 'Write a reply...')}" 
+                        onkeydown="if(event.key==='Enter'){event.preventDefault(); submitReply('${noteIdStr}', event);}" 
+                        style="flex: 1; padding: 7px 12px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-blue); outline: none;">
+                    <button onclick="submitReply('${noteIdStr}', event)" class="btn-primary" style="padding: 7px 14px; font-size: 13px; border-radius: 6px;">
+                        ${t('send', 'Send')}
+                    </button>
+                    <button onclick="toggleReplyForm('${noteIdStr}')" style="padding: 7px 12px; font-size: 13px; border-radius: 6px; background: transparent; border: 1px solid #cbd5e1; color: #64748b; cursor: pointer;">
+                        ${t('cancel', 'Cancel')}
+                    </button>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     } else {
-        container.innerHTML = '<p>No notes found for this project.</p>';
+        container.innerHTML = `<p>${t('no_notes_found', 'No notes found for this project.')}</p>`;
     }
 }
 
@@ -2213,53 +2319,67 @@ function renderCompanyEmployees(employees) {
 
     tbody.innerHTML = employees.map(emp => {
         const isSelf = emp.username.toLowerCase() === currentLoggedInUser;
-        const isActive = emp.active !== false;
+        const isPending = emp.approved === false && !emp.denied;
+        const isActive = emp.active !== false && !emp.denied;
 
-        const statusBadge = isActive
-            ? `<span style="display: inline-block; background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('active', 'Active')}</span>`
-            : `<span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('inactive', 'Inactive')}</span>`;
+        let statusBadge = '';
+        if (isPending) {
+            statusBadge = `<span style="display: inline-block; background: #fef3c7; color: #92400e; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('pending_approval', 'Pending Approval')}</span>`;
+        } else if (isActive) {
+            statusBadge = `<span style="display: inline-block; background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('active', 'Active')}</span>`;
+        } else {
+            statusBadge = `<span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('inactive', 'Inactive')}</span>`;
+        }
 
-        let toggleBtnHtml = '';
+        let actionBtnsHtml = '';
         if (isSelf) {
-            toggleBtnHtml = `
+            actionBtnsHtml = `
                 <button type="button" class="btn-primary" disabled title="${t('cannot_deactivate_self', 'You cannot deactivate your own admin account')}" style="padding: 5px 12px; font-size: 12.5px; opacity: 0.5; cursor: not-allowed; background: #94a3b8;">
                     ${t('deactivate', 'Deactivate')}
                 </button>
             `;
+        } else if (isPending) {
+            actionBtnsHtml = `
+                <button type="button" onclick="approveUser('${emp.username.replace(/'/g, "\\'")}', event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #10b981; border: 1px solid #059669;">
+                    ${t('approve', 'Approve')}
+                </button>
+                <button type="button" onclick="denyUser('${emp.username.replace(/'/g, "\\'")}', event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #ef4444; border: 1px solid #dc2626;">
+                    ${t('deny', 'Deny')}
+                </button>
+            `;
         } else if (isActive) {
-            toggleBtnHtml = `
+            actionBtnsHtml = `
                 <button type="button" onclick="toggleUserActiveStatus('${emp.username.replace(/'/g, "\\'")}', false, event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #ef4444; border: 1px solid #dc2626;">
                     ${t('deactivate', 'Deactivate')}
                 </button>
+                <button type="button" onclick="adminResetUserPassword('${emp.username.replace(/'/g, "\\'")}', event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #2563eb; border: 1px solid #1d4ed8;">
+                    ${t('reset_password', 'Reset Password')}
+                </button>
             `;
         } else {
-            toggleBtnHtml = `
+            actionBtnsHtml = `
                 <button type="button" onclick="toggleUserActiveStatus('${emp.username.replace(/'/g, "\\'")}', true, event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #10b981; border: 1px solid #059669;">
                     ${t('activate', 'Activate')}
                 </button>
+                <button type="button" onclick="adminResetUserPassword('${emp.username.replace(/'/g, "\\'")}', event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #2563eb; border: 1px solid #1d4ed8;">
+                    ${t('reset_password', 'Reset Password')}
+                </button>
             `;
         }
-
-        const resetBtnHtml = `
-            <button type="button" onclick="adminResetUserPassword('${emp.username.replace(/'/g, "\\'")}', event)" class="btn-primary" style="padding: 5px 12px; font-size: 12.5px; background: #2563eb; border: 1px solid #1d4ed8;">
-                ${t('reset_password', 'Reset Password')}
-            </button>
-        `;
 
         const roleText = t(emp.role ? emp.role.toLowerCase() : '', emp.role || 'crew');
 
         return `
             <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;">
-                <td style="padding: 12px; font-weight: 600; color: #1e293b;">${emp.fullname || emp.username}</td>
-                <td style="padding: 12px; font-family: monospace; color: #475569;">${emp.username}</td>
-                <td style="padding: 12px; color: #334155;"><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">${roleText}</span></td>
-                <td style="padding: 12px; color: #475569;">${emp.email ? `<a href="mailto:${emp.email}" style="color: var(--brand-blue); text-decoration: none;">${emp.email}</a>` : '<span style="color: #cbd5e1;">-</span>'}</td>
-                <td style="padding: 12px; color: #475569;">${emp.cellphone ? `<a href="tel:${emp.cellphone}" style="color: var(--brand-blue); text-decoration: none;">${emp.cellphone}</a>` : '<span style="color: #cbd5e1;">-</span>'}</td>
+                <td style="padding: 12px; font-weight: 600; color: #1e293b;">${escapeHtml(emp.fullname || emp.username)}</td>
+                <td style="padding: 12px; font-family: monospace; color: #475569;">${escapeHtml(emp.username)}</td>
+                <td style="padding: 12px; color: #334155;"><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">${escapeHtml(roleText)}</span></td>
+                <td style="padding: 12px; color: #475569;">${emp.email ? `<a href="mailto:${encodeURI(emp.email)}" style="color: var(--brand-blue); text-decoration: none;">${escapeHtml(emp.email)}</a>` : '<span style="color: #cbd5e1;">-</span>'}</td>
+                <td style="padding: 12px; color: #475569;">${emp.cellphone ? `<a href="tel:${encodeURI(emp.cellphone)}" style="color: var(--brand-blue); text-decoration: none;">${escapeHtml(emp.cellphone)}</a>` : '<span style="color: #cbd5e1;">-</span>'}</td>
                 <td style="padding: 12px;">${statusBadge}</td>
                 <td style="padding: 12px; text-align: right;">
                     <div style="display: inline-flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                        ${toggleBtnHtml}
-                        ${resetBtnHtml}
+                        ${actionBtnsHtml}
                     </div>
                 </td>
             </tr>
@@ -2803,10 +2923,13 @@ function closeImageModal() {
 function toggleReplyForm(noteId) {
     const form = document.getElementById(`reply-form-${noteId}`);
     if (form) {
-        if (form.style.display === 'none' || form.style.display === '') {
-            form.style.display = 'flex';
-        } else {
-            form.style.display = 'none';
+        const isHidden = form.style.display === 'none' || form.style.display === '';
+        form.style.display = isHidden ? 'flex' : 'none';
+        if (isHidden) {
+            const input = document.getElementById(`reply-input-${noteId}`);
+            if (input) {
+                setTimeout(() => input.focus(), 50);
+            }
         }
     }
 }
@@ -2818,7 +2941,7 @@ async function submitReply(noteId, event) {
 
         const content = input.value.trim();
         if (!content) {
-            alert("Reply cannot be empty");
+            alert(t('reply_cannot_be_empty', "Reply cannot be empty"));
             return;
         }
 
@@ -2835,12 +2958,24 @@ async function submitReply(noteId, event) {
         });
 
         if (res.ok) {
+            const data = await res.json().catch(() => ({}));
             input.value = '';
             const form = document.getElementById(`reply-form-${noteId}`);
             if (form) form.style.display = 'none';
-            loadNotes();
+
+            if (currentFolder && currentFolder.notes && data.reply) {
+                const note = currentFolder.notes.find(n => String(n.id) === String(noteId));
+                if (note) {
+                    if (!note.replies) note.replies = [];
+                    if (!note.replies.some(r => String(r.id) === String(data.reply.id))) {
+                        note.replies.push(data.reply);
+                    }
+                }
+            }
+            await loadNotes(true);
         } else {
-            alert("Failed to submit reply");
+            const err = await res.json().catch(() => ({}));
+            alert(err.message || t('failed_to_submit_reply', "Failed to submit reply"));
         }
     });
 }
@@ -3728,7 +3863,9 @@ async function renderContractNotesReview() {
 
     if (!container) return;
 
-    const notes = (currentFolder && currentFolder.notes) ? currentFolder.notes : [];
+    // Filter out uncontracted notes so they never appear on the contract creation/review list
+    const allNotes = (currentFolder && currentFolder.notes) ? currentFolder.notes : [];
+    const notes = allNotes.filter(note => !note.uncontract);
 
     let latestContractId = 0;
     if (isChangeOrderFlow && currentFolder && currentFolder.contracts && currentFolder.contracts.length > 0) {

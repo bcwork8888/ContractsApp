@@ -1318,7 +1318,9 @@ app.get('/api/admin/company-data', async (req, res) => {
             pendingUsers.push({
                 username: u.username,
                 fullname: u.fullname || u.username,
-                role: u.role
+                role: u.role,
+                email: u.email || '',
+                cellphone: u.cellphone || ''
             });
             return;
         }
@@ -1362,18 +1364,16 @@ app.get('/api/admin/company-data', async (req, res) => {
     const tier = compInfo.tier || 'standard';
     const companyId = compInfo.companyId || generateCompanyId(compKey, companies);
 
-    const employees = companyUsers
-        .filter(u => u.approved !== false || u.denied === true)
-        .map(u => ({
-            username: u.username,
-            fullname: u.fullname || u.username,
-            role: u.role || 'crew',
-            email: u.email || '',
-            cellphone: u.cellphone || '',
-            approved: u.approved !== false,
-            active: u.active !== false && u.deactivated !== true && !u.denied,
-            denied: u.denied === true
-        }));
+    const employees = companyUsers.map(u => ({
+        username: u.username,
+        fullname: u.fullname || u.username,
+        role: u.role || 'crew',
+        email: u.email || '',
+        cellphone: u.cellphone || '',
+        approved: u.approved !== false,
+        active: u.active !== false && u.deactivated !== true && !u.denied,
+        denied: u.denied === true
+    }));
 
     res.json({ managers, crews, projects: sortFolders(projects), pendingUsers, tier, companyId, employees });
 });
@@ -1584,39 +1584,58 @@ app.post('/api/admin/company-info', async (req, res) => {
 // API: Add reply to a note
 app.post('/api/add-reply', async (req, res) => {
     const { username, folderId, noteId, replyContent } = req.body;
+    if (!username || !noteId || !replyContent) {
+        return res.status(400).json({ success: false, message: "Missing required parameters" });
+    }
+
     const data = await getData();
-    
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
     }
 
     let note = null;
-    data.users.forEach(u => {
-        if (u.folders) {
-            u.folders.forEach(f => {
-                if (f.notes) {
-                    const foundNote = f.notes.find(n => String(n.id) === String(noteId));
-                    if (foundNote) {
-                        note = foundNote;
+    let targetFolder = null;
+
+    if (folderId) {
+        const folderRes = findFolderById(data, folderId);
+        if (folderRes && folderRes.folder && folderRes.folder.notes) {
+            targetFolder = folderRes.folder;
+            note = targetFolder.notes.find(n => String(n.id) === String(noteId));
+        }
+    }
+
+    if (!note) {
+        for (const u of data.users) {
+            if (u.folders && Array.isArray(u.folders)) {
+                for (const f of u.folders) {
+                    if (f.notes && Array.isArray(f.notes)) {
+                        const foundNote = f.notes.find(n => String(n.id) === String(noteId));
+                        if (foundNote) {
+                            note = foundNote;
+                            targetFolder = f;
+                            break;
+                        }
                     }
                 }
-            });
+                if (note) break;
+            }
         }
-    });
+    }
 
     if (note) {
         if (!note.replies) note.replies = [];
-        note.replies.push({
+        const newReply = {
             id: Date.now(),
             username: user.username,
             fullname: user.fullname || user.username,
-            role: user.role || 'user',
+            role: user.role || 'crew',
             content: replyContent,
             date: new Date().toLocaleString()
-        });
+        };
+        note.replies.push(newReply);
         await saveData(data);
-        return res.json({ success: true });
+        return res.json({ success: true, reply: newReply, replies: note.replies });
     }
     res.status(404).json({ success: false, message: "Note not found" });
 });

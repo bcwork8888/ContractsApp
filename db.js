@@ -4,7 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
-const DATA_FILE = path.join(__dirname, 'data.json');
+const DATA_FILE = process.env.NODE_ENV === 'test' ? path.join(__dirname, 'data.test.json') : path.join(__dirname, 'data.json');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
@@ -16,7 +16,43 @@ if (isSupabaseConfigured) {
     supabase = createClient(supabaseUrl, supabaseKey);
     console.log('[DB] Connected to Supabase Cloud Database');
 } else {
-    console.log('[DB] Running in local file mode (data.json)');
+    console.log('[DB] Running in local file mode (' + path.basename(DATA_FILE) + ')');
+}
+
+// User Metadata Cloud Serialization Helpers
+function formatUserFullname(fullname, email, cellphone) {
+    const cleanName = (fullname || '').split(' ::: ')[0].trim();
+    const metaParts = [];
+    if (email && typeof email === 'string' && email.trim()) {
+        metaParts.push(`email=${encodeURIComponent(email.trim())}`);
+    }
+    if (cellphone && typeof cellphone === 'string' && cellphone.trim()) {
+        metaParts.push(`phone=${encodeURIComponent(cellphone.trim())}`);
+    }
+    if (metaParts.length > 0) {
+        return `${cleanName} ::: ${metaParts.join('&')}`;
+    }
+    return cleanName;
+}
+
+function parseUserFullname(rawFullname) {
+    if (!rawFullname || typeof rawFullname !== 'string') {
+        return { fullname: '', email: '', cellphone: '' };
+    }
+    const parts = rawFullname.split(' ::: ');
+    const cleanName = parts[0].trim();
+    let email = '';
+    let cellphone = '';
+    if (parts.length > 1) {
+        try {
+            const params = new URLSearchParams(parts[1]);
+            email = params.get('email') ? decodeURIComponent(params.get('email')) : '';
+            cellphone = params.get('phone') ? decodeURIComponent(params.get('phone')) : '';
+        } catch (e) {
+            // ignore malformed metadata
+        }
+    }
+    return { fullname: cleanName, email, cellphone };
 }
 
 // Stable & Deterministic Company ID Generator
@@ -159,8 +195,22 @@ async function getData() {
             const localUser = (localData.users || []).find(lu => lu.username && lu.username.toLowerCase() === u.username.toLowerCase());
             const userProjects = (projectsData || []).filter(p => p.username && p.username.toLowerCase() === u.username.toLowerCase());
             
+            const parsedMeta = parseUserFullname(u.fullname);
+            const resolvedFullname = parsedMeta.fullname || (localUser && localUser.fullname) || u.fullname;
+            const resolvedEmail = u.email || (localUser && localUser.email) || parsedMeta.email || '';
+            const resolvedCellphone = u.cellphone || (localUser && localUser.cellphone) || parsedMeta.cellphone || '';
+
             const folders = userProjects.map(p => {
-                const localFolder = localUser && localUser.folders && localUser.folders.find(lf => String(lf.id) === String(p.id));
+                let localFolder = null;
+                for (const lu of (localData.users || [])) {
+                    if (lu.folders && Array.isArray(lu.folders)) {
+                        const found = lu.folders.find(lf => String(lf.id) === String(p.id));
+                        if (found) {
+                            localFolder = found;
+                            break;
+                        }
+                    }
+                }
                 const projContracts = (contractsData || []).filter(c => String(c.folder_id) === String(p.id)).map(c => ({
                     id: isNaN(c.id) ? c.id : Number(c.id),
                     customer: c.customer,
@@ -230,13 +280,13 @@ async function getData() {
             return {
                 username: u.username,
                 password: u.password,
-                fullname: u.fullname,
+                fullname: resolvedFullname,
                 company: u.company,
                 companyId: resolvedCompanyId,
                 role: u.role,
                 approved: u.approved,
-                email: u.email || (localUser && localUser.email) || '',
-                cellphone: u.cellphone || (localUser && localUser.cellphone) || '',
+                email: resolvedEmail,
+                cellphone: resolvedCellphone,
                 active: u.active !== undefined ? u.active : (localUser && localUser.active !== undefined ? localUser.active : true),
                 deactivated: u.deactivated !== undefined ? u.deactivated : (localUser && localUser.deactivated !== undefined ? localUser.deactivated : false),
                 denied: u.denied !== undefined ? u.denied : (localUser && localUser.denied !== undefined ? localUser.denied : false),
@@ -289,7 +339,7 @@ async function saveData(data) {
                 usersList.push({
                     username: user.username.toLowerCase(),
                     password: user.password,
-                    fullname: user.fullname || user.username,
+                    fullname: formatUserFullname(user.fullname || user.username, user.email, user.cellphone),
                     company: user.company || '',
                     role: user.role || 'user',
                     approved: user.approved !== false

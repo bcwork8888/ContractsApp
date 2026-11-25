@@ -10,6 +10,45 @@ describe('FieldSync / CCC Contracts API Test Suite', () => {
     let testFolderId = null;
     let testToken = null;
 
+    beforeAll(async () => {
+        const data = await db.getData();
+        if (!data.companies) data.companies = {};
+        if (!data.companies['demo company']) {
+            data.companies['demo company'] = {
+                companyId: 'CID-DEMO01',
+                officialName: 'Demo Company',
+                logo: './logo.JPG',
+                nameCard: '',
+                tier: 'standard'
+            };
+        }
+        if (!data.users) data.users = [];
+        let aliceUser = data.users.find(u => u.username.toLowerCase() === 'alice');
+        if (!aliceUser) {
+            aliceUser = {
+                username: 'alice',
+                password: 'password123',
+                fullname: 'Alice Seed',
+                company: 'Demo Company',
+                companyId: 'CID-DEMO01',
+                role: 'manager',
+                approved: true,
+                email: 'alice@example.com',
+                cellphone: '123-456-7890',
+                folders: []
+            };
+            data.users.push(aliceUser);
+        } else {
+            aliceUser.password = 'password123';
+            aliceUser.approved = true;
+            aliceUser.company = 'Demo Company';
+            aliceUser.companyId = 'CID-DEMO01';
+            aliceUser.active = true;
+            aliceUser.deactivated = false;
+        }
+        await db.saveData(data);
+    });
+
     describe('1. System & Health Check Endpoints', () => {
         test('GET /api/health - should return database health status', async () => {
             const res = await request(app).get('/api/health');
@@ -714,6 +753,349 @@ describe('FieldSync / CCC Contracts API Test Suite', () => {
                 .send({ username: deniedCrewUser, password: 'deniedPass123' });
             expect(finalLoginRes.statusCode).toBe(200);
             expect(finalLoginRes.body.success).toBe(true);
+        });
+
+        test('POST /api/signup - saves email and phone number and renders on admin People grid as pending', async () => {
+            const pendingEmpUser = `pending_emp_${Date.now()}`;
+            const testEmail = `emp_${Date.now()}@testbuild.com`;
+            const testPhone = '555-223-9988';
+
+            const signupRes = await request(app).post('/api/signup').send({
+                username: pendingEmpUser,
+                password: 'password123',
+                fullname: 'Pending Employee Person',
+                companyId: companyId,
+                role: 'crew',
+                email: testEmail,
+                cellphone: testPhone
+            });
+            expect(signupRes.statusCode).toBe(200);
+            expect(signupRes.body.success).toBe(true);
+            expect(signupRes.body.pendingApproval).toBe(true);
+
+            // Fetch admin company-data and verify employee grid contains user with contact details
+            const compRes = await request(app).get(`/api/admin/company-data?company=${encodeURIComponent(testCompany)}`);
+            expect(compRes.statusCode).toBe(200);
+
+            // 1. Employee list on People grid
+            const foundInEmployees = compRes.body.employees.find(e => e.username === pendingEmpUser);
+            expect(foundInEmployees).toBeDefined();
+            expect(foundInEmployees.fullname).toBe('Pending Employee Person');
+            expect(foundInEmployees.email).toBe(testEmail);
+            expect(foundInEmployees.cellphone).toBe(testPhone);
+            expect(foundInEmployees.approved).toBe(false);
+
+            // 2. Pending list
+            const foundInPending = compRes.body.pendingUsers.find(u => u.username === pendingEmpUser);
+            expect(foundInPending).toBeDefined();
+            expect(foundInPending.email).toBe(testEmail);
+            expect(foundInPending.cellphone).toBe(testPhone);
+        });
+    });
+
+    describe('Payment Processing & Remaining Balance Calculation', () => {
+        let paymentTestFolderId;
+        const paymentUsername = 'alice';
+
+        beforeAll(async () => {
+            // Create a dedicated folder for payment testing
+            const folderRes = await request(app)
+                .post('/api/add-folder')
+                .send({
+                    username: paymentUsername,
+                    projectName: 'Payment Math Verification Project',
+                    workingAddress: '789 Balance Way',
+                    customerName: 'Payment Customer',
+                    customerPhone: '555-8888',
+                    customerBillingAddress: '789 Balance Way',
+                    customerEmail: 'payment.cust@example.com'
+                });
+            expect(folderRes.statusCode).toBe(200);
+            paymentTestFolderId = folderRes.body.id;
+
+            // Add an active contract with price 5000
+            await request(app)
+                .post('/api/add-contract')
+                .send({
+                    username: paymentUsername,
+                    folderId: paymentTestFolderId,
+                    contractData: {
+                        customer: 'Payment Customer',
+                        seller: paymentUsername,
+                        price: 5000,
+                        date: '2026-11-25',
+                        template: 'company_default',
+                        email: 'payment.cust@example.com',
+                        items: [{ description: 'Main Project Scope', qty: 1, rate: 5000 }]
+                    }
+                });
+        });
+
+        test('POST /api/add-payment - validation checks for required fields and invalid folder', async () => {
+            // Missing required fields
+            const missingRes = await request(app)
+                .post('/api/add-payment')
+                .send({
+                    username: paymentUsername,
+                    folderId: paymentTestFolderId,
+                    amount: 500
+                    // missing date, method
+                });
+            expect(missingRes.statusCode).toBe(400);
+            expect(missingRes.body.success).toBe(false);
+
+            // Invalid folderId
+            const notFoundRes = await request(app)
+                .post('/api/add-payment')
+                .send({
+                    username: paymentUsername,
+                    folderId: 999999999999,
+                    amount: 500,
+                    date: '2026-11-25',
+                    method: 'Check'
+                });
+            expect(notFoundRes.statusCode).toBe(404);
+            expect(notFoundRes.body.success).toBe(false);
+        });
+
+        test('POST /api/add-payment - records payment and correctly subtracts from Remaining Balance', async () => {
+            // 1. Add first payment of $1,500
+            const payRes1 = await request(app)
+                .post('/api/add-payment')
+                .send({
+                    username: paymentUsername,
+                    folderId: paymentTestFolderId,
+                    amount: 1500,
+                    date: '2026-11-25',
+                    method: 'Check',
+                    notes: 'Initial deposit check #101'
+                });
+            expect(payRes1.statusCode).toBe(200);
+            expect(payRes1.body.success).toBe(true);
+            expect(payRes1.body.payment.amount).toBe(1500);
+
+            // Fetch folder and verify payments array
+            const folderRes1 = await request(app).get(`/api/folder?id=${paymentTestFolderId}`);
+            expect(folderRes1.statusCode).toBe(200);
+            const folder1 = folderRes1.body.folder;
+            expect(folder1.payments).toHaveLength(1);
+            expect(folder1.payments[0].amount).toBe(1500);
+
+            // Verify Remaining Balance math: Contract Price (5000) - Payments (1500) = 3500
+            const activeContractsTotal = (folder1.contracts || [])
+                .filter(c => !c.void)
+                .reduce((sum, c) => sum + parseFloat(c.price || 0), 0);
+            const totalPayments = (folder1.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            const remainingBalance = Math.max(0, activeContractsTotal - totalPayments);
+            expect(activeContractsTotal).toBe(5000);
+            expect(totalPayments).toBe(1500);
+            expect(remainingBalance).toBe(3500);
+
+            // 2. Add second payment of $3,500 with depositPaidFull = true
+            const payRes2 = await request(app)
+                .post('/api/add-payment')
+                .send({
+                    username: paymentUsername,
+                    folderId: paymentTestFolderId,
+                    amount: 3500,
+                    date: '2026-11-26',
+                    method: 'Credit Card',
+                    depositPaidFull: true,
+                    notes: 'Final balance paid in full'
+                });
+            expect(payRes2.statusCode).toBe(200);
+            expect(payRes2.body.success).toBe(true);
+
+            // Fetch updated folder
+            const folderRes2 = await request(app).get(`/api/folder?id=${paymentTestFolderId}`);
+            expect(folderRes2.statusCode).toBe(200);
+            const folder2 = folderRes2.body.folder;
+            expect(folder2.payments).toHaveLength(2);
+            expect(folder2.paymentStatus).toBe('Paid in Full');
+
+            const totalPaymentsFinal = (folder2.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            const finalRemainingBalance = Math.max(0, activeContractsTotal - totalPaymentsFinal);
+            expect(totalPaymentsFinal).toBe(5000);
+            expect(finalRemainingBalance).toBe(0);
+        });
+    });
+
+    describe('Note Replies for Crew and Managers', () => {
+        const timestamp = Date.now();
+        const mgrUser = `notemgr_${timestamp}`;
+        const crewUser = `notecrew_${timestamp}`;
+        const companyName = `NoteCo_${timestamp}`;
+        let companyId;
+        let folderId;
+        let noteId;
+
+        test('Setup: Create Admin, Company, Manager, and Crew User', async () => {
+            const adminUser = `noteadmin_${timestamp}`;
+            const adminRes = await request(app).post('/api/signup').send({
+                username: adminUser,
+                password: 'password123',
+                fullname: 'Note Admin',
+                company: companyName,
+                role: 'admin',
+                email: `admin_${timestamp}@example.com`
+            });
+            expect(adminRes.statusCode).toBe(200);
+            companyId = adminRes.body.companyId;
+            expect(companyId).toBeDefined();
+
+            // Register manager
+            const mgrRes = await request(app).post('/api/signup').send({
+                username: mgrUser,
+                password: 'password123',
+                fullname: 'Note Manager',
+                companyId: companyId,
+                role: 'manager',
+                email: `mgr_${timestamp}@example.com`
+            });
+            expect(mgrRes.statusCode).toBe(200);
+
+            // Register crew
+            const crewRes = await request(app).post('/api/signup').send({
+                username: crewUser,
+                password: 'password123',
+                fullname: 'Note Crew Worker',
+                companyId: companyId,
+                role: 'crew',
+                cellphone: '555-9090'
+            });
+            expect(crewRes.statusCode).toBe(200);
+
+            // Admin approves both
+            await request(app).post('/api/admin/approve-user').send({ username: mgrUser });
+            await request(app).post('/api/admin/approve-user').send({ username: crewUser });
+        });
+
+        test('Manager creates a project assigned to crew and adds a note', async () => {
+            // Manager creates folder
+            const folderRes = await request(app).post('/api/add-folder').send({
+                username: mgrUser,
+                projectName: 'Crew Note Project',
+                workingAddress: '100 Main St',
+                customerName: 'Jane Customer',
+                customerPhone: '555-1111',
+                customerBillingAddress: '100 Main St',
+                customerEmail: 'jane@example.com'
+            });
+            expect(folderRes.statusCode).toBe(200);
+            expect(folderRes.body.id).toBeDefined();
+            folderId = folderRes.body.id;
+
+            // Assign crew to folder
+            const assignRes = await request(app).post('/api/manager/reassign-project-crews').send({
+                username: mgrUser,
+                folderId: folderId,
+                crews: [crewUser]
+            });
+            expect(assignRes.statusCode).toBe(200);
+
+            // Add note as manager
+            const noteRes = await request(app).post('/api/add-note').send({
+                username: mgrUser,
+                folderId: folderId,
+                noteContent: 'Initial site preparation required.',
+                price: '150.00'
+            });
+            expect(noteRes.statusCode).toBe(200);
+
+            // Verify folder notes contains the note
+            const checkRes = await request(app).get(`/api/folder?id=${folderId}`);
+            expect(checkRes.statusCode).toBe(200);
+            expect(checkRes.body.folder.notes).toHaveLength(1);
+            noteId = checkRes.body.folder.notes[0].id;
+            expect(checkRes.body.folder.notes[0].content).toBe('Initial site preparation required.');
+            expect(checkRes.body.folder.notes[0].replies || []).toEqual([]);
+        });
+
+        test('Crew user fetches folder and sees the note', async () => {
+            // Crew fetches their assigned folders
+            const crewFoldersRes = await request(app).get(`/api/folders?username=${crewUser}`);
+            expect(crewFoldersRes.statusCode).toBe(200);
+            const assignedFolder = crewFoldersRes.body.find(f => String(f.id) === String(folderId));
+            expect(assignedFolder).toBeDefined();
+            expect(assignedFolder.notes).toHaveLength(1);
+            expect(assignedFolder.notes[0].id).toBe(noteId);
+
+            // Crew fetches direct folder by ID
+            const directRes = await request(app).get(`/api/folder?id=${folderId}`);
+            expect(directRes.statusCode).toBe(200);
+            expect(directRes.body.folder.notes).toHaveLength(1);
+        });
+
+        test('POST /api/add-reply - crew user can reply to the note', async () => {
+            const replyRes = await request(app).post('/api/add-reply').send({
+                username: crewUser,
+                folderId: folderId,
+                noteId: noteId,
+                replyContent: 'Materials have been ordered and will arrive Monday.'
+            });
+
+            expect(replyRes.statusCode).toBe(200);
+            expect(replyRes.body.success).toBe(true);
+            expect(replyRes.body.reply).toBeDefined();
+            expect(replyRes.body.reply.username).toBe(crewUser);
+            expect(replyRes.body.reply.fullname).toBe('Note Crew Worker');
+            expect(replyRes.body.reply.role).toBe('crew');
+            expect(replyRes.body.reply.content).toBe('Materials have been ordered and will arrive Monday.');
+            expect(replyRes.body.replies).toHaveLength(1);
+        });
+
+        test('Manager replies to the note and crew can see all replies', async () => {
+            // Manager adds a follow-up reply
+            const mgrReplyRes = await request(app).post('/api/add-reply').send({
+                username: mgrUser,
+                folderId: folderId,
+                noteId: noteId,
+                replyContent: 'Great, thanks for the update. Ensure permits are on site.'
+            });
+            expect(mgrReplyRes.statusCode).toBe(200);
+            expect(mgrReplyRes.body.success).toBe(true);
+            expect(mgrReplyRes.body.replies).toHaveLength(2);
+
+            // Crew user queries via /api/folder?id=...
+            const crewViewFolder = await request(app).get(`/api/folder?id=${folderId}`);
+            expect(crewViewFolder.statusCode).toBe(200);
+            const notes = crewViewFolder.body.folder.notes;
+            expect(notes).toHaveLength(1);
+            const replies = notes[0].replies;
+            expect(replies).toHaveLength(2);
+
+            // Check reply 1 (crew)
+            expect(replies[0].username).toBe(crewUser);
+            expect(replies[0].role).toBe('crew');
+            expect(replies[0].content).toBe('Materials have been ordered and will arrive Monday.');
+
+            // Check reply 2 (manager)
+            expect(replies[1].username).toBe(mgrUser);
+            expect(replies[1].role).toBe('manager');
+            expect(replies[1].content).toBe('Great, thanks for the update. Ensure permits are on site.');
+
+            // Crew user also sees all replies via /api/folders?username=...
+            const crewFoldersRes = await request(app).get(`/api/folders?username=${crewUser}`);
+            expect(crewFoldersRes.statusCode).toBe(200);
+            const crewFolder = crewFoldersRes.body.find(f => String(f.id) === String(folderId));
+            expect(crewFolder.notes[0].replies).toHaveLength(2);
+        });
+
+        test('POST /api/add-reply - validation checks', async () => {
+            // Missing parameters
+            const badRes1 = await request(app).post('/api/add-reply').send({
+                username: crewUser,
+                noteId: noteId
+            });
+            expect(badRes1.statusCode).toBe(400);
+
+            // Nonexistent note
+            const badRes2 = await request(app).post('/api/add-reply').send({
+                username: crewUser,
+                noteId: 'nonexistent_999999',
+                replyContent: 'Hello'
+            });
+            expect(badRes2.statusCode).toBe(404);
         });
     });
 });

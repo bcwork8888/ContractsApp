@@ -22,7 +22,7 @@
       "password": "cre2",
       "fullname": "crew member",
       "company": "testcompany",
-      "companyId": "",
+      "companyId": "CID-CPETLP",
       "role": "crew",
       "approved": true,
       "email": "",
@@ -56,7 +56,7 @@
       "password": "cc",
       "fullname": "cc",
       "company": "cc",
-      "companyId": "",
+      "companyId": "CID-H9NUGY",
       "role": "admin",
       "approved": true,
       "email": "",
@@ -73,7 +73,7 @@
       "password": "newSecretPassword123",
       "fullname": "live_admin_corp",
       "company": "LiveCorp",
-      "companyId": "",
+      "companyId": "CID-KNV6M4",
       "role": "admin",
       "approved": true,
       "email": "live_admin@livecorp.com",
@@ -90,7 +90,7 @@
       "password": "pwd",
       "fullname": "live_crew_corp",
       "company": "LiveCorp",
-      "companyId": "",
+      "companyId": "CID-KNV6M4",
       "role": "crew",
       "approved": false,
       "email": "",
@@ -764,6 +764,27 @@
               "items": []
             },
             {
+              "id": 1783309072788,
+              "customer": "first",
+              "seller": "abc, xyz",
+              "price": 200,
+              "date": "2026-07-06",
+              "template": "company_default",
+              "phone": "4124124142",
+              "email": "",
+              "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABkCAYAAAA8AQ3AAAAD8UlEQVR4AezUS47bMBAEUCP3P3S8mYVhC5ZFkezPCwIE0Uhk96tB/Xv4Q4AAgSQCCitJUMYkQODxUFh+CwgQSCOgsNJENT6oEwhkF1BY2RM0P4FGAgqrUdhWJZBdQGFlT9D8BD4JFH2msIoGay0CFQUUVsVU7USgqIDCKhqstQhUFFBYn1L1jACBkAIKK2QshiJA4JOAwvqk4hkBAiEFFFbIWAy1TsBNmQQUVqa0zEqguYDCav4LYH0CmQQUVqa0zEqgucBgYTXXsz4BAksFFNZSbpcRIDAioLBG9HxLgMBSAYW1lDv1ZYYnsF1AYW2PwAAECJwVUFhnpbxHgMB2AYW1PQIDEIgnEHUihRU1GXMRIPAmoLDeSDwgQCCqgMKKmoy5CBB4E1BYbyTjD5xAgMAcAYU1x9WpBAhMEFBYE1AdSYDAHAGFNcfVqV0E7LlUQGEt5XYZAQIjAgprRM+3BAgsFVBYS7ldRoDAiMDewhqZ3LcECLQTUFjtIrcwgbwCCitvdiYn0E5AYbWLfNfC7iUwLqCwxg2dQIDAIgGFtQjaNQQIjAsorHFDJxAg8Cow7X8KaxqtgwkQuFtAYd0t6jwCBKYJKKxptA4mQOBuAYV1t+j4eU4gQOBAQGEdwHhMgEA8AYUVLxMTESBwIKCwDmA8JrBCwB2/CSis37y8TYDARgGFtRHf1QQI/CagsH7z8jYBAhsFUhfWRjdXEyCwQUBhbUB3JQEC1wQU1jU3XxEgsEFAYW1Ad+UFAZ8QeAoorCeCvwQI5BBQWDlyMiUBAk8BhfVE8JcAgUgCx7MorGMbPyFAIJiAwgoWiHEIEDgWUFjHNn5CgEAwAYUVLJDxcZxAoK6Awqqbrc0IlBNQWOUitRCBugIKq262Nqsv0G5DhdUucgsTyCugsPJmZ3IC7QQUVrvILUwgr0DnwsqbmskJNBVQWE2DtzaBjAIKK2NqZibQVEBhNQ2+29r2rSGgsGrkaAsCLQQUVouYLUmghoDCqpGjLQi0EDhVWC0kLEmAQHgBhRU+IgMSIPAnoLD+JPxLgEB4AYUVPqLFA7qOQGABhRU4HKMRIPAqoLBePfyPAIHAAgorcDhGIzBXIN/pCitfZiYm0FZAYbWN3uIE8gkorHyZmZhAWwGFdTl6HxIgsFpAYa0Wdx8BApcFFNZlOh8SILBaQGGtFndfRgEzBxFQWEGCMAYBAt8FFNZ3I28QIBBEQGEFCcIYBAh8F1hRWN+n8AYBAgROCCisE0heIUAghoDCipGDKQgQOCGgsE4geeW8gDcJzBRQWDN1nU2AwK0CCutWTocRIDBTQGHN1HU2gcoCG3ZTWBvQXUmAwDWB/wAAAP//YH26SAAAAAZJREFUAwD3PgDJYZ73/gAAAABJRU5ErkJggg==",
+              "token": null,
+              "signatureToken": null,
+              "signed": false,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": []
+            },
+            {
               "id": 1783309548381,
               "customer": "carol",
               "seller": "abc, xyz",
@@ -836,27 +857,6 @@
               "phone": "",
               "email": "",
               "signature": "data:image/png;base64,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",
-              "token": null,
-              "signatureToken": null,
-              "signed": false,
-              "isChangeOrder": false,
-              "void": false,
-              "expirationDate": "",
-              "companyOfficialName": null,
-              "companyLogo": null,
-              "companyNameCard": null,
-              "items": []
-            },
-            {
-              "id": 1783309072788,
-              "customer": "first",
-              "seller": "abc, xyz",
-              "price": 200,
-              "date": "2026-07-06",
-              "template": "company_default",
-              "phone": "4124124142",
-              "email": "",
-              "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABkCAYAAAA8AQ3AAAAD8UlEQVR4AezUS47bMBAEUCP3P3S8mYVhC5ZFkezPCwIE0Uhk96tB/Xv4Q4AAgSQCCitJUMYkQODxUFh+CwgQSCOgsNJENT6oEwhkF1BY2RM0P4FGAgqrUdhWJZBdQGFlT9D8BD4JFH2msIoGay0CFQUUVsVU7USgqIDCKhqstQhUFFBYn1L1jACBkAIKK2QshiJA4JOAwvqk4hkBAiEFFFbIWAy1TsBNmQQUVqa0zEqguYDCav4LYH0CmQQUVqa0zEqgucBgYTXXsz4BAksFFNZSbpcRIDAioLBG9HxLgMBSAYW1lDv1ZYYnsF1AYW2PwAAECJwVUFhnpbxHgMB2AYW1PQIDEIgnEHUihRU1GXMRIPAmoLDeSDwgQCCqgMKKmoy5CBB4E1BYbyTjD5xAgMAcAYU1x9WpBAhMEFBYE1AdSYDAHAGFNcfVqV0E7LlUQGEt5XYZAQIjAgprRM+3BAgsFVBYS7ldRoDAiMDewhqZ3LcECLQTUFjtIrcwgbwCCitvdiYn0E5AYbWLfNfC7iUwLqCwxg2dQIDAIgGFtQjaNQQIjAsorHFDJxAg8Cow7X8KaxqtgwkQuFtAYd0t6jwCBKYJKKxptA4mQOBuAYV1t+j4eU4gQOBAQGEdwHhMgEA8AYUVLxMTESBwIKCwDmA8JrBCwB2/CSis37y8TYDARgGFtRHf1QQI/CagsH7z8jYBAhsFUhfWRjdXEyCwQUBhbUB3JQEC1wQU1jU3XxEgsEFAYW1Ad+UFAZ8QeAoorCeCvwQI5BBQWDlyMiUBAk8BhfVE8JcAgUgCx7MorGMbPyFAIJiAwgoWiHEIEDgWUFjHNn5CgEAwAYUVLJDxcZxAoK6Awqqbrc0IlBNQWOUitRCBugIKq262Nqsv0G5DhdUucgsTyCugsPJmZ3IC7QQUVrvILUwgr0DnwsqbmskJNBVQWE2DtzaBjAIKK2NqZibQVEBhNQ2+29r2rSGgsGrkaAsCLQQUVouYLUmghoDCqpGjLQi0EDhVWC0kLEmAQHgBhRU+IgMSIPAnoLD+JPxLgEB4AYUVPqLFA7qOQGABhRU4HKMRIPAqoLBePfyPAIHAAgorcDhGIzBXIN/pCitfZiYm0FZAYbWN3uIE8gkorHyZmZhAWwGFdTl6HxIgsFpAYa0Wdx8BApcFFNZlOh8SILBaQGGtFndfRgEzBxFQWEGCMAYBAt8FFNZ3I28QIBBEQGEFCcIYBAh8F1hRWN+n8AYBAgROCCisE0heIUAghoDCipGDKQgQOCGgsE4geeW8gDcJzBRQWDN1nU2AwK0CCutWTocRIDBTQGHN1HU2gcoCG3ZTWBvQXUmAwDWB/wAAAP//YH26SAAAAAZJREFUAwD3PgDJYZ73/gAAAABJRU5ErkJggg==",
               "token": null,
               "signatureToken": null,
               "signed": false,
@@ -1021,15 +1021,50 @@
             }
           ],
           "notes": []
+        },
+        {
+          "id": 1793023260009,
+          "name": "test123 - test123",
+          "workingAddress": "test123",
+          "customerName": "abc-test1",
+          "customerPhone": "4122222222",
+          "customerBillingAddress": "abc-test1",
+          "customerEmail": "",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
         }
       ]
+    },
+    {
+      "username": "crew4",
+      "password": "crew4",
+      "fullname": "crew4",
+      "company": "test company",
+      "companyId": "CID-HXG2MU",
+      "role": "crew",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
     },
     {
       "username": "lubai83@gmail.com",
       "password": "830402",
       "fullname": "Lu Bai",
       "company": "Bai Properties Management",
-      "companyId": "",
+      "companyId": "CID-EBDU59",
       "role": "manager",
       "approved": true,
       "email": "",
@@ -1271,140 +1306,6 @@
       ]
     },
     {
-      "username": "crew4",
-      "password": "crew4",
-      "fullname": "crew4",
-      "company": "test company",
-      "companyId": "CID-HXG2MU",
-      "role": "crew",
-      "approved": true,
-      "email": "",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": []
-    },
-    {
-      "username": "demo_manager",
-      "password": "abc",
-      "fullname": "Demo Manager",
-      "company": "Demo",
-      "companyId": "CID-QW4A6Q",
-      "role": "manager",
-      "approved": true,
-      "email": "",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": [
-        {
-          "id": 1783690032471,
-          "name": "Demo_project - 100 1st Ave_ New York_ New York",
-          "workingAddress": "100 1st Ave, New York, New York",
-          "customerName": "John Smith",
-          "customerPhone": "6465005000",
-          "customerBillingAddress": "100 1st Ave, New York, New York",
-          "customerEmail": "john.smith@gmail.com",
-          "status": "Signed",
-          "crew": "Demo_crew",
-          "crews": [
-            "Demo_crew"
-          ],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [
-            {
-              "id": 1783690174107,
-              "customer": "John Smith",
-              "seller": "Demo Manager",
-              "price": 2300,
-              "date": "2026-07-10",
-              "template": "company_default",
-              "phone": "6465005000",
-              "email": "john.smith@gmail.com",
-              "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABkCAYAAAA8AQ3AAAAEmUlEQVR4AezUPZLTTBAGYH0fBHABSCHhLhDCcSCE40AIdyGBFC4AAX+9VDnYso1lyxr1TD+Uhq2VpZnup73v/5N/BAgQ6ERAYHUyKGUSIDBNAsu3gACBbgQEVjejWl6oHQj0LiCwep+g+gkUEhBYhYatVQK9Cwis3ieofgKHBAa9J7AGHay2CIwoILBGnKqeCAwqILAGHay2CIwoILAOTdU9AgRSCgislGNRFAEChwQE1iEV9wgQSCkgsFKORVHtBJzUk4DA6mlaaiVQXEBgFf8CaJ9ATwICq6dpqZVAcYGFgVVcT/sECDQVEFhNuR1GgMASAYG1RM+7BAg0FRBYTbm7PkzxBDYXEFibj0ABBAjMFRBYc6U8R4DA5gICa/MRKIBAPoGsFQmsrJNRFwECewICa4/EDQIEsgoIrKyTURcBAnsCAmuPZPkNOxAgsI6AwFrH1a4ECKwgILBWQLUlAQLrCAisdVztWkVAn00FBFZTbocRILBEQGAt0fMuAQJNBQRWU26HESCwRGDbwFpSuXcJECgnILDKjVzDBPoVEFj9zk7lBMoJCKxyI9+qYecSWC4gsJYb2oEAgUYCAqsRtGMIEFguILCWG9qBAIHbAqv9JrBWo7UxAQLXFhBY1xa1HwECqwkIrNVobUyAwLUFBNa1RZfvZwcCBI4ICKwjMG4TIJBPQGDlm4mKCBA4IiCwjsC4TaCFgDPOExBY53l5mgCBDQUE1ob4jiZA4DwBgXWe16Gnf8XN39bU2uBHmL+P9TrW81iPYrkGF+g6sAafjfb+LXAnPn4a62Wst7E+xToUmoItYEa5BNbySd4Y/hfbWNPU0uDxNE0vYr2J9SHWz1iHrrnBtgu7b7HJg1iuhAI3f2wJy1ISgZMCn+OJd7FexXoW626sQ4E5N9ji9b/Xvfj/S6xdgGX5+TFqKn8JrPJfgU4ALi9zbrDdhN3DOOZ7LFdSAYGVdDDK2kTga5x6P9ZNeGVbT6Ku8pfAKv8VAECgHwGB1c+sVEqgiMDxNgXWcRufECCQTEBgJRuIcggQOC4gsI7b+IQAgWQCAivZQJaXYwcC4woIrHFnqzMCwwkIrOFGqiEC4woIrHFnq7PxBcp1KLDKjVzDBPoVEFj9zk7lBMoJCKxyI9cwgX4FKgdWv1NTOYGiAgKr6OC1TaBHAYHV49TUTKCogMAqOvhqbet3DAGBNcYcdUGghIDAKjFmTRIYQ0BgjTFHXRAoITArsEpIaJIAgfQCAiv9iBRIgMBOQGDtJPwkQCC9gMBKP6LGBTqOQGIBgZV4OEojQOC2gMC67eE3AgQSCwisxMNRGoF1BfrbXWD1NzMVEygrILDKjl7jBPoTEFj9zUzFBMoKCKyLR+9FAgRaCwis1uLOI0DgYgGBdTGdFwkQaC0gsFqLO69HATUnERBYSQahDAIETgsIrNNGniBAIImAwEoyCGUQIHBaoEVgna7CEwQIEJghILBmIHmEAIEcAgIrxxxUQYDADAGBNQPJI/MFPElgTQGBtaauvQkQuKqAwLoqp80IEFhTQGCtqWtvAiMLbNCbwNoA3ZEECFwm8AcAAP//xkxX4QAAAAZJREFUAwD3J6fJky9FLwAAAABJRU5ErkJggg==",
-              "token": null,
-              "signatureToken": null,
-              "signed": false,
-              "isChangeOrder": false,
-              "void": false,
-              "expirationDate": "",
-              "companyOfficialName": null,
-              "companyLogo": null,
-              "companyNameCard": null,
-              "items": [
-                {
-                  "price": 200,
-                  "description": "front door"
-                },
-                {
-                  "price": 2000,
-                  "description": "yard"
-                },
-                {
-                  "price": 100,
-                  "description": "fix front door"
-                }
-              ]
-            }
-          ],
-          "notes": [
-            {
-              "id": 1783690131325,
-              "content": "fix front door",
-              "date": "7/10/2026, 9:28:51 AM",
-              "price": 100,
-              "photos": [],
-              "replies": []
-            },
-            {
-              "id": 1783690058422,
-              "content": "front door",
-              "date": "7/10/2026, 9:27:38 AM",
-              "price": 200,
-              "photos": [
-                "data:image/png;base64,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"
-              ],
-              "replies": [
-                {
-                  "id": 1783690079810,
-                  "username": "Demo_manager",
-                  "fullname": "Demo Manager",
-                  "role": "manager",
-                  "content": "damage",
-                  "date": "7/10/2026, 9:27:59 AM"
-                },
-                {
-                  "id": 1783690117420,
-                  "username": "Demo_crew",
-                  "fullname": "Demo Crew",
-                  "role": "crew",
-                  "content": "fixed",
-                  "date": "7/10/2026, 9:28:37 AM"
-                }
-              ]
-            },
-            {
-              "id": 1783690071345,
-              "content": "yard",
-              "date": "7/10/2026, 9:27:51 AM",
-              "price": 2000,
-              "photos": [],
-              "replies": []
-            }
-          ]
-        }
-      ]
-    },
-    {
       "username": "crew1",
       "password": "crew1password",
       "fullname": "Crew Member 1",
@@ -1480,11 +1381,45 @@
       "folders": []
     },
     {
+      "username": "test1123 reset",
+      "password": "Temp-7VCC2D",
+      "fullname": "test1123 reset",
+      "company": "test1123",
+      "companyId": "CID-4QYE3E",
+      "role": "manager",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
+      "username": "superadmin",
+      "password": "superadmin1",
+      "fullname": "Super Admin",
+      "company": "",
+      "companyId": "",
+      "role": "super admin",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
       "username": "baimgt",
       "password": "Bai0402",
       "fullname": "Edith Bai",
       "company": "Bai Properties Management",
-      "companyId": "",
+      "companyId": "CID-EBDU59",
       "role": "admin",
       "approved": true,
       "email": "",
@@ -1495,6 +1430,123 @@
       "resetPasswordToken": null,
       "resetPasswordExpires": null,
       "folders": [
+        {
+          "id": 1793024387735,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": [
+            {
+              "id": 1793026164902,
+              "content": "city has requirments for front and side fence 5 feet max with 1 inch gap",
+              "date": "10/26/2026, 2:49:24 PM",
+              "price": 2000,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 1793024387842,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793023820626,
+          "name": "Fence - 5522 Jackosn st",
+          "workingAddress": "5522 Jackosn st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024250393,
+          "name": "Fence 2 - 5522 Jackson",
+          "workingAddress": "5522 Jackson",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024252968,
+          "name": "Fence 2 - 5522 Jackson",
+          "workingAddress": "5522 Jackson",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793023818991,
+          "name": "Fence - 5522 Jackosn st",
+          "workingAddress": "5522 Jackosn st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
         {
           "id": 1791386345148,
           "name": "Fence - 5522 Jackson st",
@@ -1568,6 +1620,51 @@
           "notes": []
         },
         {
+          "id": 1794503842696,
+          "name": "Plumbing at McCanless - 5557 Mccandless Ave",
+          "workingAddress": "5557 Mccandless Ave",
+          "customerName": "Lulu",
+          "customerPhone": "4123203343",
+          "customerBillingAddress": "1495 Jameson ct",
+          "customerEmail": "baiwujun@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": [
+            {
+              "id": 1794503903672,
+              "content": "What do the main line and we’re going to see where the down spot will be blah blah?",
+              "date": "11/12/2026, 5:18:23 PM",
+              "price": null,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 1793024352390,
+          "name": "Fence 3 - 5522 Jackson st_15206",
+          "workingAddress": "5522 Jackson st,15206",
+          "customerName": "Lu Bai",
+          "customerPhone": "4127264153",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
           "id": 1791386337997,
           "name": "Fence - 5522 Jackson st",
           "workingAddress": "5522 Jackson st",
@@ -1575,6 +1672,78 @@
           "customerPhone": "4124859831",
           "customerBillingAddress": "1495 Jameson ct",
           "customerEmail": "baipropertiesmanagement@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793023816981,
+          "name": "Fence - 5522 Jackosn st",
+          "workingAddress": "5522 Jackosn st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024386495,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024388697,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793025880009,
+          "name": "Fence 5 - 5522 Jackson st_15206",
+          "workingAddress": "5522 Jackson st,15206",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
           "status": "Draft",
           "crew": null,
           "crews": [],
@@ -1592,7 +1761,7 @@
       "password": "Temp-NNPRXQ",
       "fullname": "Test User",
       "company": "Demo Company",
-      "companyId": "CID-YCMPCV",
+      "companyId": "CID-PGZ6B2",
       "role": "admin",
       "approved": true,
       "email": "",
@@ -1656,6 +1825,274 @@
       "folders": []
     },
     {
+      "username": "test1123admin",
+      "password": "test",
+      "fullname": "test1123 admin",
+      "company": "test1123",
+      "companyId": "CID-4QYE3E",
+      "role": "admin",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
+      "username": "test1123crew",
+      "password": "test",
+      "fullname": "test1123 crew",
+      "company": "test1123",
+      "companyId": "CID-4QYE3E",
+      "role": "crew",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
+      "username": "bailu",
+      "password": "Temp-7DTNL6",
+      "fullname": "Lu Bai",
+      "company": "Bai Constructions",
+      "companyId": "CID-XA69PD",
+      "role": "admin",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": [
+        {
+          "id": 1794363006099,
+          "name": "Siding - 5557 Mccandless Ave",
+          "workingAddress": "5557 Mccandless Ave",
+          "customerName": "Lu Bai",
+          "customerPhone": "4127264153",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "zwy677@gmail.com",
+          "status": "Signed",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1794798377107,
+              "customer": "Lu Bai",
+              "seller": "Lu Bai",
+              "price": 15000,
+              "date": "2026-11-16",
+              "template": "company_default",
+              "phone": "4127264153",
+              "email": "zwy677@gmail.com",
+              "signature": "data:image/png;base64,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",
+              "token": null,
+              "signatureToken": null,
+              "signed": true,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "price": 8000,
+                  "noteId": 1794798243957,
+                  "description": "take off existing siding , fix rotten board and frame"
+                },
+                {
+                  "price": 5000,
+                  "noteId": 1794798299508,
+                  "description": "put house wrap underlayment, install new siding"
+                },
+                {
+                  "price": 2000,
+                  "noteId": 1794798322352,
+                  "description": "install new gutter "
+                }
+              ]
+            },
+            {
+              "id": 1794798380253,
+              "customer": "Lu Bai",
+              "seller": "Lu Bai",
+              "price": 15000,
+              "date": "2026-11-16",
+              "template": "company_default",
+              "phone": "4127264153",
+              "email": "zwy677@gmail.com",
+              "signature": "data:image/png;base64,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",
+              "token": null,
+              "signatureToken": null,
+              "signed": true,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "price": 8000,
+                  "noteId": 1794798243957,
+                  "description": "take off existing siding , fix rotten board and frame"
+                },
+                {
+                  "price": 5000,
+                  "noteId": 1794798299508,
+                  "description": "put house wrap underlayment, install new siding"
+                },
+                {
+                  "price": 2000,
+                  "noteId": 1794798322352,
+                  "description": "install new gutter "
+                }
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "id": 1794798243957,
+              "content": "take off existing siding , fix rotten board and frame",
+              "date": "11/16/2026, 3:04:03 AM",
+              "price": 8000,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1794798299508,
+              "content": "put house wrap underlayment, install new siding",
+              "date": "11/16/2026, 3:04:59 AM",
+              "price": 5000,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1794798322352,
+              "content": "install new gutter ",
+              "date": "11/16/2026, 3:05:22 AM",
+              "price": 2000,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 1794800749764,
+          "name": "Tub Fix - 5522 Jackson street",
+          "workingAddress": "5522 Jackson street",
+          "customerName": "Lu Bai",
+          "customerPhone": "4127264153",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "In-Porgress",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1794800958361,
+              "customer": "Lu Bai",
+              "seller": "Lu Bai",
+              "price": 1400,
+              "date": "2026-11-16",
+              "template": "company_default",
+              "phone": "4127264153",
+              "email": "lubai83@gmail.com",
+              "signature": "",
+              "token": "token_zpwmpopbxmwiq5eop",
+              "signatureToken": "token_zpwmpopbxmwiq5eop",
+              "signed": false,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "price": 600,
+                  "noteId": 1794800811254,
+                  "description": "master bath stand alone tub is not drain properly, need to change drain to tub drain instead of flex pipe"
+                },
+                {
+                  "price": 0,
+                  "noteId": 1794800935185,
+                  "description": "Cut tile around drain but not the wood floor deck"
+                },
+                {
+                  "price": 800,
+                  "noteId": 1794800885004,
+                  "description": "If not able to do the job from 2nd floor need to open drywall from first floor ceiling. Then patch and fix drywall after"
+                }
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "id": 1794800811254,
+              "content": "master bath stand alone tub is not drain properly, need to change drain to tub drain instead of flex pipe",
+              "date": "11/16/2026, 3:46:51 AM",
+              "price": 600,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1794800935185,
+              "content": "Cut tile around drain but not the wood floor deck",
+              "date": "11/16/2026, 3:48:55 AM",
+              "price": null,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1794800885004,
+              "content": "If not able to do the job from 2nd floor need to open drywall from first floor ceiling. Then patch and fix drywall after",
+              "date": "11/16/2026, 3:48:05 AM",
+              "price": 800,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "username": "test1124admin",
+      "password": "test",
+      "fullname": "Test",
+      "company": "test1124",
+      "companyId": "CID-5NDH6M",
+      "role": "admin",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
       "username": "testuser",
       "password": "testpassword",
       "fullname": "Test User",
@@ -1695,23 +2132,6 @@
       ]
     },
     {
-      "username": "superadmin",
-      "password": "superadmin1",
-      "fullname": "Super Admin",
-      "company": "",
-      "companyId": "",
-      "role": "super admin",
-      "approved": true,
-      "email": "",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": []
-    },
-    {
       "username": "demo_crew",
       "password": "abc",
       "fullname": "Demo Crew",
@@ -1729,13 +2149,13 @@
       "folders": []
     },
     {
-      "username": "lubai83",
-      "password": "830402",
-      "fullname": "Lu Bai",
-      "company": "Bai Properties Management",
-      "companyId": "",
+      "username": "abcd",
+      "password": "abcd",
+      "fullname": "abcd",
+      "company": "test company",
+      "companyId": "CID-HXG2MU",
       "role": "manager",
-      "approved": false,
+      "approved": true,
       "email": "",
       "cellphone": "",
       "active": true,
@@ -1746,11 +2166,11 @@
       "folders": []
     },
     {
-      "username": "abcd",
-      "password": "abcd",
-      "fullname": "abcd",
-      "company": "test company",
-      "companyId": "CID-HXG2MU",
+      "username": "lubai83",
+      "password": "830402",
+      "fullname": "Lu Bai",
+      "company": "Bai Properties Management",
+      "companyId": "CID-EBDU59",
       "role": "manager",
       "approved": true,
       "email": "",
@@ -1922,15 +2342,15 @@
           "terminationDoc": null,
           "contracts": [
             {
-              "id": 1783308980091,
-              "customer": "Test Customer",
-              "seller": "alice",
-              "price": 5000,
-              "date": "2026-07-06",
+              "id": 1781464424163,
+              "customer": "John Doe",
+              "seller": "Test User",
+              "price": 2500,
+              "date": "2026-06-14",
               "template": "company_default",
-              "phone": "123-456-7890",
-              "email": "testcustomer@example.com",
-              "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+              "phone": "",
+              "email": "",
+              "signature": "",
               "token": null,
               "signatureToken": null,
               "signed": false,
@@ -1943,15 +2363,15 @@
               "items": []
             },
             {
-              "id": 1781464424163,
-              "customer": "John Doe",
-              "seller": "Test User",
-              "price": 2500,
-              "date": "2026-06-14",
+              "id": 1783308980091,
+              "customer": "Test Customer",
+              "seller": "alice",
+              "price": 5000,
+              "date": "2026-07-06",
               "template": "company_default",
-              "phone": "",
-              "email": "",
-              "signature": "",
+              "phone": "123-456-7890",
+              "email": "testcustomer@example.com",
+              "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
               "token": null,
               "signatureToken": null,
               "signed": false,
@@ -2069,188 +2489,6 @@
               "replies": []
             }
           ]
-        },
-        {
-          "id": 1793022967666,
-          "name": "Updated Jest Project - 456 Updated St",
-          "projectName": "Updated Jest Project",
-          "workingAddress": "456 Updated St",
-          "customerName": "John Doe",
-          "customerPhone": "555-0199",
-          "customerBillingAddress": "456 Updated St",
-          "customerEmail": "",
-          "contracts": [
-            {
-              "id": 1793022967697,
-              "customer": "John Doe",
-              "seller": "alice",
-              "price": 3500,
-              "date": "2026-09-28",
-              "template": "company_default",
-              "phone": "",
-              "email": "johndoe@example.com",
-              "isChangeOrder": false,
-              "expirationDate": "",
-              "items": [
-                {
-                  "description": "Roof Installation",
-                  "qty": 1,
-                  "rate": 3500
-                }
-              ],
-              "signatureToken": "token_oov1i6myomvpbkwb5",
-              "token": "token_oov1i6myomvpbkwb5",
-              "signature": "",
-              "signed": false,
-              "emailDelivery": {
-                "success": true,
-                "simulated": true,
-                "id": "sim_1793022967699_04lvis"
-              }
-            }
-          ],
-          "notes": [
-            {
-              "id": 1793022967742,
-              "content": "Completed initial site inspection.",
-              "price": 500,
-              "uncontract": false,
-              "date": "10/26/2026, 9:56:07 AM",
-              "photos": []
-            }
-          ],
-          "status": "Sent to Client",
-          "paymentStatus": "Deposit Paid",
-          "crewsViewContractPayment": false,
-          "terminationDoc": {
-            "text": "Customer requested cancellation due to material supply delays.",
-            "reason": "Customer requested cancellation due to material supply delays.",
-            "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
-            "date": "2026-10-24",
-            "dateTime": "2026-10-24 17:15",
-            "timestamp": 1793022967675
-          }
-        },
-        {
-          "id": 1793037329721,
-          "name": "Updated Jest Project - 456 Updated St",
-          "projectName": "Updated Jest Project",
-          "workingAddress": "456 Updated St",
-          "customerName": "John Doe",
-          "customerPhone": "555-0199",
-          "customerBillingAddress": "456 Updated St",
-          "customerEmail": "",
-          "contracts": [
-            {
-              "id": 1793037329750,
-              "customer": "John Doe",
-              "seller": "alice",
-              "price": 3500,
-              "date": "2026-09-28",
-              "template": "company_default",
-              "phone": "",
-              "email": "johndoe@example.com",
-              "isChangeOrder": false,
-              "expirationDate": "",
-              "items": [
-                {
-                  "description": "Roof Installation",
-                  "qty": 1,
-                  "rate": 3500
-                }
-              ],
-              "signatureToken": "token_8gcp16gikmvpk4q52",
-              "token": "token_8gcp16gikmvpk4q52",
-              "signature": "",
-              "signed": false,
-              "emailDelivery": {
-                "success": false,
-                "error": "Invalid `to` field. Please use our testing email address instead of domains like `example.com`. See our documentation for more information."
-              }
-            }
-          ],
-          "notes": [
-            {
-              "id": 1793037330104,
-              "content": "Completed initial site inspection.",
-              "price": 500,
-              "uncontract": false,
-              "date": "10/26/2026, 1:55:30 PM",
-              "photos": []
-            }
-          ],
-          "status": "Sent to Client",
-          "paymentStatus": "Deposit Paid",
-          "crewsViewContractPayment": false,
-          "terminationDoc": {
-            "text": "Customer requested cancellation due to material supply delays.",
-            "reason": "Customer requested cancellation due to material supply delays.",
-            "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
-            "date": "2026-10-24",
-            "dateTime": "2026-10-24 17:15",
-            "timestamp": 1793037329730
-          }
-        },
-        {
-          "id": 1793037356259,
-          "name": "Updated Jest Project - 456 Updated St",
-          "projectName": "Updated Jest Project",
-          "workingAddress": "456 Updated St",
-          "customerName": "John Doe",
-          "customerPhone": "555-0199",
-          "customerBillingAddress": "456 Updated St",
-          "customerEmail": "",
-          "contracts": [
-            {
-              "id": 1793037356287,
-              "customer": "John Doe",
-              "seller": "alice",
-              "price": 3500,
-              "date": "2026-09-28",
-              "template": "company_default",
-              "phone": "",
-              "email": "johndoe@example.com",
-              "isChangeOrder": false,
-              "expirationDate": "",
-              "items": [
-                {
-                  "description": "Roof Installation",
-                  "qty": 1,
-                  "rate": 3500
-                }
-              ],
-              "signatureToken": "token_jec59wygvmvpk5am7",
-              "token": "token_jec59wygvmvpk5am7",
-              "signature": "",
-              "signed": false,
-              "emailDelivery": {
-                "success": true,
-                "simulated": true,
-                "id": "sim_1793037356287_5qi6m1"
-              }
-            }
-          ],
-          "notes": [
-            {
-              "id": 1793037356315,
-              "content": "Completed initial site inspection.",
-              "price": 500,
-              "uncontract": false,
-              "date": "10/26/2026, 1:55:56 PM",
-              "photos": []
-            }
-          ],
-          "status": "Sent to Client",
-          "paymentStatus": "Deposit Paid",
-          "crewsViewContractPayment": false,
-          "terminationDoc": {
-            "text": "Customer requested cancellation due to material supply delays.",
-            "reason": "Customer requested cancellation due to material supply delays.",
-            "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
-            "date": "2026-10-24",
-            "dateTime": "2026-10-24 17:15",
-            "timestamp": 1793037356267
-          }
         }
       ]
     },
@@ -2272,462 +2510,294 @@
       "folders": []
     },
     {
-      "username": "testuser_1793022967642",
+      "username": "test1124admin2_1795577771025",
       "password": "password123",
-      "fullname": "Test User",
-      "company": "Demo Company 1793022967642",
-      "companyId": "CID-9KZ5XS",
+      "fullname": "Test 1124 Admin 2",
+      "company": "test1124",
+      "companyId": "CID-5NDH6M",
       "role": "admin",
-      "email": "admin@example.com",
-      "cellphone": "123-456-7890",
-      "folders": [],
-      "approved": true
+      "approved": true,
+      "email": "test1124admin2_1795577771025@example.com",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
     },
     {
-      "username": "mgr_email_1793022967646",
-      "password": "password123",
-      "fullname": "Manager Email Only",
-      "company": "Demo Company",
+      "username": "test1123manager",
+      "password": "test",
+      "fullname": "test1123 manager",
+      "company": "test1123",
+      "companyId": "CID-4QYE3E",
+      "role": "manager",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": [
+        {
+          "id": 1795578387815,
+          "name": "teset1123 - teset1123 st",
+          "workingAddress": "teset1123 st",
+          "customerName": "abc-test1",
+          "customerPhone": "4122222222",
+          "customerBillingAddress": "abc-test1",
+          "customerEmail": "",
+          "status": "Signed",
+          "crew": "test1123crew",
+          "crews": [
+            "test1123crew"
+          ],
+          "payments": [
+            {
+              "id": 1795580974105,
+              "amount": 100,
+              "date": "2026-11-25",
+              "method": "Cash",
+              "depositPaidFull": false,
+              "notes": "",
+              "receipts": []
+            }
+          ],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1795578503925,
+              "customer": "abc-test1",
+              "seller": "test1123 manager",
+              "price": 3450,
+              "date": "2026-11-25",
+              "template": "company_default",
+              "phone": "4122222222",
+              "email": "",
+              "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABkCAYAAAA8AQ3AAAAJo0lEQVR4AeydZaxcRRiGDxSHhKAJGkqCheLB3Z1gwfmBOyQkaHEompDgxX/gBAtS3IpD8BKkCRD0BxYS3N837Ja2d2/Ze4+MnKf5vjuzc/eMPHP37Zw5M7PTF/yDAAQgkAgBBCuRjqKaEIBAUSBY/BVAAALJEECwkumq8hUlBwikTgDBSr0HqT8EWkQAwWpRZ9NUCKROAMFKvQepPwR6Ecg0DcHKtGNpFgRyJIBg5dirtAkCmRJAsDLtWJoFgRwJIFi9epU0CEAgSgIIVpTdQqUgAIFeBBCsXlRIgwAEoiSAYEXZLVSqOQKUlBIBBCul3qKuEGg5AQSr5X8ANB8CKRFAsFLqLeoKgZYTKClYLadH8yEAgUYJIFiN4qYwCECgDAEEqww9roUABBolgGA1ijvpwqg8BIITQLCCdwEVgAAE+iWAYPVLivdBAALBCSBYwbuACkAgPgKx1gjBirVnqBcEIDCAAII1AAkJEIBArAQQrFh7hnpBAAIDCCBYA5CUTyAHCECgHgIIVj1cyRUCEKiBAIJVA1SyhAAE6iGAYNXDlVzbQoB2NkoAwWoUN4VBAAJlCCBYZehxLQQg0CgBBKtR3BQGAQiUIRBWsMrUnGshAIHWEUCwWtflNBgC6RJAsNLtO2oOgdYRQLBa1+WhGky5EChPAMEqz5AcIACBhgggWA2BphgIQKA8AQSrPENygAAEpiRQ2ysEqza0ZAwBCFRNAMGqmij5QQACtRFAsGpDS8YQgEDVBBCsqomWz48cIACBQQggWIOAIRkCEIiPAIIVX59QIwhAYBACCNYgYEiGQBMEKGNoBBCsofHi3RCAQEACCFZA+BQNAQgMjQCCNTRevBsCEAhIIGnBCsiNoiEAgQAEEKwA0CkSAhAYHgEEa3jcuCouAhNUnbflWOYEEKzMOzib5k27IX/r16Pk+8ixjAkgWBl3bouadmGnrZd3QoJMCSBYmXZsy5p1vdr7i3wW+b5yLFMCCFamHdvCZh3aafPRnZAgWQKDVxzBGpwNv0mLgEdZnnxfVtVmLksQcjQEK8debW+bunNZjLLS+BtYUNXcRH6kfKx8vPwPuR+iTO5OG6f0sxAsUcCyIeBR1jtqDU8MBSFi20Z185zj5woflV8kP0i+rnyEfGpz2pZKHI1giUJe1vrWdEdZPDGM709hpKp0o/w++cxyj5yeUXil/Cj5pvKF5NNN5b5uJ6WNQbBEAcuKwHVqjf/39hNDbg0FIxI7XvX4QL6n3EJ1gsIZ5evJD5ZfLH9M/oV8avtYCXfJT0KwRAHLjoA/FG7UKfoxjxwLR2ADFf2T/Bz5DPKb5EvKz5UP2RCsISPjggQI+H/je1XPOeUWLQVZWuyNskg9qUrOKv9Zvq18L/lH8mEZgjUsbFyUAIEzOnX0E6hVOnGCZgh4VPWaivJtoILCo6nZFLlfXsoQrFL4uDhiAq+qbp4XUVAwyjKFZrw7qlpJxb0u31Du+SoF5Q3BKs+QHOIl4FHW96redvId5Vh9BLZQ1p6rmnxUtbLSnpJXZm0WrMogklG0BL5RzSxaCgo/TvdciuN4dQTmUlZelvCgQvP1XFWloyrlO8kQrEkoiGRKwOuy/CHyh+nmTNsYqln7qeD35QfKbafqh+eqKh1VKc9JhmBNQkEkYwIrqG1fyreXXyLHyhFYTpd7Av0ahfPJH5AvL++OZhWtxxCseriSa1wEJqo6e8hth+vHcXJseAT8AOMtXbq1/Cv5/nJvtWnkxFcES7SxVhDwbcrenZb6MbvXA3VeEvRBYDO9x5Pqpyu0XaUfS8mvlTdmCFZjqCkoAgKeeO8+xbpB9fF6IQXYNAjMrt9dKn9Y7nlAzwd6I7I3K3+ntEYNwWoUN4VFQOA81cEfQAWFJ+GXcATvSWB3pb4rP0xu8+jKk+oP+UUI70uwQlSMMiFQI4EjlPc98gXkXty4uELsPwKLKnqL3IK+iEJvSvZugdMUD2oIVlD8FB6QgCfhf1T5vuXx/NZaimNFYTF/TyB2k/v2z1ubfOyLt9ooKawhWGH5U3o4Av4wzq/ifTaTRxEWrTavhveqdB+m5+1Mnqu6VWyWlke1DATBUo9gkxFoV9RPvbxt52o122cz3amw+2UWirbGfKvnvZc+rvhTtdqjT89ffaJ4VIZgRdUdVCYQAa/UPrNT9mUKa18AqTJC28KqwIlyH3boFeqKFm77Mop4/kpBfIZgxdcn1CgMAS+I7D4NO1lV8DojBdmZF3zeplZ5JDVGoY8q/lXh5nIvqvW8nqJxGoIVZ79QqzAEfA68zw7/XcUfIPchgH6Mr2jS5nPSPZryvj9vqdnl39YUtyv0KnUfJ/2I4tEbghV9F1HBhgn4tFIvKPUIxCdkenHkFaqD4z7iV9FkrDua+kw19mjKRxP7XPXReu1bwl0Veh+ggjQMwUqjn6hlswSeV3EWLc/vzKS4vyTBo60fFL9b7jkvP1lUNDr7v9GUt9OcrVr7K7YUpGUIVlr9RW2bI/ChivLj/dUUelL6RYWe7/GJDz7/yU/QXlCa575WVRjashtN9QKKYPWi0lcab2oJgVfUTj81XFOhV4B7D51XyXuieg2lebvKywr/lHtx5R0Kz5cfIvdEtrf+jFC8jPl6fzefvxLLm7Y9HzVWGY6T+5QEl91rbirp0ZTaNsAQrAFISIDAoAQ8r+WnhzvoHXPIvYbLwuFJen+WfI65J+2P0e88ge89d54z8vfw+ZtiHle613xZcLyS3KO3eZU2t9xndnmezE8qvd/RSwueVbpHcr7eI76n9dqbtj0fZeH0JuRRSnPZvyn03JRvVZObm1Ld+zI3tK838iYIQGAKAhYRr5L3SMrzXD7IbnW9wwsuLRw+3O4JvfaXgCooFiuKYiO5z4+y4FiQXtJrnynlo5zfUNzzZN6YfaziFrS1FVqAFBQWy+cU8Qp0j+C8BMGCuaLS/N2Lvl313JQn2JWUpyFYefYrraqWQD+5fa03+dbQgmLh8LKIjZU2Uu6ni35C5y9q8Er6C5TmVfXeeP2X4vYJCn0uuufHLHg+u2t9pXljtq/37eg6em1B9AGEXuRpwXxTad/KW2EIViu6mUYGJuA5pomqg8+U8hIJj6B21mvv3/P8lN3HDm+lND+RtOD57K7xeu1bSV+vKIZg8TcAAQgkQwDBSqarqCgEINCEYEEZAhCAQCUEEKxKMJIJBCDQBAEEqwnKlAEBCFRCAMGqBCOZdAkQQqBOAghWnXTJGwIQqJQAglUpTjKDAATqJIBg1UmXvCGQM4EAbUOwAkCnSAhAYHgE/gEAAP//uVzkBQAAAAZJREFUAwBnMwXYw8FRvgAAAABJRU5ErkJggg==",
+              "token": null,
+              "signatureToken": null,
+              "signed": true,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "price": 150,
+                  "noteId": 1795578404829,
+                  "description": "test1"
+                },
+                {
+                  "price": 0,
+                  "noteId": 1795578416123,
+                  "description": ""
+                },
+                {
+                  "price": 3000,
+                  "noteId": 1795578427467,
+                  "description": "test3"
+                },
+                {
+                  "price": 300,
+                  "noteId": 1795578458048,
+                  "description": "test contract"
+                }
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "id": 1795578404829,
+              "content": "test1",
+              "date": "11/25/2026, 3:46:44 AM",
+              "price": 150,
+              "photos": [],
+              "replies": [
+                {
+                  "id": 1795578656315,
+                  "username": "test1123crew",
+                  "fullname": "test1123 crew",
+                  "role": "crew",
+                  "content": "test",
+                  "date": "11/25/2026, 3:50:56 AM"
+                },
+                {
+                  "id": 1795579758864,
+                  "username": "test1123crew",
+                  "fullname": "test1123 crew",
+                  "role": "crew",
+                  "content": "Test crew reply from script 1795579758067",
+                  "date": "11/24/2026, 11:09:18 PM"
+                }
+              ]
+            },
+            {
+              "id": 1795578416123,
+              "content": "",
+              "date": "11/25/2026, 3:46:56 AM",
+              "price": null,
+              "photos": [],
+              "replies": [
+                {
+                  "id": 1795578671949,
+                  "username": "test1123crew",
+                  "fullname": "test1123 crew",
+                  "role": "crew",
+                  "content": "test",
+                  "date": "11/25/2026, 3:51:11 AM"
+                }
+              ]
+            },
+            {
+              "id": 1795578427467,
+              "content": "test3",
+              "date": "11/25/2026, 3:47:07 AM",
+              "price": 3000,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1795578458048,
+              "content": "test contract",
+              "date": "11/25/2026, 3:47:38 AM",
+              "price": 300,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "username": "demo_manager",
+      "password": "abc",
+      "fullname": "Demo Manager",
+      "company": "Demo",
       "companyId": "CID-QW4A6Q",
       "role": "manager",
-      "email": "manager@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "crew_phone_1793022967650",
-      "password": "password123",
-      "fullname": "Crew Phone Only",
-      "company": "Demo Company",
-      "companyId": "CID-QW4A6Q",
-      "role": "crew",
-      "email": "",
-      "cellphone": "987-654-3210",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_1793022967652",
-      "password": "password123",
-      "fullname": "Acme Admin",
-      "company": "Acme Build 1793022967652",
-      "companyId": "CID-APGG3S",
-      "role": "admin",
-      "email": "admin_1793022967652@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_admin1_1793022967657",
-      "password": "password123",
-      "fullname": "Delta Admin 1",
-      "company": "Delta Corp 1793022967657",
-      "companyId": "CID-DBBMTA",
-      "role": "admin",
-      "email": "delta_admin1_1793022967657@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_admin2_1793022967659",
-      "password": "password123",
-      "fullname": "Delta Admin 2",
-      "company": "Delta Corp 1793022967657",
-      "companyId": "CID-DBBMTA",
-      "role": "admin",
-      "email": "delta_admin2_1793022967659@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_crew1_1793022967660",
-      "password": "password123",
-      "fullname": "Delta Crew 1",
-      "company": "Delta Corp 1793022967657",
-      "companyId": "CID-DBBMTA",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-123-4567",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_pwd_1793022967611",
-      "password": "brandNewPassword99",
-      "fullname": "Admin Resetter",
-      "company": "Reset Co 1793022967611",
-      "companyId": "CID-SR6K3G",
-      "role": "admin",
-      "email": "admin.resetter@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "crew_pwd_1793022967611",
-      "password": "crewPassword1",
-      "fullname": "Crew Worker",
-      "company": "Reset Co 1793022967611",
-      "companyId": "CID-SR6K3G",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-1234",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_people_1793022967611",
-      "password": "password123",
-      "fullname": "Admin People Test",
-      "company": "People Co 1793022967611",
-      "companyId": "CID-YBSF54",
-      "role": "admin",
-      "email": "admin.people@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "crew_people_1793022967611",
-      "password": "Temp-P525QR",
-      "fullname": "Crew People Test",
-      "company": "People Co 1793022967611",
-      "companyId": "CID-YBSF54",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-9876",
-      "folders": [],
       "approved": true,
-      "active": true
-    },
-    {
-      "username": "crew_denied_1793022967775",
-      "password": "deniedPass123",
-      "fullname": "Denied Crew Candidate",
-      "company": "People Co 1793022967611",
-      "companyId": "CID-YBSF54",
-      "role": "crew",
       "email": "",
-      "cellphone": "555-4321",
-      "folders": [],
-      "approved": true,
-      "active": true
-    },
-    {
-      "username": "testuser_1793037329698",
-      "password": "password123",
-      "fullname": "Test User",
-      "company": "Demo Company 1793037329698",
-      "companyId": "CID-VJKPFA",
-      "role": "admin",
-      "email": "admin@example.com",
-      "cellphone": "123-456-7890",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "mgr_email_1793037329703",
-      "password": "password123",
-      "fullname": "Manager Email Only",
-      "company": "Demo Company",
-      "companyId": "CID-QW4A6Q",
-      "role": "manager",
-      "email": "manager@example.com",
       "cellphone": "",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "crew_phone_1793037329705",
-      "password": "password123",
-      "fullname": "Crew Phone Only",
-      "company": "Demo Company",
-      "companyId": "CID-QW4A6Q",
-      "role": "crew",
-      "email": "",
-      "cellphone": "987-654-3210",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_1793037329707",
-      "password": "password123",
-      "fullname": "Acme Admin",
-      "company": "Acme Build 1793037329707",
-      "companyId": "CID-T9BFXD",
-      "role": "admin",
-      "email": "admin_1793037329707@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_admin1_1793037329712",
-      "password": "password123",
-      "fullname": "Delta Admin 1",
-      "company": "Delta Corp 1793037329712",
-      "companyId": "CID-FN3DAR",
-      "role": "admin",
-      "email": "delta_admin1_1793037329712@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_admin2_1793037329713",
-      "password": "password123",
-      "fullname": "Delta Admin 2",
-      "company": "Delta Corp 1793037329712",
-      "companyId": "CID-FN3DAR",
-      "role": "admin",
-      "email": "delta_admin2_1793037329713@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_crew1_1793037329715",
-      "password": "password123",
-      "fullname": "Delta Crew 1",
-      "company": "Delta Corp 1793037329712",
-      "companyId": "CID-FN3DAR",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-123-4567",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_pwd_1793037329664",
-      "password": "brandNewPassword99",
-      "fullname": "Admin Resetter",
-      "company": "Reset Co 1793037329664",
-      "companyId": "CID-D8EL9S",
-      "role": "admin",
-      "email": "admin.resetter@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "crew_pwd_1793037329664",
-      "password": "crewPassword1",
-      "fullname": "Crew Worker",
-      "company": "Reset Co 1793037329664",
-      "companyId": "CID-D8EL9S",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-1234",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_people_1793037329664",
-      "password": "password123",
-      "fullname": "Admin People Test",
-      "company": "People Co 1793037329664",
-      "companyId": "CID-WVMRHU",
-      "role": "admin",
-      "email": "admin.people@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "crew_people_1793037329664",
-      "password": "Temp-CG43AM",
-      "fullname": "Crew People Test",
-      "company": "People Co 1793037329664",
-      "companyId": "CID-WVMRHU",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-9876",
-      "folders": [],
-      "approved": true,
-      "active": true
-    },
-    {
-      "username": "crew_denied_1793037330243",
-      "password": "deniedPass123",
-      "fullname": "Denied Crew Candidate",
-      "company": "People Co 1793037329664",
-      "companyId": "CID-WVMRHU",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-4321",
-      "folders": [],
-      "approved": true,
-      "active": true
-    },
-    {
-      "username": "testuser_1793037356239",
-      "password": "password123",
-      "fullname": "Test User",
-      "company": "Demo Company 1793037356239",
-      "companyId": "CID-MEN25Z",
-      "role": "admin",
-      "email": "admin@example.com",
-      "cellphone": "123-456-7890",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "mgr_email_1793037356242",
-      "password": "password123",
-      "fullname": "Manager Email Only",
-      "company": "Demo Company",
-      "companyId": "CID-QW4A6Q",
-      "role": "manager",
-      "email": "manager@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "crew_phone_1793037356244",
-      "password": "password123",
-      "fullname": "Crew Phone Only",
-      "company": "Demo Company",
-      "companyId": "CID-QW4A6Q",
-      "role": "crew",
-      "email": "",
-      "cellphone": "987-654-3210",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_1793037356246",
-      "password": "password123",
-      "fullname": "Acme Admin",
-      "company": "Acme Build 1793037356246",
-      "companyId": "CID-H94KE2",
-      "role": "admin",
-      "email": "admin_1793037356246@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_admin1_1793037356249",
-      "password": "password123",
-      "fullname": "Delta Admin 1",
-      "company": "Delta Corp 1793037356249",
-      "companyId": "CID-HJ2JMF",
-      "role": "admin",
-      "email": "delta_admin1_1793037356249@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_admin2_1793037356251",
-      "password": "password123",
-      "fullname": "Delta Admin 2",
-      "company": "Delta Corp 1793037356249",
-      "companyId": "CID-HJ2JMF",
-      "role": "admin",
-      "email": "delta_admin2_1793037356251@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "delta_crew1_1793037356252",
-      "password": "password123",
-      "fullname": "Delta Crew 1",
-      "company": "Delta Corp 1793037356249",
-      "companyId": "CID-HJ2JMF",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-123-4567",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_pwd_1793037356204",
-      "password": "brandNewPassword99",
-      "fullname": "Admin Resetter",
-      "company": "Reset Co 1793037356204",
-      "companyId": "CID-DTKXLK",
-      "role": "admin",
-      "email": "admin.resetter@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "crew_pwd_1793037356204",
-      "password": "crewPassword1",
-      "fullname": "Crew Worker",
-      "company": "Reset Co 1793037356204",
-      "companyId": "CID-DTKXLK",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-1234",
-      "folders": [],
-      "approved": false
-    },
-    {
-      "username": "admin_people_1793037356204",
-      "password": "password123",
-      "fullname": "Admin People Test",
-      "company": "People Co 1793037356204",
-      "companyId": "CID-89YTFX",
-      "role": "admin",
-      "email": "admin.people@example.com",
-      "cellphone": "",
-      "folders": [],
-      "approved": true
-    },
-    {
-      "username": "crew_people_1793037356204",
-      "password": "Temp-E8RC3F",
-      "fullname": "Crew People Test",
-      "company": "People Co 1793037356204",
-      "companyId": "CID-89YTFX",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-9876",
-      "folders": [],
-      "approved": true,
-      "active": true
-    },
-    {
-      "username": "crew_denied_1793037356345",
-      "password": "deniedPass123",
-      "fullname": "Denied Crew Candidate",
-      "company": "People Co 1793037356204",
-      "companyId": "CID-89YTFX",
-      "role": "crew",
-      "email": "",
-      "cellphone": "555-4321",
-      "folders": [],
-      "approved": true,
-      "active": true
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": [
+        {
+          "id": 1783690032471,
+          "name": "Demo_project - 100 1st Ave_ New York_ New York",
+          "workingAddress": "100 1st Ave, New York, New York",
+          "customerName": "John Smith",
+          "customerPhone": "6465005000",
+          "customerBillingAddress": "100 1st Ave, New York, New York",
+          "customerEmail": "john.smith@gmail.com",
+          "status": "Signed",
+          "crew": "Demo_crew",
+          "crews": [
+            "Demo_crew"
+          ],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1783690174107,
+              "customer": "John Smith",
+              "seller": "Demo Manager",
+              "price": 2300,
+              "date": "2026-07-10",
+              "template": "company_default",
+              "phone": "6465005000",
+              "email": "john.smith@gmail.com",
+              "signature": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABkCAYAAAA8AQ3AAAAEmUlEQVR4AezUPZLTTBAGYH0fBHABSCHhLhDCcSCE40AIdyGBFC4AAX+9VDnYso1lyxr1TD+Uhq2VpZnup73v/5N/BAgQ6ERAYHUyKGUSIDBNAsu3gACBbgQEVjejWl6oHQj0LiCwep+g+gkUEhBYhYatVQK9Cwis3ieofgKHBAa9J7AGHay2CIwoILBGnKqeCAwqILAGHay2CIwoILAOTdU9AgRSCgislGNRFAEChwQE1iEV9wgQSCkgsFKORVHtBJzUk4DA6mlaaiVQXEBgFf8CaJ9ATwICq6dpqZVAcYGFgVVcT/sECDQVEFhNuR1GgMASAYG1RM+7BAg0FRBYTbm7PkzxBDYXEFibj0ABBAjMFRBYc6U8R4DA5gICa/MRKIBAPoGsFQmsrJNRFwECewICa4/EDQIEsgoIrKyTURcBAnsCAmuPZPkNOxAgsI6AwFrH1a4ECKwgILBWQLUlAQLrCAisdVztWkVAn00FBFZTbocRILBEQGAt0fMuAQJNBQRWU26HESCwRGDbwFpSuXcJECgnILDKjVzDBPoVEFj9zk7lBMoJCKxyI9+qYecSWC4gsJYb2oEAgUYCAqsRtGMIEFguILCWG9qBAIHbAqv9JrBWo7UxAQLXFhBY1xa1HwECqwkIrNVobUyAwLUFBNa1RZfvZwcCBI4ICKwjMG4TIJBPQGDlm4mKCBA4IiCwjsC4TaCFgDPOExBY53l5mgCBDQUE1ob4jiZA4DwBgXWe16Gnf8XN39bU2uBHmL+P9TrW81iPYrkGF+g6sAafjfb+LXAnPn4a62Wst7E+xToUmoItYEa5BNbySd4Y/hfbWNPU0uDxNE0vYr2J9SHWz1iHrrnBtgu7b7HJg1iuhAI3f2wJy1ISgZMCn+OJd7FexXoW626sQ4E5N9ji9b/Xvfj/S6xdgGX5+TFqKn8JrPJfgU4ALi9zbrDdhN3DOOZ7LFdSAYGVdDDK2kTga5x6P9ZNeGVbT6Ku8pfAKv8VAECgHwGB1c+sVEqgiMDxNgXWcRufECCQTEBgJRuIcggQOC4gsI7b+IQAgWQCAivZQJaXYwcC4woIrHFnqzMCwwkIrOFGqiEC4woIrHFnq7PxBcp1KLDKjVzDBPoVEFj9zk7lBMoJCKxyI9cwgX4FKgdWv1NTOYGiAgKr6OC1TaBHAYHV49TUTKCogMAqOvhqbet3DAGBNcYcdUGghIDAKjFmTRIYQ0BgjTFHXRAoITArsEpIaJIAgfQCAiv9iBRIgMBOQGDtJPwkQCC9gMBKP6LGBTqOQGIBgZV4OEojQOC2gMC67eE3AgQSCwisxMNRGoF1BfrbXWD1NzMVEygrILDKjl7jBPoTEFj9zUzFBMoKCKyLR+9FAgRaCwis1uLOI0DgYgGBdTGdFwkQaC0gsFqLO69HATUnERBYSQahDAIETgsIrNNGniBAIImAwEoyCGUQIHBaoEVgna7CEwQIEJghILBmIHmEAIEcAgIrxxxUQYDADAGBNQPJI/MFPElgTQGBtaauvQkQuKqAwLoqp80IEFhTQGCtqWtvAiMLbNCbwNoA3ZEECFwm8AcAAP//xkxX4QAAAAZJREFUAwD3J6fJky9FLwAAAABJRU5ErkJggg==",
+              "token": null,
+              "signatureToken": null,
+              "signed": false,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "price": 200,
+                  "description": "front door"
+                },
+                {
+                  "price": 2000,
+                  "description": "yard"
+                },
+                {
+                  "price": 100,
+                  "description": "fix front door"
+                }
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "id": 1783690131325,
+              "content": "fix front door",
+              "date": "7/10/2026, 9:28:51 AM",
+              "price": 100,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1783690058422,
+              "content": "front door",
+              "date": "7/10/2026, 9:27:38 AM",
+              "price": 200,
+              "photos": [
+                "data:image/png;base64,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"
+              ],
+              "replies": [
+                {
+                  "id": 1783690079810,
+                  "username": "Demo_manager",
+                  "fullname": "Demo Manager",
+                  "role": "manager",
+                  "content": "damage",
+                  "date": "7/10/2026, 9:27:59 AM"
+                },
+                {
+                  "id": 1783690117420,
+                  "username": "Demo_crew",
+                  "fullname": "Demo Crew",
+                  "role": "crew",
+                  "content": "fixed",
+                  "date": "7/10/2026, 9:28:37 AM"
+                }
+              ]
+            },
+            {
+              "id": 1783690071345,
+              "content": "yard",
+              "date": "7/10/2026, 9:27:51 AM",
+              "price": 2000,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        }
+      ]
     }
   ],
   "companies": {
-    "demo": {
-      "companyId": "CID-QW4A6Q",
-      "officialName": "Demo Company",
-      "logo": "data:image/png;base64,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",
-      "nameCard": "Demo Company\nAcme Corp\n111 5th Ave, New York, New York\n646-100-1000",
-      "tier": "standard"
-    },
-    "live company 23742": {
-      "companyId": "CID-79ZQP2",
-      "officialName": "Live Company 23742",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "admin_db_company": {
-      "companyId": "CID-KEM7RR",
-      "officialName": "admin_db_company",
+    "demo company 1793037356239": {
+      "companyId": "CID-MEN25Z",
+      "officialName": "Demo Company 1793037356239",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
@@ -2746,9 +2816,44 @@
       "nameCard": "",
       "tier": "standard"
     },
+    "acme build 1793037329707": {
+      "companyId": "CID-T9BFXD",
+      "officialName": "Acme Build 1793037329707",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo": {
+      "companyId": "CID-QW4A6Q",
+      "officialName": "Demo Company",
+      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUYAAABmCAYAAAC3DDhyAAAMQGlDQ1BJQ0MgUHJvZmlsZQAASImVVwdYU8kWnluSkEBoAQSkhN4EASkBpITQQu8IohKSAKHEGAgq9rKo4NpFBWzoqohip9kRxcKi2PuCiIqyLhbsypsU0HVf+d5839z57z9n/nPm3Jl77wCgdoojEuWi6gDkCQvEscH+9HHJKXRSL8ABAWgAEvDicPNFzOjocADLUPv38u4mQKTtNXup1j/7/2vR4PHzuQAg0RCn8/K5eRAfBgCv5IrEBQAQpbzZ1AKRFMMKtMQwQIgXS3GmHFdKcboc75fZxMeyIG4BQEmFwxFnAqB6BfL0Qm4m1FDth9hRyBMIAVCjQ+yTlzeZB3EaxNbQRgSxVJ+R/oNO5t8004c1OZzMYSyfi6woBQjyRbmc6f9nOv53ycuVDPmwhFUlSxwSK50zzNvtnMlhUqwCcZ8wPTIKYk2IPwh4MnuIUUqWJCRBbo8acPNZMGdAB2JHHicgDGIDiIOEuZHhCj49QxDEhhiuEHSaoIAdD7EuxIv5+YFxCpst4smxCl9oXYaYxVTw5zlimV+pr4eSnASmQv91Fp+t0MdUi7LikyCmQGxeKEiMhFgVYof8nLgwhc3YoixW5JCNWBIrjd8c4li+MNhfro8VZoiDYhX2JXn5Q/PFtmQJ2JEKfLAgKz5Enh+shcuRxQ/ngl3hC5kJQzr8/HHhQ3Ph8QMC5XPHnvGFCXEKnQ+iAv9Y+VicIsqNVtjjpvzcYClvCrFLfmGcYiyeWAAXpFwfzxAVRMfL48SLsjmh0fJ48BUgHLBAAKADCazpYDLIBoL2vvo+eCfvCQIcIAaZgA/sFczQiCRZjxBe40AR+BMiPsgfHucv6+WDQsh/HWblV3uQIestlI3IAU8gzgNhIBfeS2SjhMPeEsFjyAj+4Z0DKxfGmwurtP/f80Psd4YJmXAFIxnySFcbsiQGEgOIIcQgog2uj/vgXng4vPrB6owzcI+heXy3JzwhdBAeEW4QOgl3Jgnmi3+KMgJ0Qv0gRS7Sf8wFbgk1XXF/3BuqQ2VcB9cH9rgL9MPEfaFnV8iyFHFLs0L/SftvM/jhaSjsyI5klDyC7Ee2/nmkqq2q67CKNNc/5kcea/pwvlnDPT/7Z/2QfR5sw362xBZjh7BW7DR2ATuG1QM6dhJrwNqw41I8vLoey1bXkLdYWTw5UEfwD39DT1aayXzHGsdexy/yvgL+NOk7GrAmi6aLBZlZBXQm/CLw6Wwh12EU3dnR2RUA6fdF/vp6EyP7biA6bd+5BX8A4H1ycHDw6Hcu9CQAB9zh9m/8zlkz4KdDGYDzjVyJuFDO4dILAb4l1OBO0wNGwAxYw/k4AzfgBfxAIAgFUSAeJIOJMPosuM7FYCqYCeaBYlAKVoC1oBxsBtvALrAXHAT14Bg4Dc6BS+AKuAHuwdXTA16AfvAOfEYQhIRQERqihxgjFogd4owwEB8kEAlHYpFkJA3JRISIBJmJLEBKkVVIObIVqUYOII3IaeQC0oHcQbqQXuQ18gnFUBVUCzVELdHRKANlomFoPDoBzUSnoEXoQnQZuh6tQvegdehp9BJ6A+1EX6ADGMCUMR3MBLPHGBgLi8JSsAxMjM3GSrAyrAqrxZrgc76GdWJ92EeciNNwOm4PV3AInoBz8Sn4bHwpXo7vwuvwFvwa3oX3498IVIIBwY7gSWATxhEyCVMJxYQywg7CEcJZuJd6CO+IRKIO0YroDvdiMjGbOIO4lLiRuI94ithB7CYOkEgkPZIdyZsUReKQCkjFpA2kPaSTpKukHtIHJWUlYyVnpSClFCWh0nylMqXdSieUrio9VfpMVidbkD3JUWQeeTp5OXk7uYl8mdxD/kzRoFhRvCnxlGzKPMp6Si3lLOU+5Y2ysrKpsodyjLJAea7yeuX9yueVu5Q/qmiq2KqwVFJVJCrLVHaqnFK5o/KGSqVaUv2oKdQC6jJqNfUM9SH1gypN1UGVrcpTnaNaoVqnelX1pRpZzUKNqTZRrUitTO2Q2mW1PnWyuqU6S52jPlu9Qr1R/Zb6gAZNw0kjSiNPY6nGbo0LGs80SZqWmoGaPM2Fmts0z2h20zCaGY1F49IW0LbTztJ6tIhaVlpsrWytUq29Wu1a/dqa2i7aidrTtCu0j2t36mA6ljpsnVyd5ToHdW7qfBphOII5gj9iyYjaEVdHvNcdqeuny9ct0d2ne0P3kx5dL1AvR2+lXr3eA31c31Y/Rn+q/ib9s/p9I7VGeo3kjiwZeXDkXQPUwNYg1mCGwTaDNoMBQyPDYEOR4QbDM4Z9RjpGfkbZRmuMThj1GtOMfYwFxmuMTxo/p2vTmfRc+np6C73fxMAkxERistWk3eSzqZVpgul8032mD8woZgyzDLM1Zs1m/ebG5hHmM81rzO9akC0YFlkW6yxaLd5bWlkmWS6yrLd8ZqVrxbYqsqqxum9Ntfa1nmJdZX3dhmjDsMmx2WhzxRa1dbXNsq2wvWyH2rnZCew22nWMIozyGCUcVTXqlr2KPdO+0L7GvstBxyHcYb5DvcPL0eajU0avHN06+pujq2Ou43bHe06aTqFO852anF472zpznSucr4+hjgkaM2dMw5hXLnYufJdNLrddaa4Rrotcm12/urm7id1q3Xrdzd3T3CvdbzG0GNGMpYzzHgQPf485Hsc8Pnq6eRZ4HvT8y8veK8drt9ezsVZj+WO3j+32NvXmeG/17vSh+6T5bPHp9DXx5fhW+T7yM/Pj+e3we8q0YWYz9zBf+jv6i/2P+L9nebJmsU4FYAHBASUB7YGagQmB5YEPg0yDMoNqgvqDXYNnBJ8KIYSEhawMucU2ZHPZ1ez+UPfQWaEtYSphcWHlYY/CbcPF4U0RaERoxOqI+5EWkcLI+igQxY5aHfUg2ip6SvTRGGJMdExFzJNYp9iZsa1xtLhJcbvj3sX7xy+Pv5dgnSBJaE5US0xNrE58nxSQtCqpc9zocbPGXUrWTxYkN6SQUhJTdqQMjA8cv3Z8T6pranHqzQlWE6ZNuDBRf2LuxOOT1CZxJh1KI6Qlpe1O+8KJ4lRxBtLZ6ZXp/VwWdx33Bc+Pt4bXy/fmr+I/zfDOWJXxLNM7c3Vmb5ZvVllWn4AlKBe8yg7J3pz9PicqZ2fOYG5S7r48pby0vEahpjBH2DLZaPK0yR0iO1GxqHOK55S1U/rFYeId+Uj+hPyGAi34I98msZb8Iukq9CmsKPwwNXHqoWka04TT2qbbTl8y/WlRUNFvM/AZ3BnNM01mzpvZNYs5a+tsZHb67OY5ZnMWzumZGzx31zzKvJx5v893nL9q/tsFSQuaFhounLuw+5fgX2qKVYvFxbcWeS3avBhfLFjcvmTMkg1LvpXwSi6WOpaWlX5Zyl168VenX9f/OrgsY1n7crflm1YQVwhX3Fzpu3LXKo1VRau6V0esrltDX1Oy5u3aSWsvlLmUbV5HWSdZ17k+fH3DBvMNKzZ8Kc8qv1HhX7Gv0qBySeX7jbyNVzf5bardbLi5dPOnLYItt7cGb62rsqwq20bcVrjtyfbE7a2/MX6r3qG/o3TH153CnZ27Yne1VLtXV+822L28Bq2R1PTuSd1zZW/A3oZa+9qt+3T2le4H+yX7nx9IO3DzYNjB5kOMQ7WHLQ5XHqEdKalD6qbX9ddn1Xc2JDd0NIY2Njd5NR056nB05zGTYxXHtY8vP0E5sfDE4MmikwOnRKf6Tmee7m6e1HzvzLgz11tiWtrPhp09fy7o3JlWZuvJ897nj13wvNB4kXGx/pLbpbo217Yjv7v+fqTdrb3usvvlhiseV5o6xnacuOp79fS1gGvnrrOvX7oReaPjZsLN27dSb3Xe5t1+dif3zqu7hXc/35t7n3C/5IH6g7KHBg+r/rD5Y1+nW+fxroCutkdxj+51c7tfPM5//KVn4RPqk7Knxk+rnzk/O9Yb1Hvl+fjnPS9ELz73Ff+p8WflS+uXh//y+6utf1x/zyvxq8HXS9/ovdn51uVt80D0wMN3ee8+vy/5oPdh10fGx9ZPSZ+efp76hfRl/Vebr03fwr7dH8wbHBRxxBzZrwAGK5qRAcDrnQBQkwGgwfMZZbz8/CcriPzMKkPgP2H5GVFW3ACohf/vMX3w7+YWAPu3w+MX1FdLBSCaCkC8B0DHjBmuQ2c12blSWojwHLAl8Gt6Xjr4N0V+5vwh7p9bIFV1AT+3/wI/dXxfO0IzUwAAAIplWElmTU0AKgAAAAgABAEaAAUAAAABAAAAPgEbAAUAAAABAAAARgEoAAMAAAABAAIAAIdpAAQAAAABAAAATgAAAAAAAACQAAAAAQAAAJAAAAABAAOShgAHAAAAEgAAAHigAgAEAAAAAQAAAUagAwAEAAAAAQAAAGYAAAAAQVNDSUkAAABTY3JlZW5zaG90irQG6wAAAAlwSFlzAAAWJQAAFiUBSVIk8AAAAdZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iPgogICAgICAgICA8ZXhpZjpQaXhlbFlEaW1lbnNpb24+MTAyPC9leGlmOlBpeGVsWURpbWVuc2lvbj4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjMyNjwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOlVzZXJDb21tZW50PlNjcmVlbnNob3Q8L2V4aWY6VXNlckNvbW1lbnQ+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgq+7Y55AAAAHGlET1QAAAACAAAAAAAAADMAAAAoAAAAMwAAADMAAAkhPfPSQAAACO1JREFUeAHsm3tUVVUex78oiK9KILVMwlECRJTAFB8UD8d8rlrO4FROU4OhxmQmqNFKJlLTfKTlizGXDmr2GNJw0eBjnMRmxNEBATUYDAEBE8SQ8k0gzNm3da/37HPO5SGzZPB7/rn799u/ve85n/2737P32efadevZvx48SIAESIAELATsKIwWFiyQAAmQgIkAhZGJQAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5QAIkQAISAQqjBIQmCZAACVAYmQMkQAIkIBGgMEpAaJIACZAAhZE5cNcR6NSpI3wGeMHb8xE4dbsXxaXfIe/bAhQWFqP6p5/uOh68YC0BCqOWicWzfMmbCA0OtNj9+vYxlc8Ul6K2thbBT07G1avXLPUstF4CIUEjMD/mNfj6esO+fXvDEz1Xdh6f7/wSa+MTUHmxyjCOFW2bAIXRYHzbtWuH8yXZsLe3N4gA3lm6Bis/2GBYz4o7T2D82FCsfX8xnJ3ua9LJ1NfXY/2GrfjjguVNasfgtkGAwmgwjpPDJmLjOts/CjFz9AsYY9AD3XeawJuvz8K86Jdv6zTKyysQPGYyzp+/cFv9sPH/FwEKo8F4fbUnEf5+Pga1t9zu3iO55LqFo9WUPtm6HuPGhLTI+Vys+hGPDh2Ny5evtEh/7KT1E6Aw6oyRg4M9youPo107O51atWvtnxLw1oIVaietO0og/IVnsGp5XIueQ+nZcxj02C9btE921noJUBh1xmZ6xG+x7J35OjVal1hq9X80WFtBzx0h4OLshLwTX9t8Niw2zlL2HkDGsWxcv1GNJwID4OfrA9fevWye8/y4pYj/cJvNGFa2DQIURp1xPPKPL+Hp0U+nRt/lO2Q0SpRXPppziE2ePm694eXpjodde+FCZRXOFBUrr48UtuiOdx83V+XHPwDOLk44cjQTObmnGjzdnj27I+iJYejUoSNOnS5AdnYOblRXN9hOL0Bcp7uyqz/A2wPde7igsKgEubn5OFdWrhfebN/e5O0IGOpv2P7AwUN4PnwWrl+/oYkRGzVbN6823LW+du06XN2HoK6uTtNWz9H7oQfh5eWOvr94GJXKuOadKsC3+QWoqanVC2+2z9mpG3wHeZvan1LypjlMxSrJ328QHB0ckH0yF5cuXW72+bSFhhRGaRS7dOmM0tPpsLNTL6PFLuW/07N0f3RbtiUi6vW3pZ6MzfbK6yIvhT+LGS89r/xo3AwDxasjO5JSsHDx+7h586ZuXE5WKlycu2nqXomKxc4vUjAz8veInv0ynO67VxUjricz6xuEPTcNP/x4yVIn3vFL2LgKo0ICNbMu0Sbj2Ak898IfGv1cdcozkzBn9jTlOvtYvsO6UFdXj6PpmVj07gf415Fj1lVNLjt26ICy4izN2Jk72rMvFVNefMVs6n56uPfFwf07IDjoHVOnRyMpea9elcn31IQnMSdqBgYq70nKOWRudOFCJT769AusWv2hzZvfp9viERI03NzM8pmUvA+Rr76BqFnTMOe1GRA5a30Ejf4VTpzMQ0PthRiuXBaHsEkTNNdbq+Rb2uF0RCt5LW5id9tBYZRGfI4iIrFvzJK8UJKjGEtXrtfdqRbvu4lNmMYcA308kZL0Ee65p2tjwk0x4qH/ixGzkfr1YU2bitLjcFDu8vKxYNFKDB7si4njbT8Xq6mpwVNh4aZZZGjISHyyZR0cHR3l7lS2uF7/YWNtzirEbOmrPX9Bjx73q9raMv6ZdhS/fnZas2dUEVOnYMWSWN2vuHLlKtw8Aho12zPKAdHxZ58nm0RJ/pIe3V2wf/dnyqz/IbnK0BbiMz1ynqHQpqXugnd/D017MeMvPFMMcdPRO0KVXfSs4zmw1f6tRe9hV+JmdO7cSa8LlW/J8nVYsSpe5WvrBoVRGuGso/uUpa2r5AVWr9ukzGpWo6L0hO6mzIjgp/GfvHxNO2uHeAVow5pluu2t4/TKYrYWNmU6DqSmqaqNhPFY5kkM9h+oijUyKiq+h//wsSjITWtQFM19mNvoveA+cvgQJCVu0hVsc3ujT9FvwOMTVbNYo1jZf+jALtNSXfYLO2ru29iyPVGvSuMTM6lzRZmaGbMILCw6g8HDx6vaDAvwR/KOhGZdr+ho4+btiJm/RNWnMIyE7ex3ZRA3HqOjIWEUueHl2U8z0zTqT/jXxP8ZcQvfsxXSpuoojFbDeb+LM/JzDll5bhW9/UJQpixtjZJ1Z9JuRETOvdVAKvV68AEcz9hv+PxKCtc1xQzDxz9U9U6dkTDqdmDDWaUsp+Xlto1wU9Vfd/8dv5uqnl2LZV3+N4c0S7OG+rKuF0v8UeN+Y+1qVNmIhViud+89sFGzRfMXxcydiYnjRplNy2d6RhaiYxZabLHkPp2T1qiZl6WRTkFviW6UazrNVa6GhFEV3AQjMHRSo55NN6HLVhtKYbQamoVx8/BqZLiV5+fi95UX8ciAn/8aOHtmBOJiozUxYqkmHswbHRmHd8P8l0KjGNGH2KSwtbzZ+7eDpmd85j6MxMBc/7/8rFY2Yh5w81N9RfLOBDw+MkDlszaEAJeUnEU/5dlq165drKtU5ZjYxdi46WOVryGjqjxXNyT/dBGGBk7QrbtdZ8qubRgx7DGb3YiNno4dHQ2fOYrG4pGG16AgXKz6wdJXaxNGvdmy5WTbWOG/AAAA//9YZsgQAAAPQ0lEQVTtXQl8TUcXP7YqipLaakkkkUgIYgtiF0usTZDWvoaifFX7UkrSUEGIPSW2kBJLae1FLCERkdoba0SppWhVtfbOuXrv9969MzfPi3zfk3vmx+/eOWdm7sx/7vvfmTNnJtneLeb2AihICJz9MRaKFy+qQWNNzHfw8eBRkvzdggXgckq8Jg0KWrTtCglHjml0Fdxd4eCejRq5LFi5ej1MD1sIaVevSaImjb1h1dK5kDt3bjmJcn3+/AUULV0Jnj17JsluXT0OuXLlUvSmN5h25uwIWLpiDdjZFYShQ/qDX9sWpkk093/99TdMDpkJa9d9D2UdSsHIYQOhmU9DTTpZUMqpOvz550MpWqJEMTiTvFdWmV2fPHkCdRq2gwsXUxV5Nc+KsHPLGsiePZsik29u374DLh715Gi6V7vCheDCmThuupj1W6DfoBFcXUaE75coDqeT9wiL2Lp9D0wKngnnLlyCfPnyQu/uAfDF5yO47cVClixbDcNHByvlxe39FtzdXJQ47+bipVRITDoBCQnHIH/+vFCxgjuMGhcMv/1+H9LLj+/HofhEWMve7zv37kGngA+gaZN63PdOfnaVms3gStrPcjTLXrMRMb7s2zKlS8LxxF3cjm7cvCMkHz+t6E4m7YZSJUsocflmx65Y+KjbQDmqXBcvmA7t/VoqcdObg4eOQBv/nqYi6b5Hl44wa8YkjRwF7dr3gv1xCZJOjxh79/sMNm7eblbGyshwaN3Sx0wmR54+fQp1G/tByrmLski6bt8cBV41q5rJ5IiPbwAkJZ+SotNCxkJg766ySrm+ePECWvl1h8PxSYpMvkFcEB9e8KrbWiIVnk4tq+VVFbZtilKLpfjcBcvg80nTuLqMCGdM/Rx69+zELeLsT+elD4Fa+XFgV5gSNFYtluK/3rkL5SrUVXR6xIaYBg4cAes3blXSq2/08mPavgOGa/I72JeGxENbIWeOHOripHhmYcl92P9RSMT4L/hh076AnuyLrg44gnq/rDkpTJ86Hvr07KxOCo8ePYLi9p4a+cWzh6FwoYIaOaYvW7424DN44afj+6BYsSIaVfj8SJg4+SWZiIjx0uUrUK22ryZv9aoesGvrGo0cBbGxceD3UaBG17FDa4iYyycW/w/7wt59h6Q8ovrG7j8MfgF9NOXKguT4HeDgUFqOKtfIZdEwbHSQEte7ae/fChbPD+UmmTg5FMLnL+XqMiJMObEfihZ9T1MEfmDKV2oAd+7e0+hQELtrHVT2cOfqPL2aQ+qVq5JOj9j6fTISYtioXi/o5V/1zUb45NNx3Ox6/Y0j1Op1+B95bmFvqJCI8d+Ow2kYTsfUgUcWzk4OkBjH/1IHdB0Au37YZ1bM7WsnuV/gY2yk1YSNuEQBR7Gurs4a9dmz5+Dna79IchExmk7/1QXc/eU0ZMumnb5OYKOqOWx0pQ7v2RWG86cPqsVS3JQYb/98AnLmzKlJd/2Xm/Dt5m0auSzo26szvPXWW3JUucYywvVjxGtJQPPDutVfc5NOD1sEX341m6vLiFDU3nPnL4FXvdbCogf06wYhk8dw9aajOBGx4RTY7v0K3PymQlF+TFO8TBV49PixaXKz+6sXEuGdd/KZyTByj03RHV1raeRZTUDEyHrUrXw5OBS7idu3vfoOhW+/36HRpZ5LgIIF8mvk+w8mQLsOvRR59uzZ4c71l1NNRfjvjd5XW51WFBcR46SgGTBr3hJutjvXT3PtXD36fAqbt+zk5rl34wxXbkqMojTcjBYIz7APgHejDyxICYBTwOQEbT9h5qjoDTB46HiLyrE0kV6/IoaIpSh4Vq4Ae3bEcNUh0+ZC6Mz5kk5EbGiLrlyjKTe/qVCU/+HDv6CkYzXTpJp7UV60FRctXVmTPqsJiBhZj+rZAG/evA1oz1EH3iINpsFpVDH2NX7+/LmUxb5MKfjxCJ9sRowNhsWRq9VFv1LcVogRba5oe32dAUeaFTwbWVSkHlHFs4UJ33Za26dFBQsS6dmkJ4eEQVg4f/SKxenV1ZTEReRkaXtE+S2ZDkfMC4WO7VtpWo+/hcIl0h+tajK+YQIiRtZhommDtX1pav9xLFsGkg6bL4DI5X42cpK0YizHrbnaCjHqmResaRfmuXHjFrhVaWhxdpHJgmcnTq/QHGzxIRfHLPDs+TN48uQp6PUrLvTgIoVeEJkzvonZDAMGj5ayiogto8QoWhgyre+csGDo2snfVCTdEzFqIMmaAr3VTGtbnHTsJPi0/FDKjj+wX5mNkReWR8XAp8Mn8lQWy2yFGPXaiXap++y/KLzN3JLs7ArBtes3zJIkJZ+EPv2Hmcn0IqLFH8zToKk/nDj5k152M11i3BZwdiprJsOIPIrVay+6OvVniyOi4OLsCAkH+QsnoTMXQsi0cClrZhHjgwd/QmnnGqLqSfI9O2PAs5J2ZIgzoiKlKunmzQpKw48Y10TN1/XTs6aT0The3L6yNLLA/CKb3pHEZGjepos1j1Dy2Aox6rVz3MSpMH/RCqXOmXUjchfC572KvVLP5px49Dg0a91JaoJohHri1Flo4NNe2Ew9V6xB/xkHq9e89HnNLGLEir1X0kPxheVVVORJYQmp8sp702SGJ8abaT9yV0Qz2pGm9sO080eY8+07miLxJbN38VLskeoE6JdXs4bW/QcXEuQfjy0Ro2hBatuOvdC5xyB18157PD07J8+vk1eJrZtWQm0v/uLEtBkLYEroHCmbqL04dbd3qal8GNXP0PsY1/fxg5OnUqQsmUmMU0LnwbQZ89RVk+J6syhLF364Bb9BQkMTY4tmjSB6Bf/lwNXlsNmLdLsyR64cQhcRUzvO6uXzwLc5fxFBNO2q7+0Fm9bzfe+69PwEcFcFBlsixmWLZ0G71s00mOH0q4Z3K8U/T52gZ9cACOyj9QudGR6hcUBW51XHRbuXMB3ax7r1HgJbtvEXiXLlygnror+G+nW91MUq8RreLZXdO6L2YuLtO2OhU/eBSj75Rs+tSL1anJnEiFj4tuum2alVgHlaoEkiT5635SqbXV+HJ4VZgTYaMTQxbmbEU48REC+gO4S8RY+nl2UJB74Hl3KOclS54ouHdhzcLqf3BcYMuAiD9kZ5JRv9BtF9qEgRO6U8+QbLLVbmv9N0WyLGSh7lYd+uDXJVza5//PEAKlZrAvfv/2EmR2fiheFfcd2HrHHMbtzIG9YzctMLuG1zxNggZWSGC0e+zRrC4IF9uJjLZalNH3rtxTxY/3nMhCBv36xSyR22slmAiHQ2fbcDegYOlR8n3NKX0cUX+QGPmR/jspVrYdHiKPjtt/vQvUsH+DiwG3dTgZynKbOdH2U29KweDEuM6DKB02ieQ/Lde7+Dk1tti/p+5LBBMGYEf5oYNGU226v8ctQp2iUhP+Qp2/t88WKq5Mrh5OjAJQpMq/5R2BIxYv3QNQldlHgBba+XU6+w/blJkvMw+vOh/yEvoL9cCYeqCqnw0ohkq5bNhZYtGovUihw/MuyfEGslIbvBtLgrRb1PGLeRouuOKGCbb926DTgSy5s3jyiZVH7Nuq2U0SgmzMwRo7AiOgqjOHcjBIYlxoCObWDRnK+4r8GGTdssXg3VO7wgNfUqeNZqLj3Do6KrNJri7TjhVoIjxB9n9Tq+cOlymqK1NWJEokP3JN7BEEqlLbgJnhoOM2YttCClNklutosm5dQBrgO+NrVlkuFjgmDJ0mhN4tfVXtPVaPkhtkaMXXsNFpoh5DpnlathiXH3trVQlZ3uwguiU3J4aVGmZ9dydvdW9szqjS5FZZvKh42aBJHLzfc52xoxYn179/gQpk+dwN12aNoe0b3I7ipKz5PjKUh7mcuJaETKyyOSpUfSGW2v6Uq3aR0yixhPnU4BVxdH4alMpnWQ79U7umR5Vr0akhjRyH7jynHuqEZ0EITeCyA6gALzmB74gHE89itiQSh37zTqeQGn2biPeUHESo3aFokRK4mLRzHRi15pxR+nnSuYrXXoyC807bRGgOaS6BVzrXbHQq+BXv0/gx92H0j38fXqYHsX6h7ZxSskYkkUOyYshKfKtKk0mmPmLIiE5UtmW/Qe7o09CP4f9ePWMasKDUmMTX0awNqoBdw+tebL6OriBPH7v+OWx/Ofw3MLJ4wdCm1bNdW1O6GdLe7wUXYW5GjArYm8cONKMvfHOGr8lxCxeBUvC4j87zp0DoTde/hnGor2QeNWO/yh8ULhQu/C+NFD2NayNtwDCeQ8SIj79sexMxNHAx699boDnocZNGEYNKjvzf0Yqp+Hp+LgoRejxk15JRsnjlLHjxkCHfzb6E7j8UMXdygRgqeE6S5kiE7h2XcgHj7o2FtdbU08vREnmoFWRM6GOrWqa/KiAHceoZ1cdg3jJsqiQkMSoy31JR7WWtHdDRyd7CFf3pcuEmlp1+Akm+7Ix3nZUn2trQuu4Faq6A7l2Ao+tvPBg4eApwvFH0mCW+xQ2v9FwB02HdjxZG7lndmWPgfpTE22/AKP/n4MN27egsvsuK+oVestPgNSr85Ixni0mLOzAxTIn09Kiof0ppy7BHgGJ24rzOyQHjHKz8ddPFU9PcCb+W7mzpMH8PSmo8dOsF0+5juR5PRGuBIxGqGXqY2GRMBSYjQkOOk0mogxHYBITQi8qQgQMVrfc0SM1mNHOQkBm0aAiNH67iFitB47ykkI2DQCRIzWdw8Ro/XYUU5CwKYRIGK0vnuIGK3HjnISAjaNwP7dG8CjQnlNHQ+wvzDZlv2lSQpiBIgYxdiQhhB4oxHAwypwj7Y6/M4OjPib/YVKCmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIEiBjF2JCGECAEDIoAEaNBO56aTQgQAmIE/gFPq35oia49lQAAAABJRU5ErkJggg==",
+      "nameCard": "Demo Company\nAcme Corp\n111 5th Ave, New York, New York\n646-100-1000",
+      "tier": "standard"
+    },
+    "test1124": {
+      "companyId": "CID-5NDH6M",
+      "officialName": "test1124",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
     "demo company 1793022967642": {
       "companyId": "CID-9KZ5XS",
       "officialName": "Demo Company 1793022967642",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo company 1795577784544": {
+      "companyId": "CID-9EL26A",
+      "officialName": "Demo Company 1795577784544",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1793037329712": {
+      "companyId": "CID-FN3DAR",
+      "officialName": "Delta Corp 1793037329712",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
@@ -2767,6 +2872,34 @@
       "nameCard": "",
       "tier": "standard"
     },
+    "admin_db_company": {
+      "companyId": "CID-KEM7RR",
+      "officialName": "admin_db_company",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "bai constructions": {
+      "companyId": "CID-XA69PD",
+      "officialName": "Bai Constructions",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1793037356204": {
+      "companyId": "CID-89YTFX",
+      "officialName": "People Co 1793037356204",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "test1123": {
+      "companyId": "CID-4QYE3E",
+      "officialName": "test1123",
+      "logo": "./logo.JPG",
+      "nameCard": "test1123\n1123 test St\ntest, test",
+      "tier": "standard"
+    },
     "reset co 1793022967611": {
       "companyId": "CID-SR6K3G",
       "officialName": "Reset Co 1793022967611",
@@ -2781,27 +2914,6 @@
       "nameCard": "",
       "tier": "standard"
     },
-    "demo company 1793037329698": {
-      "companyId": "CID-VJKPFA",
-      "officialName": "Demo Company 1793037329698",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "acme build 1793037329707": {
-      "companyId": "CID-T9BFXD",
-      "officialName": "Acme Build 1793037329707",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "delta corp 1793037329712": {
-      "companyId": "CID-FN3DAR",
-      "officialName": "Delta Corp 1793037329712",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
     "reset co 1793037329664": {
       "companyId": "CID-D8EL9S",
       "officialName": "Reset Co 1793037329664",
@@ -2809,16 +2921,37 @@
       "nameCard": "",
       "tier": "standard"
     },
-    "people co 1793037329664": {
-      "companyId": "CID-WVMRHU",
-      "officialName": "People Co 1793037329664",
+    "demo company 1793037329698": {
+      "companyId": "CID-VJKPFA",
+      "officialName": "Demo Company 1793037329698",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "demo company 1793037356239": {
-      "companyId": "CID-MEN25Z",
-      "officialName": "Demo Company 1793037356239",
+    "acme build 1795577784553": {
+      "companyId": "CID-YKMVE9",
+      "officialName": "Acme Build 1795577784553",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1795577784563": {
+      "companyId": "CID-ZQLBT4",
+      "officialName": "Delta Corp 1795577784563",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "reset co 1795577784511": {
+      "companyId": "CID-G4SY22",
+      "officialName": "Reset Co 1795577784511",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1795577784511": {
+      "companyId": "CID-TQAREF",
+      "officialName": "People Co 1795577784511",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
@@ -2844,9 +2977,177 @@
       "nameCard": "",
       "tier": "standard"
     },
-    "people co 1793037356204": {
-      "companyId": "CID-89YTFX",
-      "officialName": "People Co 1793037356204",
+    "live company 23742": {
+      "companyId": "CID-79ZQP2",
+      "officialName": "Live Company 23742",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1793037329664": {
+      "companyId": "CID-WVMRHU",
+      "officialName": "People Co 1793037329664",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo company 1795580413935": {
+      "companyId": "CID-7H959B",
+      "officialName": "Demo Company 1795580413935",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "acme build 1795580413946": {
+      "companyId": "CID-5RX3Z6",
+      "officialName": "Acme Build 1795580413946",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1795580413952": {
+      "companyId": "CID-P2SPSV",
+      "officialName": "Delta Corp 1795580413952",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "reset co 1795580413899": {
+      "companyId": "CID-U6863N",
+      "officialName": "Reset Co 1795580413899",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1795580413899": {
+      "companyId": "CID-XK6MDW",
+      "officialName": "People Co 1795580413899",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo company 1795580466312": {
+      "companyId": "CID-2ZZUZF",
+      "officialName": "Demo Company 1795580466312",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "acme build 1795580466327": {
+      "companyId": "CID-ZCHUKV",
+      "officialName": "Acme Build 1795580466327",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1795580466336": {
+      "companyId": "CID-Y2BPHW",
+      "officialName": "Delta Corp 1795580466336",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "reset co 1795580466275": {
+      "companyId": "CID-AZCVAY",
+      "officialName": "Reset Co 1795580466275",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1795580466275": {
+      "companyId": "CID-BRQ9PN",
+      "officialName": "People Co 1795580466275",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "noteco_1795580466275": {
+      "companyId": "CID-Q335GL",
+      "officialName": "NoteCo_1795580466275",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo company 1795580510987": {
+      "companyId": "CID-XLUYQS",
+      "officialName": "Demo Company 1795580510987",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "acme build 1795580510999": {
+      "companyId": "CID-Q73GGR",
+      "officialName": "Acme Build 1795580510999",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1795580511005": {
+      "companyId": "CID-Q34AMA",
+      "officialName": "Delta Corp 1795580511005",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "reset co 1795580510953": {
+      "companyId": "CID-X7FAMQ",
+      "officialName": "Reset Co 1795580510953",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1795580510953": {
+      "companyId": "CID-JSUM5Y",
+      "officialName": "People Co 1795580510953",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "noteco_1795580510954": {
+      "companyId": "CID-UVF85F",
+      "officialName": "NoteCo_1795580510954",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo company 1795580547982": {
+      "companyId": "CID-CZPXEJ",
+      "officialName": "Demo Company 1795580547982",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "acme build 1795580547994": {
+      "companyId": "CID-383N7M",
+      "officialName": "Acme Build 1795580547994",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1795580548000": {
+      "companyId": "CID-RBL2R8",
+      "officialName": "Delta Corp 1795580548000",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "reset co 1795580547946": {
+      "companyId": "CID-LC58CK",
+      "officialName": "Reset Co 1795580547946",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1795580547947": {
+      "companyId": "CID-SS6D2L",
+      "officialName": "People Co 1795580547947",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "noteco_1795580547947": {
+      "companyId": "CID-XMM7F7",
+      "officialName": "NoteCo_1795580547947",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
