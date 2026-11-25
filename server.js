@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
@@ -390,8 +391,9 @@ app.post('/api/request-password-reset', async (req, res) => {
         user.resetPasswordExpires = Date.now() + (60 * 60 * 1000); // 1 hour
         await saveData(data);
 
-        const host = req.get('host');
-        const protocol = req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        const forwardedProto = req.headers['x-forwarded-proto'];
+        const protocol = forwardedProto ? forwardedProto.split(',')[0].trim() : req.protocol;
         const resetLink = `${protocol}://${host}/?token=${token}&username=${encodeURIComponent(user.username)}#reset-password`;
 
         // Dispatch via Resend email service
@@ -401,6 +403,28 @@ app.post('/api/request-password-reset', async (req, res) => {
             fullname: user.fullname,
             resetLink
         });
+
+        if (emailDelivery && !emailDelivery.success) {
+            return res.status(502).json({
+                success: false,
+                role: user.role,
+                email: adminEmail,
+                error: emailDelivery.error,
+                message: `Resend email delivery failed: ${emailDelivery.error || 'Unknown error'}. Note: In Resend sandbox mode, emails can only be sent to the verified account owner (bc.work.8888@gmail.com).`
+            });
+        }
+
+        if (emailDelivery && emailDelivery.simulated) {
+            return res.json({
+                success: true,
+                simulated: true,
+                role: user.role,
+                email: adminEmail,
+                resetLink,
+                emailDelivery,
+                message: `[Simulated] RESEND_API_KEY is not configured in Vercel environment variables. Reset link: ${resetLink}`
+            });
+        }
 
         return res.json({
             success: true,
@@ -600,16 +624,50 @@ app.post('/api/add-note', async (req, res) => {
     }
 
     if (!folder.notes) folder.notes = []; // Ensure array exists
+    const isUncontract = Boolean(uncontract === true || uncontract === 'true' || uncontract === 1 || uncontract === '1');
     folder.notes.push({
         id: Date.now(),
         content: noteContent,
         price: price || null,
-        uncontract: !!uncontract,
+        uncontract: isUncontract,
         date: new Date().toLocaleString(),
         photos: photos || []
     });
     await saveData(data);
     res.json({ success: true });
+});
+
+// API: Toggle or set uncontracted flag on a single note
+app.post('/api/note/toggle-uncontract', async (req, res) => {
+    const { folderId, noteId, uncontract } = req.body;
+    if (!folderId || !noteId) {
+        return res.status(400).json({ success: false, message: "Missing required parameters" });
+    }
+
+    const data = await getData();
+    const folderResult = findFolderById(data, folderId);
+    const folder = folderResult ? folderResult.folder : null;
+
+    if (!folder) {
+        return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    const note = (folder.notes || []).find(n => String(n.id) === String(noteId));
+    if (!note) {
+        return res.status(404).json({ success: false, message: "Note not found" });
+    }
+
+    if (typeof uncontract === 'boolean') {
+        note.uncontract = uncontract;
+    } else if (typeof uncontract === 'string') {
+        note.uncontract = uncontract === 'true' || uncontract === '1';
+    } else {
+        note.uncontract = !note.uncontract;
+    }
+    note.modifiedAt = Date.now();
+
+    await saveData(data);
+    res.json({ success: true, uncontract: note.uncontract, noteId: note.id });
 });
 
 // API: Update multiple notes in a project folder
@@ -634,6 +692,9 @@ app.post('/api/project/update-notes', async (req, res) => {
                 note.content = updatedNote.content;
                 note.price = updatedNote.price || null;
                 note.modifiedAt = Date.now();
+                if (updatedNote.uncontract !== undefined) {
+                    note.uncontract = Boolean(updatedNote.uncontract === true || updatedNote.uncontract === 'true' || updatedNote.uncontract === 1 || updatedNote.uncontract === '1');
+                }
             }
         });
     }
@@ -644,6 +705,7 @@ app.post('/api/project/update-notes', async (req, res) => {
 
 app.post('/api/add-contract', async (req, res) => {
     const { username, folderId, contractData } = req.body;
+    const cData = contractData || req.body || {};
     const data = await getData();
 
     const folderResult = findFolderById(data, folderId);
@@ -652,7 +714,7 @@ app.post('/api/add-contract', async (req, res) => {
     if (folder) {
         if (!folder.contracts) folder.contracts = [];
 
-        if (contractData.voidExisting) {
+        if (cData.voidExisting) {
             folder.contracts.forEach(c => {
                 c.void = true;
             });
@@ -660,20 +722,20 @@ app.post('/api/add-contract', async (req, res) => {
 
         const newContract = {
             id: Date.now(),
-            customer: contractData.customer,
-            seller: contractData.seller,
-            price: contractData.price,
-            date: contractData.date,
-            template: contractData.template,
-            phone: contractData.phone || '',
-            email: contractData.email || '',
-            isChangeOrder: !!contractData.isChangeOrder,
-            expirationDate: contractData.expirationDate || '',
-            items: contractData.items || []
+            customer: cData.customer,
+            seller: cData.seller,
+            price: cData.price,
+            date: cData.date,
+            template: cData.template,
+            phone: cData.phone || '',
+            email: cData.email || '',
+            isChangeOrder: !!cData.isChangeOrder,
+            expirationDate: cData.expirationDate || '',
+            items: cData.items || []
         };
 
-        if (contractData.signLater) {
-            if (!contractData.email) {
+        if (cData.signLater) {
+            if (!cData.email) {
                 return res.status(400).json({ success: false, message: "Email is required for Sign Later option" });
             }
             const token = 'token_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
@@ -685,21 +747,22 @@ app.post('/api/add-contract', async (req, res) => {
             // Update project folder status
             folder.status = "Sent to Client";
 
-            const host = req.get('host');
-            const protocol = req.protocol;
+            const host = req.headers['x-forwarded-host'] || req.get('host');
+            const forwardedProto = req.headers['x-forwarded-proto'];
+            const protocol = forwardedProto ? forwardedProto.split(',')[0].trim() : req.protocol;
             const signLink = `${protocol}://${host}/sign.html?token=${token}`;
 
             // Dispatch signing link via Resend email service
             const emailDelivery = await mailer.sendContractSignEmail({
-                to: contractData.email,
-                customerName: contractData.customer,
+                to: cData.email,
+                customerName: cData.customer,
                 projectName: folder.name,
                 signLink,
                 companyName: folder.company || 'FieldSync'
             });
             newContract.emailDelivery = emailDelivery;
         } else {
-            newContract.signature = contractData.signature || '';
+            newContract.signature = cData.signature || '';
             newContract.signed = true;
             folder.status = "Signed";
         }
@@ -714,7 +777,8 @@ app.post('/api/add-contract', async (req, res) => {
 // API: Add Payment
 app.post('/api/add-payment', async (req, res) => {
     const { username, folderId, amount, date, method, notes, depositPaidFull, receipts } = req.body;
-    if (!folderId || amount === undefined || amount === null || amount === '' || !date || !method) {
+    const paymentMethod = method || 'Cash';
+    if (!folderId || amount === undefined || amount === null || amount === '' || !date) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
     }
 
@@ -739,7 +803,7 @@ app.post('/api/add-payment', async (req, res) => {
         id: Date.now(),
         amount: cleanAmount,
         date: date,
-        method: method || 'Cash',
+        method: paymentMethod,
         depositPaidFull: !!depositPaidFull,
         notes: notes || '',
         receipts: receipts || []
@@ -747,10 +811,10 @@ app.post('/api/add-payment', async (req, res) => {
 
     folder.payments.push(newPayment);
     if (newPayment.depositPaidFull) {
-        folder.paymentStatus = 'Paid in Full';
+        folder.paymentStatus = 'Deposit Paid';
     }
     await saveData(data);
-    res.json({ success: true, payment: newPayment });
+    res.json({ success: true, payment: newPayment, paymentStatus: folder.paymentStatus, payments: folder.payments });
 });
 
 

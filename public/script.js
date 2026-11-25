@@ -11,6 +11,11 @@ function parseNumericPrice(val) {
     return isNaN(num) ? 0 : num;
 }
 
+function isNoteUncontracted(note) {
+    if (!note) return false;
+    return note.uncontract === true || note.uncontract === 'true' || note.uncontract === 1 || note.uncontract === '1';
+}
+
 const ORIGINAL_FETCH = window.fetch;
 // Resolves the remote Node server address. Change this URL to your deployed server hostname when publishing to the App Store!
 const API_BASE_URL = (typeof window !== 'undefined' && (window.location.origin.startsWith('capacitor://') || window.location.origin.startsWith('file://') || !window.location.origin.startsWith('http')))
@@ -138,6 +143,8 @@ const TRANSLATIONS = {
     "save_new_password": "保存新密码",
     "reset_password_for": "重置密码用户",
     "reset_link_sent": "密码重置链接已发送至该账户绑定的电子邮箱：",
+    "email_simulated_notice": "邮件服务当前处于模拟模式（生产环境未配置 RESEND_API_KEY）：",
+    "direct_reset_link": "直接重置密码链接：",
     "contact_admin_for_reset": "请联系您所在公司的管理员以重置密码：",
     "no_email_listed": "未列出邮箱",
     "contact_company_admin": "请联系您所在公司的管理员。",
@@ -218,6 +225,7 @@ const TRANSLATIONS = {
     "unpaid": "未付款 (Unpaid)",
     "deposit_paid": "定金已付 (Deposit Paid)",
     "paid_in_full": "全额已付 (Paid in Full)",
+    "total_payments_recorded": "已记录付款总计",
     "add_payment_btn": "+ 记录付款",
     "add_new_payment": "记录新付款",
     "payment_amount": "金额 ($) *:",
@@ -317,6 +325,8 @@ const TRANSLATIONS = {
     "back_to_notes": "← 返回备注",
     "included_in_contract": "已计入合同",
     "uncontracted_badge": "非合同项",
+    "exclude_from_contract": "设为非合同项",
+    "include_in_contract": "设为合同项",
     "no_notes_for_project": "该项目暂无备注。您可以在左侧添加第一条备注！",
     "no_data": "暂无数据"
   },
@@ -362,6 +372,8 @@ const TRANSLATIONS = {
     "save_new_password": "Save New Password",
     "reset_password_for": "Reset password for",
     "reset_link_sent": "A password reset link has been sent to your email:",
+    "email_simulated_notice": "Email delivery is currently in simulation mode (RESEND_API_KEY is not set in Vercel):",
+    "direct_reset_link": "Direct Password Reset Link:",
     "contact_admin_for_reset": "Please contact your company administrator to reset your password:",
     "no_email_listed": "No email listed",
     "contact_company_admin": "Please contact your company administrator.",
@@ -442,6 +454,7 @@ const TRANSLATIONS = {
     "unpaid": "Unpaid",
     "deposit_paid": "Deposit Paid",
     "paid_in_full": "Paid in Full",
+    "total_payments_recorded": "Total Payments Recorded",
     "add_payment_btn": "+ Add Payment",
     "add_new_payment": "Record New Payment",
     "payment_amount": "Amount ($) *:",
@@ -541,6 +554,8 @@ const TRANSLATIONS = {
     "back_to_notes": "← Back",
     "included_in_contract": "Included in Contract",
     "uncontracted_badge": "Uncontracted",
+    "exclude_from_contract": "Exclude from Contract",
+    "include_in_contract": "Include in Contract",
     "no_notes_for_project": "No notes found for this project. You can add one using the form on the left!",
     "no_data": "No data found"
   },
@@ -586,6 +601,8 @@ const TRANSLATIONS = {
     "save_new_password": "Guardar Nueva Contraseña",
     "reset_password_for": "Restablecer contraseña para",
     "reset_link_sent": "Se ha enviado un enlace de restablecimiento de contraseña a su correo:",
+    "email_simulated_notice": "El servicio de correo electrónico está en modo de simulación (RESEND_API_KEY no está configurada en Vercel):",
+    "direct_reset_link": "Enlace directo para restablecer contraseña:",
     "contact_admin_for_reset": "Comuníquese con el administrador de su empresa para restablecer su contraseña:",
     "no_email_listed": "Sin correo registrado",
     "contact_company_admin": "Por favor contacte al administrador de su empresa.",
@@ -666,6 +683,7 @@ const TRANSLATIONS = {
     "unpaid": "No Pagado (Unpaid)",
     "deposit_paid": "Depósito Pagado (Deposit Paid)",
     "paid_in_full": "Pagado por Completo (Paid in Full)",
+    "total_payments_recorded": "Total de Pagos Registrados",
     "add_payment_btn": "+ Registrar Pago",
     "add_new_payment": "Registrar Nuevo Pago",
     "payment_amount": "Monto ($) *:",
@@ -765,6 +783,8 @@ const TRANSLATIONS = {
     "back_to_notes": "← Volver",
     "included_in_contract": "Incluido en Contrato",
     "uncontracted_badge": "No Contractual",
+    "exclude_from_contract": "Excluir del Contrato",
+    "include_in_contract": "Incluir en Contrato",
     "no_notes_for_project": "No se encontraron notas para este proyecto. ¡Puede agregar una usando el formulario de la izquierda!",
     "no_data": "No se encontraron datos"
   }
@@ -1016,7 +1036,7 @@ function updateRemainingBalance(folder) {
     // 2. If no active contracts exist, calculate from contracted notes
     if (totalProjectPrice === 0 && folder.notes && Array.isArray(folder.notes)) {
         folder.notes.forEach(note => {
-            if (!note.uncontract) {
+            if (!isNoteUncontracted(note)) {
                 totalProjectPrice += parseNumericPrice(note.price);
             }
         });
@@ -1040,7 +1060,19 @@ function renderPayments(folder) {
     const payments = (folder && folder.payments && Array.isArray(folder.payments)) ? folder.payments : [];
 
     if (payments.length > 0) {
-        container.innerHTML = payments.map(payment => {
+        let totalPaymentsAmount = 0;
+        payments.forEach(p => {
+            totalPaymentsAmount += parseNumericPrice(p.amount);
+        });
+
+        const summaryHtml = `
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; color: #334155; font-size: 13px;">${t('total_payments_recorded', 'Total Payments')}:</span>
+                <span style="font-weight: 700; color: #1e293b; font-size: 14px;">$${totalPaymentsAmount.toFixed(2)} (${payments.length})</span>
+            </div>
+        `;
+
+        const listHtml = payments.map(payment => {
             const amountFormatted = parseNumericPrice(payment.amount).toFixed(2);
             const badgeHtml = payment.depositPaidFull ? `
                 <span style="font-size: 10px; margin-left: 8px; padding: 2px 6px; border-radius: 4px; background: #def7ec; font-weight: bold; color: #03543f;">
@@ -1076,6 +1108,8 @@ function renderPayments(folder) {
                 </div>
             `;
         }).join('');
+
+        container.innerHTML = summaryHtml + listHtml;
     } else {
         container.innerHTML = `<p>${t('no_payments', 'No payments recorded for this project.')}</p>`;
     }
@@ -1100,7 +1134,7 @@ async function loadWorkData() {
 
     if (folder) {
         // Merge with in-memory currentFolder payments so newly added payments are never lost
-        if (currentFolder && currentFolder.payments && Array.isArray(currentFolder.payments) && currentFolder.payments.length > 0) {
+        if (currentFolder && String(currentFolder.id) === String(currentFolderId) && currentFolder.payments && Array.isArray(currentFolder.payments) && currentFolder.payments.length > 0) {
             if (!folder.payments) folder.payments = [];
             currentFolder.payments.forEach(p => {
                 if (!folder.payments.some(fp => String(fp.id) === String(p.id))) {
@@ -1191,7 +1225,7 @@ async function loadPayments(forceFetch = false) {
         if (directRes.ok) {
             const data = await directRes.json();
             folder = data.folder;
-            if (currentFolder && currentFolder.payments && currentFolder.payments.length > 0) {
+            if (currentFolder && String(currentFolder.id) === String(currentFolderId) && currentFolder.payments && currentFolder.payments.length > 0) {
                 if (!folder.payments) folder.payments = [];
                 currentFolder.payments.forEach(p => {
                     if (!folder.payments.some(fp => String(fp.id) === String(p.id))) {
@@ -1262,26 +1296,38 @@ async function savePayment(event) {
             paymentReceiptsData = [];
 
             // Update currentFolder in memory immediately
-            if (!currentFolder) {
+            if (!currentFolder || String(currentFolder.id) !== String(currentFolderId)) {
                 currentFolder = { id: currentFolderId, payments: [] };
             }
             if (!currentFolder.payments || !Array.isArray(currentFolder.payments)) {
                 currentFolder.payments = [];
             }
-            const newPaymentRecord = data.payment || {
-                id: Date.now(),
-                amount: numAmount,
-                date: date,
-                method: method,
-                depositPaidFull: depositPaidFull,
-                notes: notes,
-                receipts: []
-            };
-            if (!currentFolder.payments.some(p => String(p.id) === String(newPaymentRecord.id))) {
-                currentFolder.payments.push(newPaymentRecord);
+            if (data.payments && Array.isArray(data.payments)) {
+                currentFolder.payments = data.payments;
+            } else {
+                const newPaymentRecord = data.payment || {
+                    id: Date.now(),
+                    amount: numAmount,
+                    date: date,
+                    method: method,
+                    depositPaidFull: depositPaidFull,
+                    notes: notes,
+                    receipts: []
+                };
+                if (!currentFolder.payments.some(p => String(p.id) === String(newPaymentRecord.id))) {
+                    currentFolder.payments.push(newPaymentRecord);
+                }
             }
-            if (depositPaidFull) {
-                currentFolder.paymentStatus = 'Paid in Full';
+
+            if (data.paymentStatus) {
+                currentFolder.paymentStatus = data.paymentStatus;
+            } else if (depositPaidFull) {
+                currentFolder.paymentStatus = 'Deposit Paid';
+            }
+
+            const paymentSelect = document.getElementById('payment-status-select');
+            if (paymentSelect && currentFolder.paymentStatus) {
+                paymentSelect.value = currentFolder.paymentStatus;
             }
 
             // Immediately render payments list and update remaining balance on the page
@@ -1487,10 +1533,24 @@ async function requestPasswordReset(event) {
                 msgEl.style.display = 'block';
                 if (res.ok) {
                     if (result.role === 'admin' || result.role === 'super admin') {
-                        msgEl.style.backgroundColor = '#ecfdf5';
-                        msgEl.style.color = '#065f46';
-                        msgEl.style.border = '1px solid #a7f3d0';
-                        msgEl.innerHTML = `<strong>✓ ${t('reset_link_sent', 'A password reset link has been sent to your email:')}</strong><br><span style="color: #047857; word-break: break-all;">${result.email}</span>`;
+                        if (result.simulated) {
+                            msgEl.style.backgroundColor = '#fffbeb';
+                            msgEl.style.color = '#92400e';
+                            msgEl.style.border = '1px solid #fde68a';
+                            msgEl.innerHTML = `
+                                <strong>⚠️ ${t('email_simulated_notice', 'Email delivery is currently in simulation mode (RESEND_API_KEY is not set in Vercel):')}</strong><br>
+                                <span style="font-size: 13px; color: #78350f;">Recipient: ${escapeHtml(result.email)}</span><br>
+                                <div style="margin-top: 10px; padding: 8px; background: #ffffff; border: 1px dashed #f59e0b; border-radius: 4px;">
+                                    <strong>${t('direct_reset_link', 'Direct Password Reset Link:')}</strong><br>
+                                    <a href="${result.resetLink}" style="color: #2563eb; font-weight: bold; word-break: break-all; text-decoration: underline;">${escapeHtml(result.resetLink)}</a>
+                                </div>
+                            `;
+                        } else {
+                            msgEl.style.backgroundColor = '#ecfdf5';
+                            msgEl.style.color = '#065f46';
+                            msgEl.style.border = '1px solid #a7f3d0';
+                            msgEl.innerHTML = `<strong>✓ ${t('reset_link_sent', 'A password reset link has been sent to your email:')}</strong><br><span style="color: #047857; word-break: break-all;">${result.email}</span>`;
+                        }
                     } else {
                         // Crew or Manager
                         msgEl.style.backgroundColor = '#eff6ff';
@@ -1894,6 +1954,9 @@ async function saveNewProject(event) {
 
 // Called when a folder card is clicked
 async function openFolder(folderId, folderName) {
+    if (currentFolder && String(currentFolder.id) !== String(folderId)) {
+        currentFolder = null;
+    }
     // 1. Store the current folder context
     currentFolderId = folderId;
 
@@ -1979,7 +2042,7 @@ async function loadNotes(forceFetch = false) {
                 <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 500;">
                     ${escapeHtml(note.content)}
                     ${note.price ? `<span style="margin-left: 10px; font-size: 12px; padding: 2px 6px; background: #e0f2fe; color: #0369a1; border-radius: 4px; font-weight: bold; white-space: nowrap;">$${note.price}</span>` : ''}
-                    ${note.uncontract ? `<span style="margin-left: 8px; font-size: 10px; padding: 2px 6px; background: #f1f5f9; color: #475569; border-radius: 4px; font-weight: bold; white-space: nowrap;">Uncontracted</span>` : ''}
+                    ${isNoteUncontracted(note) ? `<span style="margin-left: 8px; font-size: 10px; padding: 2px 6px; background: #f1f5f9; color: #475569; border-radius: 4px; font-weight: bold; white-space: nowrap;">${t('uncontracted_badge', 'Uncontracted')}</span>` : ''}
                 </p>
                 ${note.photos && note.photos.length > 0 ? `
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -1994,9 +2057,16 @@ async function loadNotes(forceFetch = false) {
                 ` : ''}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <small style="color: #888;">${escapeHtml(note.date)}</small>
-                    <button onclick="toggleReplyForm('${noteIdStr}')" style="padding: 3px 10px; font-size: 12px; background: white; border: 1px solid var(--border-blue); color: var(--brand-blue); border-radius: 4px; cursor: pointer; font-weight: 500;">
-                        💬 ${t('reply', 'Reply')}${replyBadgeText}
-                    </button>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        ${(sessionStorage.getItem('role') === 'admin' || sessionStorage.getItem('role') === 'manager' || sessionStorage.getItem('role') === 'super admin') ? `
+                            <button onclick="toggleNoteUncontract('${noteIdStr}', event)" style="padding: 3px 8px; font-size: 11.5px; background: ${isNoteUncontracted(note) ? '#f0fdf4' : '#f8fafc'}; border: 1px solid ${isNoteUncontracted(note) ? '#86efac' : '#cbd5e1'}; color: ${isNoteUncontracted(note) ? '#166534' : '#475569'}; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                                ${isNoteUncontracted(note) ? '✓ ' + t('include_in_contract', 'Include in Contract') : '⊘ ' + t('exclude_from_contract', 'Exclude from Contract')}
+                            </button>
+                        ` : ''}
+                        <button onclick="toggleReplyForm('${noteIdStr}')" style="padding: 3px 10px; font-size: 12px; background: white; border: 1px solid var(--border-blue); color: var(--brand-blue); border-radius: 4px; cursor: pointer; font-weight: 500;">
+                            💬 ${t('reply', 'Reply')}${replyBadgeText}
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Replies Thread -->
@@ -3906,6 +3976,36 @@ async function saveStep1Note(event) {
     });
 }
 
+async function toggleNoteUncontract(noteId, event) {
+    if (event) event.stopPropagation();
+    try {
+        const res = await fetch('/api/note/toggle-uncontract', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folderId: currentFolderId, noteId: noteId })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (currentFolder && currentFolder.notes) {
+                const note = currentFolder.notes.find(n => String(n.id) === String(noteId));
+                if (note) note.uncontract = data.uncontract;
+            }
+            // Always refresh folder from server for true state
+            const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+            if (directRes.ok) {
+                const fData = await directRes.json();
+                currentFolder = fData.folder;
+            }
+            await loadWorkData();
+            if (currentAddContractStep === 1) {
+                await renderContractNotesReview();
+            }
+        }
+    } catch (e) {
+        console.error('Error toggling note uncontract:', e);
+    }
+}
+
 async function renderContractNotesReview() {
     if (!currentFolder && currentFolderId) {
         const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
@@ -3924,7 +4024,7 @@ async function renderContractNotesReview() {
 
     // Filter out uncontracted notes so they never appear on the contract creation/review list
     const allNotes = (currentFolder && currentFolder.notes) ? currentFolder.notes : [];
-    const notes = allNotes.filter(note => !note.uncontract);
+    const notes = allNotes.filter(note => !isNoteUncontracted(note));
 
     let latestContractId = 0;
     if (isChangeOrderFlow && currentFolder && currentFolder.contracts && currentFolder.contracts.length > 0) {
@@ -3938,10 +4038,10 @@ async function renderContractNotesReview() {
     notes.forEach(note => {
         const noteTime = note.modifiedAt || note.id;
         const isEligible = isChangeOrderFlow ? (noteTime > latestContractId) : true;
-        const isIncluded = isEligible && !note.uncontract;
+        const isIncluded = isEligible && !isNoteUncontracted(note);
         if (isIncluded) {
             includedCount++;
-            totalPrice += parseFloat(note.price) || 0;
+            totalPrice += parseNumericPrice(note.price);
         }
     });
 
@@ -3957,16 +4057,16 @@ async function renderContractNotesReview() {
     container.innerHTML = notes.slice().reverse().map(note => {
         const noteTime = note.modifiedAt || note.id;
         const isEligible = isChangeOrderFlow ? (noteTime > latestContractId) : true;
-        const isIncluded = isEligible && !note.uncontract;
+        const isIncluded = isEligible && !isNoteUncontracted(note);
 
         const priceBadge = note.price ? `
             <span style="background: #dbeafe; color: #1e40af; font-weight: 700; font-size: 13px; padding: 3px 8px; border-radius: 6px; white-space: nowrap;">
-                $${parseFloat(note.price).toFixed(2)}
+                $${parseNumericPrice(note.price).toFixed(2)}
             </span>
         ` : '';
 
         let statusBadge = '';
-        if (note.uncontract) {
+        if (isNoteUncontracted(note)) {
             statusBadge = `<span style="background: #f1f5f9; color: #64748b; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px;">${t('uncontracted_badge', 'Uncontracted')}</span>`;
         } else if (isIncluded) {
             statusBadge = `<span style="background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px;">✓ ${t('included_in_contract', 'Included in Contract')}</span>`;
@@ -3995,7 +4095,12 @@ async function renderContractNotesReview() {
                     ${priceBadge}
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 8px; margin-top: 4px;">
-                    ${statusBadge}
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        ${statusBadge}
+                        <button type="button" onclick="toggleNoteUncontract('${note.id}', event)" style="padding: 2px 7px; font-size: 11px; background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                            ⊘ ${t('exclude_from_contract', 'Exclude from Contract')}
+                        </button>
+                    </div>
                     <span style="font-size: 11px; color: #94a3b8;">${note.date || ''}</span>
                 </div>
                 ${photosHtml}
@@ -4015,10 +4120,10 @@ function recalculateContractItemsFromNotes() {
             const latestContractId = latestContract ? latestContract.id : 0;
             const changeOrderNotes = currentFolder.notes.filter(note => {
                 const noteTime = note.modifiedAt || note.id;
-                return noteTime > latestContractId && !note.uncontract;
+                return noteTime > latestContractId && !isNoteUncontracted(note);
             });
             changeOrderNotes.forEach(note => {
-                const itemPrice = note.price ? parseFloat(note.price) || 0 : 0;
+                const itemPrice = parseNumericPrice(note.price);
                 totalNotePrice += itemPrice;
                 contractItems.push({
                     noteId: note.id,
@@ -4027,9 +4132,9 @@ function recalculateContractItemsFromNotes() {
                 });
             });
         } else {
-            const contractNotes = currentFolder.notes.filter(note => !note.uncontract);
+            const contractNotes = currentFolder.notes.filter(note => !isNoteUncontracted(note));
             contractNotes.forEach(note => {
-                const itemPrice = note.price ? parseFloat(note.price) || 0 : 0;
+                const itemPrice = parseNumericPrice(note.price);
                 totalNotePrice += itemPrice;
                 contractItems.push({
                     noteId: note.id,
@@ -4480,7 +4585,7 @@ function handleAddChangeOrderClick() {
 
     const changeOrderNotes = (currentFolder.notes || []).filter(note => {
         const noteTime = note.modifiedAt || note.id;
-        return noteTime > latestContractId && !note.uncontract;
+        return noteTime > latestContractId && !isNoteUncontracted(note);
     });
 
     if (changeOrderNotes.length === 0) {
@@ -4504,7 +4609,7 @@ function handleAddChangeOrderClick() {
     let totalNotePrice = 0;
     contractItems = [];
     changeOrderNotes.forEach(note => {
-        const itemPrice = note.price ? parseFloat(note.price) || 0 : 0;
+        const itemPrice = parseNumericPrice(note.price);
         totalNotePrice += itemPrice;
         contractItems.push({
             noteId: note.id,

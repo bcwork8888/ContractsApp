@@ -133,4 +133,27 @@ describe('Add Contract Step 1 (Review & Add Notes) Flow Tests', () => {
         const changeOrderTotal = changeOrderNotes.reduce((sum, n) => sum + (parseFloat(n.price) || 0), 0);
         expect(changeOrderTotal).toBe(800);
     });
+
+    test('isNoteUncontracted helper accurately identifies truthy uncontract flags across types', () => {
+        expect(scriptJs).toContain('function isNoteUncontracted(');
+        expect(scriptJs).toContain('function toggleNoteUncontract(');
+
+        // Helper definition test
+        const isNoteUncontracted = (note) => {
+            if (!note) return false;
+            return note.uncontract === true || note.uncontract === 'true' || note.uncontract === 1 || note.uncontract === '1';
+        };
+
+        expect(isNoteUncontracted({ uncontract: true })).toBe(true);
+        expect(isNoteUncontracted({ uncontract: 'true' })).toBe(true);
+        expect(isNoteUncontracted({ uncontract: 1 })).toBe(true);
+        expect(isNoteUncontracted({ uncontract: '1' })).toBe(true);
+
+        expect(isNoteUncontracted({ uncontract: false })).toBe(false);
+        expect(isNoteUncontracted({ uncontract: 'false' })).toBe(false);
+        expect(isNoteUncontracted({ uncontract: 0 })).toBe(false);
+        expect(isNoteUncontracted({ uncontract: null })).toBe(false);
+        expect(isNoteUncontracted({ uncontract: undefined })).toBe(false);
+        expect(isNoteUncontracted({})).toBe(false);
+    });
 });

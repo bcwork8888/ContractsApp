@@ -81,8 +81,8 @@
       "active": true,
       "deactivated": false,
       "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
+      "resetPasswordToken": "rst_1795638623338_3wbcknr9h8",
+      "resetPasswordExpires": 1795642223338,
       "folders": []
     },
     {
@@ -157,6 +157,7 @@
               "content": "testtest09891",
               "date": "8/21/2026, 12:08:49 PM",
               "price": 200,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -165,6 +166,7 @@
               "content": "test",
               "date": "10/24/2026, 5:06:24 PM",
               "price": 300,
+              "uncontract": false,
               "photos": [],
               "replies": [
                 {
@@ -182,6 +184,7 @@
               "content": "test2",
               "date": "10/24/2026, 5:07:05 PM",
               "price": 12,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -318,6 +321,7 @@
               "content": "test123",
               "date": "4/29/2026, 7:55:00 PM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -326,6 +330,7 @@
               "content": "aasdfwe",
               "date": "7/9/2026, 11:19:36 PM",
               "price": 150,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -334,6 +339,7 @@
               "content": "test2",
               "date": "4/29/2026, 10:06:34 PM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -342,6 +348,7 @@
               "content": "test",
               "date": "8/20/2026, 11:38:06 PM",
               "price": -150,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -350,6 +357,7 @@
               "content": "test3",
               "date": "4/29/2026, 10:08:19 PM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -415,6 +423,7 @@
               "content": "test2",
               "date": "8/21/2026, 12:13:20 PM",
               "price": 2000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -423,6 +432,7 @@
               "content": "test3",
               "date": "8/21/2026, 12:13:29 PM",
               "price": -10,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -431,6 +441,7 @@
               "content": "test4",
               "date": "8/21/2026, 12:13:38 PM",
               "price": 1234,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -439,6 +450,7 @@
               "content": "test1",
               "date": "8/21/2026, 12:13:13 PM",
               "price": 11150,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -493,6 +505,7 @@
               "content": "optional",
               "date": "7/15/2026, 11:04:38 AM",
               "price": 50,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -501,6 +514,7 @@
               "content": "add tree",
               "date": "7/15/2026, 11:05:23 AM",
               "price": 20,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -509,6 +523,7 @@
               "content": "test1",
               "date": "7/15/2026, 10:28:42 AM",
               "price": 150,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -517,6 +532,7 @@
               "content": "front door",
               "date": "7/15/2026, 11:04:29 AM",
               "price": 200,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -544,6 +560,7 @@
               "content": "abc",
               "date": "7/9/2026, 11:41:29 PM",
               "price": 150,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -552,6 +569,7 @@
               "content": "second",
               "date": "7/9/2026, 11:41:43 PM",
               "price": 200,
+              "uncontract": false,
               "photos": [
                 "data:image/png;base64,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"
               ],
@@ -665,6 +683,7 @@
               "content": "test4",
               "date": "8/21/2026, 12:04:51 AM",
               "price": -100,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -673,6 +692,7 @@
               "content": "test",
               "date": "8/21/2026, 12:04:32 AM",
               "price": 150,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -681,6 +701,7 @@
               "content": "test-add2",
               "date": "8/21/2026, 12:06:19 AM",
               "price": 600,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -689,6 +710,7 @@
               "content": "test5",
               "date": "8/21/2026, 12:05:00 AM",
               "price": 1000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -697,6 +719,7 @@
               "content": "test-add3",
               "date": "8/21/2026, 12:06:28 AM",
               "price": -50,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -705,6 +728,7 @@
               "content": "test2",
               "date": "8/21/2026, 12:04:39 AM",
               "price": 200,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -713,6 +737,7 @@
               "content": "test3",
               "date": "8/21/2026, 12:04:45 AM",
               "price": 500,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -721,10 +746,106 @@
               "content": "test-add",
               "date": "8/21/2026, 12:06:12 AM",
               "price": 600,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
           ]
+        },
+        {
+          "id": 1777514894074,
+          "name": "test",
+          "workingAddress": "",
+          "customerName": "",
+          "customerPhone": "",
+          "customerBillingAddress": "",
+          "customerEmail": "",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": [
+            {
+              "id": 1783996965649,
+              "content": "notes 1",
+              "date": "7/13/2026, 10:42:45 PM",
+              "price": 150,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1783996971526,
+              "content": "notes2",
+              "date": "7/13/2026, 10:42:51 PM",
+              "price": 150,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 1792034583026,
+          "name": "abc-test1 - abc-test1",
+          "workingAddress": "abc-test1",
+          "customerName": "abc-test1",
+          "customerPhone": "4122222222",
+          "customerBillingAddress": "abc-test1",
+          "customerEmail": "",
+          "status": "Signed",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1792034614812,
+              "customer": "abc-test1",
+              "seller": "abc, xyz",
+              "price": 300,
+              "date": "2026-10-15",
+              "template": "company_default",
+              "phone": "4122222222",
+              "email": "",
+              "signature": "data:image/png;base64,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",
+              "token": null,
+              "signatureToken": null,
+              "signed": true,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": []
+            }
+          ],
+          "notes": []
+        },
+        {
+          "id": 1793023260009,
+          "name": "test123 - test123",
+          "workingAddress": "test123",
+          "customerName": "abc-test1",
+          "customerPhone": "4122222222",
+          "customerBillingAddress": "abc-test1",
+          "customerEmail": "",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
         },
         {
           "id": 1777502778520,
@@ -875,6 +996,7 @@
               "content": "test2",
               "date": "6/14/2026, 3:27:49 PM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -883,6 +1005,7 @@
               "content": "upload photo",
               "date": "7/5/2026, 10:17:21 PM",
               "price": null,
+              "uncontract": false,
               "photos": [
                 "data:image/png;base64,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"
               ],
@@ -893,6 +1016,7 @@
               "content": "test",
               "date": "6/14/2026, 3:27:45 PM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": [
                 {
@@ -945,99 +1069,6 @@
               "items": []
             }
           ],
-          "notes": []
-        },
-        {
-          "id": 1777514894074,
-          "name": "test",
-          "workingAddress": "",
-          "customerName": "",
-          "customerPhone": "",
-          "customerBillingAddress": "",
-          "customerEmail": "",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": [
-            {
-              "id": 1783996965649,
-              "content": "notes 1",
-              "date": "7/13/2026, 10:42:45 PM",
-              "price": 150,
-              "photos": [],
-              "replies": []
-            },
-            {
-              "id": 1783996971526,
-              "content": "notes2",
-              "date": "7/13/2026, 10:42:51 PM",
-              "price": 150,
-              "photos": [],
-              "replies": []
-            }
-          ]
-        },
-        {
-          "id": 1792034583026,
-          "name": "abc-test1 - abc-test1",
-          "workingAddress": "abc-test1",
-          "customerName": "abc-test1",
-          "customerPhone": "4122222222",
-          "customerBillingAddress": "abc-test1",
-          "customerEmail": "",
-          "status": "Signed",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [
-            {
-              "id": 1792034614812,
-              "customer": "abc-test1",
-              "seller": "abc, xyz",
-              "price": 300,
-              "date": "2026-10-15",
-              "template": "company_default",
-              "phone": "4122222222",
-              "email": "",
-              "signature": "data:image/png;base64,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",
-              "token": null,
-              "signatureToken": null,
-              "signed": true,
-              "isChangeOrder": false,
-              "void": false,
-              "expirationDate": "",
-              "companyOfficialName": null,
-              "companyLogo": null,
-              "companyNameCard": null,
-              "items": []
-            }
-          ],
-          "notes": []
-        },
-        {
-          "id": 1793023260009,
-          "name": "test123 - test123",
-          "workingAddress": "test123",
-          "customerName": "abc-test1",
-          "customerPhone": "4122222222",
-          "customerBillingAddress": "abc-test1",
-          "customerEmail": "",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
           "notes": []
         }
       ]
@@ -1263,17 +1294,19 @@
           "notes": [
             {
               "id": 1791388487017,
-              "content": "front  fence 4 feet height 30 feet long ",
+              "content": "front  fence 4 feet height 30 feet long",
               "date": "10/7/2026, 3:54:47 PM",
               "price": 500,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
             {
               "id": 1791388489022,
-              "content": "front  fence 4 feet height 30 feet long ",
+              "content": "front  fence 4 feet height 30 feet long",
               "date": "10/7/2026, 3:54:49 PM",
               "price": 500,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -1282,6 +1315,7 @@
               "content": "front fence 4' tall 20 ft long",
               "date": "10/7/2026, 3:56:45 PM",
               "price": 2000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -1290,14 +1324,16 @@
               "content": "front fence 4' tall 20 ft long",
               "date": "10/7/2026, 3:56:33 PM",
               "price": 2000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
             {
               "id": 1791388490191,
-              "content": "front  fence 4 feet height 30 feet long ",
+              "content": "front  fence 4 feet height 30 feet long",
               "date": "10/7/2026, 3:54:50 PM",
               "price": 500,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -1427,8 +1463,8 @@
       "active": true,
       "deactivated": false,
       "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
+      "resetPasswordToken": "rst_1795638483946_czoeofehrl",
+      "resetPasswordExpires": 1795642083946,
       "folders": []
     },
     {
@@ -1440,574 +1476,6 @@
       "role": "manager",
       "approved": true,
       "email": "bc.work.8888@gmail.com",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": []
-    },
-    {
-      "username": "test1122crew",
-      "password": "test",
-      "fullname": "test1122crew",
-      "company": "test1122",
-      "companyId": "CID-VMD2RU",
-      "role": "crew",
-      "approved": true,
-      "email": "",
-      "cellphone": "422222",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": []
-    },
-    {
-      "username": "test1122manager1",
-      "password": "test",
-      "fullname": "test1122 manager",
-      "company": "test1122",
-      "companyId": "CID-VMD2RU",
-      "role": "manager",
-      "approved": true,
-      "email": "bc.work.8888@gmail.com",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": [
-        {
-          "id": 1795582770791,
-          "name": "test1122 - test1122",
-          "workingAddress": "test1122",
-          "customerName": "test1122customer",
-          "customerPhone": "234",
-          "customerBillingAddress": "test1122",
-          "customerEmail": "",
-          "status": "Signed",
-          "crew": "test1122crew",
-          "crews": [
-            "test1122crew"
-          ],
-          "payments": [
-            {
-              "id": 1795583877622,
-              "amount": 170,
-              "date": "2026-11-25",
-              "method": "Cash",
-              "depositPaidFull": false,
-              "notes": "Test payment 170",
-              "receipts": []
-            }
-          ],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [
-            {
-              "id": 1795582846473,
-              "customer": "test1122customer",
-              "seller": "test1122 manager",
-              "price": 1170,
-              "date": "2026-11-25",
-              "template": "company_default",
-              "phone": "234",
-              "email": "",
-              "signature": "data:image/png;base64,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",
-              "token": null,
-              "signatureToken": null,
-              "signed": true,
-              "isChangeOrder": false,
-              "void": false,
-              "expirationDate": "",
-              "companyOfficialName": null,
-              "companyLogo": null,
-              "companyNameCard": null,
-              "items": [
-                {
-                  "price": 150,
-                  "noteId": 1795582781869,
-                  "description": "test1"
-                },
-                {
-                  "price": 120,
-                  "noteId": 1795582791424,
-                  "description": "test2"
-                },
-                {
-                  "price": 400,
-                  "noteId": 1795582801883,
-                  "description": "test3"
-                },
-                {
-                  "price": 500,
-                  "noteId": 1795582820197,
-                  "description": "test4"
-                }
-              ]
-            }
-          ],
-          "notes": [
-            {
-              "id": 1795582781869,
-              "content": "test1",
-              "date": "11/25/2026, 4:59:41 AM",
-              "price": 150,
-              "photos": [],
-              "replies": [
-                {
-                  "id": 1795582967868,
-                  "username": "test1122manager1",
-                  "fullname": "test1122 manager",
-                  "role": "manager",
-                  "content": "test",
-                  "date": "11/25/2026, 5:02:47 AM"
-                },
-                {
-                  "id": 1795583039053,
-                  "username": "test1122crew",
-                  "fullname": "test1122crew",
-                  "role": "crew",
-                  "content": "reply test",
-                  "date": "11/25/2026, 5:03:59 AM"
-                }
-              ]
-            },
-            {
-              "id": 1795582791424,
-              "content": "test2",
-              "date": "11/25/2026, 4:59:51 AM",
-              "price": 120,
-              "photos": [],
-              "replies": []
-            },
-            {
-              "id": 1795582801883,
-              "content": "test3",
-              "date": "11/25/2026, 5:00:01 AM",
-              "price": 400,
-              "photos": [],
-              "replies": []
-            },
-            {
-              "id": 1795582820197,
-              "content": "test4",
-              "date": "11/25/2026, 5:00:20 AM",
-              "price": 500,
-              "photos": [],
-              "replies": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "username": "baimgt",
-      "password": "Bai0402",
-      "fullname": "Edith Bai",
-      "company": "Bai Properties Management",
-      "companyId": "CID-EBDU59",
-      "role": "admin",
-      "approved": true,
-      "email": "",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": [
-        {
-          "id": 1793024387735,
-          "name": "fence 4 - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": [
-            {
-              "id": 1793026164902,
-              "content": "city has requirments for front and side fence 5 feet max with 1 inch gap",
-              "date": "10/26/2026, 2:49:24 PM",
-              "price": 2000,
-              "photos": [],
-              "replies": []
-            }
-          ]
-        },
-        {
-          "id": 1793024387842,
-          "name": "fence 4 - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793023820626,
-          "name": "Fence - 5522 Jackosn st",
-          "workingAddress": "5522 Jackosn st",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793024250393,
-          "name": "Fence 2 - 5522 Jackson",
-          "workingAddress": "5522 Jackson",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793024252968,
-          "name": "Fence 2 - 5522 Jackson",
-          "workingAddress": "5522 Jackson",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793023818991,
-          "name": "Fence - 5522 Jackosn st",
-          "workingAddress": "5522 Jackosn st",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1791386345148,
-          "name": "Fence - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Ricky Zhang",
-          "customerPhone": "4124859831",
-          "customerBillingAddress": "1495 Jameson ct",
-          "customerEmail": "baipropertiesmanagement@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1791386346621,
-          "name": "Fence - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Ricky Zhang",
-          "customerPhone": "4124859831",
-          "customerBillingAddress": "1495 Jameson ct",
-          "customerEmail": "baipropertiesmanagement@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1791386346497,
-          "name": "Fence - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Ricky Zhang",
-          "customerPhone": "4124859831",
-          "customerBillingAddress": "1495 Jameson ct",
-          "customerEmail": "baipropertiesmanagement@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1791386345746,
-          "name": "Fence - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Ricky Zhang",
-          "customerPhone": "4124859831",
-          "customerBillingAddress": "1495 Jameson ct",
-          "customerEmail": "baipropertiesmanagement@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1794503842696,
-          "name": "Plumbing at McCanless - 5557 Mccandless Ave",
-          "workingAddress": "5557 Mccandless Ave",
-          "customerName": "Lulu",
-          "customerPhone": "4123203343",
-          "customerBillingAddress": "1495 Jameson ct",
-          "customerEmail": "baiwujun@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": [
-            {
-              "id": 1794503903672,
-              "content": "What do the main line and we’re going to see where the down spot will be blah blah?",
-              "date": "11/12/2026, 5:18:23 PM",
-              "price": null,
-              "photos": [],
-              "replies": []
-            }
-          ]
-        },
-        {
-          "id": 1793024352390,
-          "name": "Fence 3 - 5522 Jackson st_15206",
-          "workingAddress": "5522 Jackson st,15206",
-          "customerName": "Lu Bai",
-          "customerPhone": "4127264153",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1791386337997,
-          "name": "Fence - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Ricky Zhang",
-          "customerPhone": "4124859831",
-          "customerBillingAddress": "1495 Jameson ct",
-          "customerEmail": "baipropertiesmanagement@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793023816981,
-          "name": "Fence - 5522 Jackosn st",
-          "workingAddress": "5522 Jackosn st",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793024386495,
-          "name": "fence 4 - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793024388697,
-          "name": "fence 4 - 5522 Jackson st",
-          "workingAddress": "5522 Jackson st",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        },
-        {
-          "id": 1793025880009,
-          "name": "Fence 5 - 5522 Jackson st_15206",
-          "workingAddress": "5522 Jackson st,15206",
-          "customerName": "Lu Bai",
-          "customerPhone": "4123203342",
-          "customerBillingAddress": "1495 Jameson Court",
-          "customerEmail": "lubai83@gmail.com",
-          "status": "Draft",
-          "crew": null,
-          "crews": [],
-          "payments": [],
-          "paymentStatus": "N/A",
-          "crewsViewContractPayment": false,
-          "terminationDoc": null,
-          "contracts": [],
-          "notes": []
-        }
-      ]
-    },
-    {
-      "username": "testuser_1790566907998",
-      "password": "Temp-NNPRXQ",
-      "fullname": "Test User",
-      "company": "Demo Company",
-      "companyId": "CID-PGZ6B2",
-      "role": "admin",
-      "approved": true,
-      "email": "",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": []
-    },
-    {
-      "username": "live_admin_21837",
-      "password": "pass123",
-      "fullname": "Live Admin",
-      "company": "Live Company 23742",
-      "companyId": "CID-79ZQP2",
-      "role": "admin",
-      "approved": true,
-      "email": "liveadmin@example.com",
-      "cellphone": "",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": []
-    },
-    {
-      "username": "live_crew_16186",
-      "password": "pass123",
-      "fullname": "Live Crew",
-      "company": "Live Company 23742",
-      "companyId": "CID-79ZQP2",
-      "role": "crew",
-      "approved": false,
-      "email": "",
-      "cellphone": "555-4321",
-      "active": true,
-      "deactivated": false,
-      "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
-      "folders": []
-    },
-    {
-      "username": "admin_db",
-      "password": "admin_db",
-      "fullname": "admin_db",
-      "company": "admin_db_company",
-      "companyId": "CID-KEM7RR",
-      "role": "admin",
-      "approved": true,
-      "email": "admin_db@abc.com",
       "cellphone": "",
       "active": true,
       "deactivated": false,
@@ -2163,6 +1631,7 @@
               "content": "take off existing siding , fix rotten board and frame",
               "date": "11/16/2026, 3:04:03 AM",
               "price": 8000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -2171,14 +1640,16 @@
               "content": "put house wrap underlayment, install new siding",
               "date": "11/16/2026, 3:04:59 AM",
               "price": 5000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
             {
               "id": 1794798322352,
-              "content": "install new gutter ",
+              "content": "install new gutter",
               "date": "11/16/2026, 3:05:22 AM",
               "price": 2000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -2244,6 +1715,7 @@
               "content": "master bath stand alone tub is not drain properly, need to change drain to tub drain instead of flex pipe",
               "date": "11/16/2026, 3:46:51 AM",
               "price": 600,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -2252,6 +1724,7 @@
               "content": "Cut tile around drain but not the wood floor deck",
               "date": "11/16/2026, 3:48:55 AM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -2260,6 +1733,7 @@
               "content": "If not able to do the job from 2nd floor need to open drywall from first floor ceiling. Then patch and fix drywall after",
               "date": "11/16/2026, 3:48:05 AM",
               "price": 800,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -2275,13 +1749,13 @@
       "companyId": "CID-5NDH6M",
       "role": "admin",
       "approved": true,
-      "email": "",
+      "email": "bc.work.8888@gmail.com",
       "cellphone": "",
       "active": true,
       "deactivated": false,
       "denied": false,
-      "resetPasswordToken": null,
-      "resetPasswordExpires": null,
+      "resetPasswordToken": "rst_1795638933268_u299vpjbdh",
+      "resetPasswordExpires": 1795642533268,
       "folders": []
     },
     {
@@ -2322,6 +1796,657 @@
           "notes": []
         }
       ]
+    },
+    {
+      "username": "test1122crew",
+      "password": "test",
+      "fullname": "test1122crew",
+      "company": "test1122",
+      "companyId": "CID-VMD2RU",
+      "role": "crew",
+      "approved": true,
+      "email": "",
+      "cellphone": "422222",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
+      "username": "test1122manager1",
+      "password": "test",
+      "fullname": "test1122 manager",
+      "company": "test1122",
+      "companyId": "CID-VMD2RU",
+      "role": "manager",
+      "approved": true,
+      "email": "bc.work.8888@gmail.com",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": [
+        {
+          "id": 1795582770791,
+          "name": "test1122 - test1122",
+          "workingAddress": "test1122",
+          "customerName": "test1122customer",
+          "customerPhone": "234",
+          "customerBillingAddress": "test1122",
+          "customerEmail": "",
+          "status": "Signed",
+          "crew": "test1122crew",
+          "crews": [
+            "test1122crew"
+          ],
+          "payments": [
+            {
+              "id": 1795583877622,
+              "amount": 170,
+              "date": "2026-11-25",
+              "method": "Cash",
+              "depositPaidFull": false,
+              "notes": "Test payment 170"
+            },
+            {
+              "id": 1795635834537,
+              "amount": 200,
+              "date": "2026-11-25",
+              "method": "Cash",
+              "depositPaidFull": true,
+              "notes": "Second payment"
+            }
+          ],
+          "paymentStatus": "Paid in Full",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1795582846473,
+              "customer": "test1122customer",
+              "seller": "test1122 manager",
+              "price": 1170,
+              "date": "2026-11-25",
+              "template": "company_default",
+              "phone": "234",
+              "email": "",
+              "signature": "data:image/png;base64,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",
+              "token": null,
+              "signatureToken": null,
+              "signed": true,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "price": 150,
+                  "noteId": 1795582781869,
+                  "description": "test1"
+                },
+                {
+                  "price": 120,
+                  "noteId": 1795582791424,
+                  "description": "test2"
+                },
+                {
+                  "price": 400,
+                  "noteId": 1795582801883,
+                  "description": "test3"
+                },
+                {
+                  "price": 500,
+                  "noteId": 1795582820197,
+                  "description": "test4"
+                }
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "id": 1795582781869,
+              "content": "test1",
+              "date": "11/25/2026, 4:59:41 AM",
+              "price": 150,
+              "uncontract": false,
+              "photos": [],
+              "replies": [
+                {
+                  "id": 1795582967868,
+                  "username": "test1122manager1",
+                  "fullname": "test1122 manager",
+                  "role": "manager",
+                  "content": "test",
+                  "date": "11/25/2026, 5:02:47 AM"
+                },
+                {
+                  "id": 1795583039053,
+                  "username": "test1122crew",
+                  "fullname": "test1122crew",
+                  "role": "crew",
+                  "content": "reply test",
+                  "date": "11/25/2026, 5:03:59 AM"
+                }
+              ]
+            },
+            {
+              "id": 1795582791424,
+              "content": "test2",
+              "date": "11/25/2026, 4:59:51 AM",
+              "price": 120,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1795582801883,
+              "content": "test3",
+              "date": "11/25/2026, 5:00:01 AM",
+              "price": 400,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1795582820197,
+              "content": "test4",
+              "date": "11/25/2026, 5:00:20 AM",
+              "price": 500,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 1795625478708,
+          "name": "test1122r3 - test1122r3",
+          "workingAddress": "test1122r3",
+          "customerName": "abc-test1",
+          "customerPhone": "4122222222",
+          "customerBillingAddress": "abc-test1",
+          "customerEmail": "",
+          "status": "Signed",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1795625538104,
+              "customer": "abc-test1",
+              "seller": "test1122 manager",
+              "price": 357,
+              "date": "2026-11-25",
+              "template": "company_default",
+              "phone": "4122222222",
+              "email": "",
+              "signature": "data:image/png;base64,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",
+              "token": null,
+              "signatureToken": null,
+              "signed": true,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "price": 12,
+                  "noteId": 1795625490939,
+                  "description": "test"
+                },
+                {
+                  "price": 345,
+                  "noteId": 1795625510234,
+                  "description": "test"
+                }
+              ]
+            }
+          ],
+          "notes": [
+            {
+              "id": 1795625490939,
+              "content": "test",
+              "date": "11/25/2026, 4:51:30 PM",
+              "price": 12,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            },
+            {
+              "id": 1795625510234,
+              "content": "test",
+              "date": "11/25/2026, 4:51:50 PM",
+              "price": 345,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "username": "baimgt",
+      "password": "Bai0402",
+      "fullname": "Edith Bai",
+      "company": "Bai Properties Management",
+      "companyId": "CID-EBDU59",
+      "role": "admin",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": [
+        {
+          "id": 1793024387735,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": [
+            {
+              "id": 1793026164902,
+              "content": "city has requirments for front and side fence 5 feet max with 1 inch gap",
+              "date": "10/26/2026, 2:49:24 PM",
+              "price": 2000,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 1793024387842,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793023820626,
+          "name": "Fence - 5522 Jackosn st",
+          "workingAddress": "5522 Jackosn st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024250393,
+          "name": "Fence 2 - 5522 Jackson",
+          "workingAddress": "5522 Jackson",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024252968,
+          "name": "Fence 2 - 5522 Jackson",
+          "workingAddress": "5522 Jackson",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793025880009,
+          "name": "Fence 5 - 5522 Jackson st_15206",
+          "workingAddress": "5522 Jackson st,15206",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793023818991,
+          "name": "Fence - 5522 Jackosn st",
+          "workingAddress": "5522 Jackosn st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1791386345148,
+          "name": "Fence - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Ricky Zhang",
+          "customerPhone": "4124859831",
+          "customerBillingAddress": "1495 Jameson ct",
+          "customerEmail": "baipropertiesmanagement@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1791386346621,
+          "name": "Fence - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Ricky Zhang",
+          "customerPhone": "4124859831",
+          "customerBillingAddress": "1495 Jameson ct",
+          "customerEmail": "baipropertiesmanagement@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1791386346497,
+          "name": "Fence - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Ricky Zhang",
+          "customerPhone": "4124859831",
+          "customerBillingAddress": "1495 Jameson ct",
+          "customerEmail": "baipropertiesmanagement@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1791386345746,
+          "name": "Fence - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Ricky Zhang",
+          "customerPhone": "4124859831",
+          "customerBillingAddress": "1495 Jameson ct",
+          "customerEmail": "baipropertiesmanagement@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1794503842696,
+          "name": "Plumbing at McCanless - 5557 Mccandless Ave",
+          "workingAddress": "5557 Mccandless Ave",
+          "customerName": "Lulu",
+          "customerPhone": "4123203343",
+          "customerBillingAddress": "1495 Jameson ct",
+          "customerEmail": "baiwujun@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": [
+            {
+              "id": 1794503903672,
+              "content": "What do the main line and we’re going to see where the down spot will be blah blah?",
+              "date": "11/12/2026, 5:18:23 PM",
+              "price": null,
+              "uncontract": false,
+              "photos": [],
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 1793024352390,
+          "name": "Fence 3 - 5522 Jackson st_15206",
+          "workingAddress": "5522 Jackson st,15206",
+          "customerName": "Lu Bai",
+          "customerPhone": "4127264153",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1791386337997,
+          "name": "Fence - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Ricky Zhang",
+          "customerPhone": "4124859831",
+          "customerBillingAddress": "1495 Jameson ct",
+          "customerEmail": "baipropertiesmanagement@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793023816981,
+          "name": "Fence - 5522 Jackosn st",
+          "workingAddress": "5522 Jackosn st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024386495,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
+          "id": 1793024388697,
+          "name": "fence 4 - 5522 Jackson st",
+          "workingAddress": "5522 Jackson st",
+          "customerName": "Lu Bai",
+          "customerPhone": "4123203342",
+          "customerBillingAddress": "1495 Jameson Court",
+          "customerEmail": "lubai83@gmail.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [],
+          "paymentStatus": "N/A",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "username": "testuser_1790566907998",
+      "password": "Temp-NNPRXQ",
+      "fullname": "Test User",
+      "company": "Demo Company",
+      "companyId": "CID-PGZ6B2",
+      "role": "admin",
+      "approved": true,
+      "email": "",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
+      "username": "live_admin_21837",
+      "password": "pass123",
+      "fullname": "Live Admin",
+      "company": "Live Company 23742",
+      "companyId": "CID-79ZQP2",
+      "role": "admin",
+      "approved": true,
+      "email": "liveadmin@example.com",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
+      "username": "live_crew_16186",
+      "password": "pass123",
+      "fullname": "Live Crew",
+      "company": "Live Company 23742",
+      "companyId": "CID-79ZQP2",
+      "role": "crew",
+      "approved": false,
+      "email": "",
+      "cellphone": "555-4321",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
+    },
+    {
+      "username": "admin_db",
+      "password": "admin_db",
+      "fullname": "admin_db",
+      "company": "admin_db_company",
+      "companyId": "CID-KEM7RR",
+      "role": "admin",
+      "approved": true,
+      "email": "admin_db@abc.com",
+      "cellphone": "",
+      "active": true,
+      "deactivated": false,
+      "denied": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "folders": []
     },
     {
       "username": "demo_crew",
@@ -2515,6 +2640,49 @@
       "resetPasswordExpires": null,
       "folders": [
         {
+          "id": 1795636895204,
+          "name": "Multi Payment Test 1795636894152 - 123 Live St",
+          "workingAddress": "123 Live St",
+          "customerName": "Live Customer",
+          "customerPhone": "555-0199",
+          "customerBillingAddress": "123 Live St",
+          "customerEmail": "live@example.com",
+          "status": "Draft",
+          "crew": null,
+          "crews": [],
+          "payments": [
+            {
+              "id": 1795636898019,
+              "amount": 2500,
+              "date": "2026-11-25",
+              "method": "Cash",
+              "depositPaidFull": false,
+              "notes": "Deposit part 1"
+            },
+            {
+              "id": 1795636899824,
+              "amount": 2500,
+              "date": "2026-11-26",
+              "method": "Check",
+              "depositPaidFull": true,
+              "notes": "Deposit part 2 - full deposit milestone"
+            },
+            {
+              "id": 1795636901819,
+              "amount": 1000,
+              "date": "2026-11-27",
+              "method": "Credit Card",
+              "depositPaidFull": false,
+              "notes": "Progress payment"
+            }
+          ],
+          "paymentStatus": "Deposit Paid",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [],
+          "notes": []
+        },
+        {
           "id": 1781464413314,
           "name": "Project Alpha",
           "workingAddress": "",
@@ -2582,6 +2750,7 @@
               "content": "This is a test note",
               "date": "6/14/2026, 3:13:40 PM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -2590,6 +2759,7 @@
               "content": "Tested note with base64 image",
               "date": "7/5/2026, 10:03:54 PM",
               "price": null,
+              "uncontract": false,
               "photos": [
                 "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
               ],
@@ -2677,10 +2847,82 @@
               "content": "Completed initial site inspection.",
               "date": "9/27/2026, 11:43:11 PM",
               "price": 500,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
           ]
+        },
+        {
+          "id": 1795636934994,
+          "name": "Live Math Test 1795636933938 - 100 Math Way",
+          "workingAddress": "100 Math Way",
+          "customerName": "Math Customer",
+          "customerPhone": "555-0100",
+          "customerBillingAddress": "100 Math Way",
+          "customerEmail": "math@example.com",
+          "status": "Signed",
+          "crew": null,
+          "crews": [],
+          "payments": [
+            {
+              "id": 1795636939129,
+              "amount": 2500,
+              "date": "2026-11-25",
+              "method": "Cash",
+              "depositPaidFull": false,
+              "notes": ""
+            },
+            {
+              "id": 1795636941016,
+              "amount": 2500,
+              "date": "2026-11-26",
+              "method": "Check",
+              "depositPaidFull": true,
+              "notes": ""
+            },
+            {
+              "id": 1795636942834,
+              "amount": 1000,
+              "date": "2026-11-27",
+              "method": "Credit Card",
+              "depositPaidFull": false,
+              "notes": ""
+            }
+          ],
+          "paymentStatus": "Deposit Paid",
+          "crewsViewContractPayment": false,
+          "terminationDoc": null,
+          "contracts": [
+            {
+              "id": 1795636937261,
+              "customer": "Math Customer",
+              "seller": "Alice",
+              "price": 10000,
+              "date": "2026-11-25",
+              "template": "company_default",
+              "phone": "",
+              "email": "",
+              "signature": "",
+              "token": null,
+              "signatureToken": null,
+              "signed": true,
+              "isChangeOrder": false,
+              "void": false,
+              "expirationDate": "",
+              "companyOfficialName": null,
+              "companyLogo": null,
+              "companyNameCard": null,
+              "items": [
+                {
+                  "qty": 1,
+                  "rate": 10000,
+                  "description": "Main Project Scope"
+                }
+              ]
+            }
+          ],
+          "notes": []
         }
       ]
     },
@@ -2754,8 +2996,7 @@
               "date": "2026-11-25",
               "method": "Cash",
               "depositPaidFull": false,
-              "notes": "",
-              "receipts": []
+              "notes": ""
             },
             {
               "id": 1795583578767,
@@ -2763,8 +3004,7 @@
               "date": "2026-11-25",
               "method": "Check",
               "depositPaidFull": false,
-              "notes": "Test curl payment",
-              "receipts": []
+              "notes": "Test curl payment"
             }
           ],
           "paymentStatus": "N/A",
@@ -2820,6 +3060,7 @@
               "content": "test1",
               "date": "11/25/2026, 3:46:44 AM",
               "price": 150,
+              "uncontract": false,
               "photos": [],
               "replies": [
                 {
@@ -2845,6 +3086,7 @@
               "content": "",
               "date": "11/25/2026, 3:46:56 AM",
               "price": null,
+              "uncontract": false,
               "photos": [],
               "replies": [
                 {
@@ -2862,6 +3104,7 @@
               "content": "test3",
               "date": "11/25/2026, 3:47:07 AM",
               "price": 3000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -2870,6 +3113,7 @@
               "content": "test contract",
               "date": "11/25/2026, 3:47:38 AM",
               "price": 300,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -2952,6 +3196,7 @@
               "content": "fix front door",
               "date": "7/10/2026, 9:28:51 AM",
               "price": 100,
+              "uncontract": false,
               "photos": [],
               "replies": []
             },
@@ -2960,6 +3205,7 @@
               "content": "front door",
               "date": "7/10/2026, 9:27:38 AM",
               "price": 200,
+              "uncontract": false,
               "photos": [
                 "data:image/png;base64,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"
               ],
@@ -2987,6 +3233,7 @@
               "content": "yard",
               "date": "7/10/2026, 9:27:51 AM",
               "price": 2000,
+              "uncontract": false,
               "photos": [],
               "replies": []
             }
@@ -2996,62 +3243,6 @@
     }
   ],
   "companies": {
-    "tech corp": {
-      "companyId": "CID-VCML92",
-      "officialName": "Tech Corp",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "acme build 1793037329707": {
-      "companyId": "CID-T9BFXD",
-      "officialName": "Acme Build 1793037329707",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "test1124": {
-      "companyId": "CID-5NDH6M",
-      "officialName": "test1124",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "demo company 1793022967642": {
-      "companyId": "CID-9KZ5XS",
-      "officialName": "Demo Company 1793022967642",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "demo company 1795577784544": {
-      "companyId": "CID-9EL26A",
-      "officialName": "Demo Company 1795577784544",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "delta corp 1793037329712": {
-      "companyId": "CID-FN3DAR",
-      "officialName": "Delta Corp 1793037329712",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "acme build 1793022967652": {
-      "companyId": "CID-APGG3S",
-      "officialName": "Acme Build 1793022967652",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
-    "delta corp 1793022967657": {
-      "companyId": "CID-DBBMTA",
-      "officialName": "Delta Corp 1793022967657",
-      "logo": "./logo.JPG",
-      "nameCard": "",
-      "tier": "standard"
-    },
     "admin_db_company": {
       "companyId": "CID-KEM7RR",
       "officialName": "admin_db_company",
@@ -3192,58 +3383,58 @@
       "nameCard": "",
       "tier": "standard"
     },
-    "demo company 1795580547982": {
-      "companyId": "CID-CZPXEJ",
-      "officialName": "Demo Company 1795580547982",
+    "tech corp": {
+      "companyId": "CID-VCML92",
+      "officialName": "Tech Corp",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "acme build 1795580547994": {
-      "companyId": "CID-383N7M",
-      "officialName": "Acme Build 1795580547994",
+    "acme build 1793037329707": {
+      "companyId": "CID-T9BFXD",
+      "officialName": "Acme Build 1793037329707",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "delta corp 1795580413952": {
-      "companyId": "CID-P2SPSV",
-      "officialName": "Delta Corp 1795580413952",
+    "test1124": {
+      "companyId": "CID-5NDH6M",
+      "officialName": "test1124",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "delta corp 1795580511005": {
-      "companyId": "CID-Q34AMA",
-      "officialName": "Delta Corp 1795580511005",
+    "demo company 1793022967642": {
+      "companyId": "CID-9KZ5XS",
+      "officialName": "Demo Company 1793022967642",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "reset co 1795580510953": {
-      "companyId": "CID-X7FAMQ",
-      "officialName": "Reset Co 1795580510953",
+    "demo company 1795577784544": {
+      "companyId": "CID-9EL26A",
+      "officialName": "Demo Company 1795577784544",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "reset co 1795580413899": {
-      "companyId": "CID-U6863N",
-      "officialName": "Reset Co 1795580413899",
+    "delta corp 1793037329712": {
+      "companyId": "CID-FN3DAR",
+      "officialName": "Delta Corp 1793037329712",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "people co 1795580413899": {
-      "companyId": "CID-XK6MDW",
-      "officialName": "People Co 1795580413899",
+    "acme build 1793022967652": {
+      "companyId": "CID-APGG3S",
+      "officialName": "Acme Build 1793022967652",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
     },
-    "demo company 1795580466312": {
-      "companyId": "CID-2ZZUZF",
-      "officialName": "Demo Company 1795580466312",
+    "delta corp 1793022967657": {
+      "companyId": "CID-DBBMTA",
+      "officialName": "Delta Corp 1793022967657",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
@@ -3272,6 +3463,13 @@
     "people co 1795580466275": {
       "companyId": "CID-BRQ9PN",
       "officialName": "People Co 1795580466275",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "noteco_1795580510954": {
+      "companyId": "CID-UVF85F",
+      "officialName": "NoteCo_1795580510954",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"
@@ -3353,9 +3551,58 @@
       "nameCard": "",
       "tier": "standard"
     },
-    "noteco_1795580510954": {
-      "companyId": "CID-UVF85F",
-      "officialName": "NoteCo_1795580510954",
+    "acme build 1795580547994": {
+      "companyId": "CID-383N7M",
+      "officialName": "Acme Build 1795580547994",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo company 1795580547982": {
+      "companyId": "CID-CZPXEJ",
+      "officialName": "Demo Company 1795580547982",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1795580413952": {
+      "companyId": "CID-P2SPSV",
+      "officialName": "Delta Corp 1795580413952",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "delta corp 1795580511005": {
+      "companyId": "CID-Q34AMA",
+      "officialName": "Delta Corp 1795580511005",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "reset co 1795580510953": {
+      "companyId": "CID-X7FAMQ",
+      "officialName": "Reset Co 1795580510953",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "reset co 1795580413899": {
+      "companyId": "CID-U6863N",
+      "officialName": "Reset Co 1795580413899",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "people co 1795580413899": {
+      "companyId": "CID-XK6MDW",
+      "officialName": "People Co 1795580413899",
+      "logo": "./logo.JPG",
+      "nameCard": "",
+      "tier": "standard"
+    },
+    "demo company 1795580466312": {
+      "companyId": "CID-2ZZUZF",
+      "officialName": "Demo Company 1795580466312",
       "logo": "./logo.JPG",
       "nameCard": "",
       "tier": "standard"

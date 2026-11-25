@@ -55,6 +55,78 @@ function parseUserFullname(rawFullname) {
     return { fullname: cleanName, email, cellphone };
 }
 
+// Metadata serialization for note uncontract flag when Supabase notes table lacks an uncontract column
+function formatNoteContent(content, uncontract) {
+    const raw = (content || '').trim();
+    const cleanContent = raw.replace(/\s*:::\s*uncontract=(true|false)/gi, '').trim();
+    if (uncontract) {
+        return cleanContent ? `${cleanContent} ::: uncontract=true` : '::: uncontract=true';
+    }
+    return cleanContent;
+}
+
+function parseNoteContent(rawContent) {
+    if (!rawContent || typeof rawContent !== 'string') {
+        return { content: '', uncontract: false };
+    }
+    if (rawContent.includes('::: uncontract=')) {
+        const parts = rawContent.split('::: uncontract=');
+        const cleanContent = parts[0].trim();
+        const uncontractVal = parts[1].trim().toLowerCase() === 'true';
+        return { content: cleanContent, uncontract: uncontractVal };
+    }
+    return { content: rawContent, uncontract: false };
+}
+
+// Metadata serialization for project payments & paymentStatus when Supabase projects table lacks dedicated columns
+function formatProjectBillingAddress(billingAddress, payments, paymentStatus) {
+    const raw = (billingAddress || '').trim();
+    const cleanAddress = raw.split(' ::: fs_meta=')[0].trim();
+    const metaObj = {};
+    if (payments && Array.isArray(payments) && payments.length > 0) {
+        metaObj.payments = payments.map(p => ({
+            id: isNaN(p.id) ? p.id : Number(p.id),
+            amount: typeof p.amount === 'number' ? p.amount : parseFloat(p.amount),
+            date: p.date || '',
+            method: p.method || 'Cash',
+            depositPaidFull: Boolean(p.depositPaidFull),
+            notes: p.notes || ''
+        }));
+    }
+    if (paymentStatus && paymentStatus !== 'N/A') {
+        metaObj.paymentStatus = paymentStatus;
+    }
+
+    if (Object.keys(metaObj).length > 0) {
+        return `${cleanAddress} ::: fs_meta=${encodeURIComponent(JSON.stringify(metaObj))}`;
+    }
+    return cleanAddress;
+}
+
+function parseProjectBillingAddress(rawBillingAddress) {
+    if (!rawBillingAddress || typeof rawBillingAddress !== 'string') {
+        return { billingAddress: '', payments: [], paymentStatus: 'N/A' };
+    }
+    const parts = rawBillingAddress.split(' ::: fs_meta=');
+    const cleanAddress = parts[0].trim();
+    let payments = [];
+    let paymentStatus = 'N/A';
+    if (parts.length > 1) {
+        try {
+            const metaObj = JSON.parse(decodeURIComponent(parts[1]));
+            if (metaObj.payments && Array.isArray(metaObj.payments)) {
+                payments = metaObj.payments;
+            }
+            if (metaObj.paymentStatus) {
+                paymentStatus = metaObj.paymentStatus;
+            }
+        } catch (e) {
+            // ignore malformed metadata
+        }
+    }
+    return { billingAddress: cleanAddress, payments, paymentStatus };
+}
+
 // Stable & Deterministic Company ID Generator
 function generateCompanyId(companyKey, existingCompanies) {
     const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -243,15 +315,44 @@ async function getData() {
                         date: r.date
                     }));
 
+                    const parsedContent = parseNoteContent(n.content);
+                    const localNote = (localFolder && localFolder.notes) ? localFolder.notes.find(ln => String(ln.id) === String(n.id)) : null;
+                    const isUncontract = Boolean(
+                        (n.uncontract !== undefined && n.uncontract !== null)
+                            ? (n.uncontract === true || n.uncontract === 'true' || n.uncontract === 1)
+                            : (parsedContent.uncontract || (localNote && (localNote.uncontract === true || localNote.uncontract === 'true' || localNote.uncontract === 1)))
+                    );
+
                     return {
                         id: isNaN(n.id) ? n.id : Number(n.id),
-                        content: n.content,
+                        content: parsedContent.content,
                         date: n.date,
                         price: n.price,
+                        uncontract: isUncontract,
                         photos: n.photos || [],
                         replies: noteReplies
                     };
                 });
+
+                const parsedBilling = parseProjectBillingAddress(p.customer_billing_address);
+                const localPayments = (localFolder && Array.isArray(localFolder.payments)) ? localFolder.payments : [];
+                const cloudPayments = (parsedBilling.payments && Array.isArray(parsedBilling.payments)) ? parsedBilling.payments : [];
+                const mergedPaymentsMap = new Map();
+                cloudPayments.forEach(pay => mergedPaymentsMap.set(String(pay.id), pay));
+                localPayments.forEach(pay => {
+                    if (!mergedPaymentsMap.has(String(pay.id))) {
+                        mergedPaymentsMap.set(String(pay.id), pay);
+                    } else {
+                        const existing = mergedPaymentsMap.get(String(pay.id));
+                        if ((!existing.receipts || existing.receipts.length === 0) && pay.receipts && pay.receipts.length > 0) {
+                            existing.receipts = pay.receipts;
+                        }
+                    }
+                });
+                const resolvedPayments = Array.from(mergedPaymentsMap.values());
+                const resolvedPaymentStatus = (parsedBilling.paymentStatus && parsedBilling.paymentStatus !== 'N/A')
+                    ? parsedBilling.paymentStatus
+                    : (p.payment_status || (localFolder && localFolder.paymentStatus) || 'N/A');
 
                 return {
                     id: isNaN(p.id) ? p.id : Number(p.id),
@@ -259,13 +360,13 @@ async function getData() {
                     workingAddress: p.working_address,
                     customerName: p.customer_name,
                     customerPhone: p.customer_phone,
-                    customerBillingAddress: p.customer_billing_address,
+                    customerBillingAddress: parsedBilling.billingAddress || p.customer_billing_address || '',
                     customerEmail: p.customer_email,
                     status: p.status,
                     crew: p.crew,
                     crews: p.crews || [],
-                    payments: (p.payments && Array.isArray(p.payments)) ? p.payments : ((localFolder && localFolder.payments) || []),
-                    paymentStatus: p.payment_status || (localFolder && localFolder.paymentStatus) || 'N/A',
+                    payments: resolvedPayments,
+                    paymentStatus: resolvedPaymentStatus,
                     crewsViewContractPayment: p.crews_view_contract_payment !== undefined ? Boolean(p.crews_view_contract_payment) : Boolean(localFolder && localFolder.crewsViewContractPayment),
                     terminationDoc: p.termination_doc || (localFolder && localFolder.terminationDoc) || null,
                     contracts: projContracts,
@@ -364,7 +465,7 @@ async function saveData(data) {
                             working_address: folder.workingAddress || '',
                             customer_name: folder.customerName || '',
                             customer_phone: folder.customerPhone || '',
-                            customer_billing_address: folder.customerBillingAddress || '',
+                            customer_billing_address: formatProjectBillingAddress(folder.customerBillingAddress, folder.payments, folder.paymentStatus),
                             customer_email: folder.customerEmail || '',
                             status: folder.status || 'Draft',
                             crew: folder.crew || null,
@@ -397,10 +498,11 @@ async function saveData(data) {
                         if (folder.notes && Array.isArray(folder.notes)) {
                             for (const note of folder.notes) {
                                 const noteIdStr = String(note.id);
+                                const isUncontract = Boolean(note.uncontract === true || note.uncontract === 'true' || note.uncontract === 1 || note.uncontract === '1');
                                 notesList.push({
                                     id: noteIdStr,
                                     folder_id: folderIdStr,
-                                    content: note.content || '',
+                                    content: formatNoteContent(note.content, isUncontract),
                                     date: note.date || '',
                                     price: note.price ? Number(note.price) : null,
                                     photos: note.photos || []

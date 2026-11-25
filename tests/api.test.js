@@ -458,6 +458,8 @@ describe('FieldSync / CCC Contracts API Test Suite', () => {
     });
 
     describe('5. Notes & Field Documentation', () => {
+        let uncontractedNoteId = null;
+
         test('POST /api/add-note - should add field note to project', async () => {
             if (!testFolderId) return;
 
@@ -473,6 +475,62 @@ describe('FieldSync / CCC Contracts API Test Suite', () => {
 
             expect(res.statusCode).toBe(200);
             expect(res.body.success).toBe(true);
+        });
+
+        test('POST /api/add-note - should support uncontract: true and persist it', async () => {
+            if (!testFolderId) return;
+
+            const res = await request(app)
+                .post('/api/add-note')
+                .send({
+                    username: testUsername,
+                    folderId: testFolderId,
+                    noteContent: 'Optional excluded work item',
+                    price: 350,
+                    uncontract: true,
+                    photos: []
+                });
+
+            expect(res.statusCode).toBe(200);
+            expect(res.body.success).toBe(true);
+
+            // Verify via /api/folder
+            const folderRes = await request(app).get(`/api/folder?id=${testFolderId}`);
+            expect(folderRes.statusCode).toBe(200);
+            const notes = folderRes.body.folder.notes;
+            const addedNote = notes.find(n => n.content === 'Optional excluded work item');
+            expect(addedNote).toBeDefined();
+            expect(addedNote.uncontract).toBe(true);
+            uncontractedNoteId = addedNote.id;
+        });
+
+        test('POST /api/note/toggle-uncontract - should toggle uncontract flag', async () => {
+            if (!testFolderId || !uncontractedNoteId) return;
+
+            // Toggle to false
+            const toggleRes1 = await request(app)
+                .post('/api/note/toggle-uncontract')
+                .send({
+                    folderId: testFolderId,
+                    noteId: uncontractedNoteId,
+                    uncontract: false
+                });
+
+            expect(toggleRes1.statusCode).toBe(200);
+            expect(toggleRes1.body.success).toBe(true);
+            expect(toggleRes1.body.uncontract).toBe(false);
+
+            // Toggle back to true without specifying boolean
+            const toggleRes2 = await request(app)
+                .post('/api/note/toggle-uncontract')
+                .send({
+                    folderId: testFolderId,
+                    noteId: uncontractedNoteId
+                });
+
+            expect(toggleRes2.statusCode).toBe(200);
+            expect(toggleRes2.body.success).toBe(true);
+            expect(toggleRes2.body.uncontract).toBe(true);
         });
     });
 
@@ -891,29 +949,56 @@ describe('FieldSync / CCC Contracts API Test Suite', () => {
             expect(totalPayments).toBe(1500);
             expect(remainingBalance).toBe(3500);
 
-            // 2. Add second payment of $3,500 with depositPaidFull = true
+            // 2. Add second payment of $1,500 with depositPaidFull = true
             const payRes2 = await request(app)
                 .post('/api/add-payment')
                 .send({
                     username: paymentUsername,
                     folderId: paymentTestFolderId,
-                    amount: 3500,
+                    amount: 1500,
                     date: '2026-11-26',
                     method: 'Credit Card',
                     depositPaidFull: true,
-                    notes: 'Final balance paid in full'
+                    notes: 'Deposit paid in full milestone'
                 });
             expect(payRes2.statusCode).toBe(200);
             expect(payRes2.body.success).toBe(true);
+            expect(payRes2.body.paymentStatus).toBe('Deposit Paid');
 
             // Fetch updated folder
             const folderRes2 = await request(app).get(`/api/folder?id=${paymentTestFolderId}`);
             expect(folderRes2.statusCode).toBe(200);
             const folder2 = folderRes2.body.folder;
             expect(folder2.payments).toHaveLength(2);
-            expect(folder2.paymentStatus).toBe('Paid in Full');
+            expect(folder2.paymentStatus).toBe('Deposit Paid');
 
-            const totalPaymentsFinal = (folder2.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            const totalPayments2 = (folder2.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+            const remainingBalance2 = Math.max(0, activeContractsTotal - totalPayments2);
+            expect(totalPayments2).toBe(3000);
+            expect(remainingBalance2).toBe(2000);
+
+            // 3. Add third payment of $2,000 (verify multiple payments support)
+            const payRes3 = await request(app)
+                .post('/api/add-payment')
+                .send({
+                    username: paymentUsername,
+                    folderId: paymentTestFolderId,
+                    amount: 2000,
+                    date: '2026-11-27',
+                    method: 'Bank Transfer',
+                    notes: 'Final balance settlement'
+                });
+            expect(payRes3.statusCode).toBe(200);
+            expect(payRes3.body.success).toBe(true);
+            expect(payRes3.body.payments).toHaveLength(3);
+
+            // Fetch updated folder after 3rd payment
+            const folderRes3 = await request(app).get(`/api/folder?id=${paymentTestFolderId}`);
+            expect(folderRes3.statusCode).toBe(200);
+            const folder3 = folderRes3.body.folder;
+            expect(folder3.payments).toHaveLength(3);
+
+            const totalPaymentsFinal = (folder3.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
             const finalRemainingBalance = Math.max(0, activeContractsTotal - totalPaymentsFinal);
             expect(totalPaymentsFinal).toBe(5000);
             expect(finalRemainingBalance).toBe(0);
