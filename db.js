@@ -273,6 +273,15 @@ async function getData() {
                 };
             });
 
+            // Also preserve any folders in localUser.folders not present in userProjects
+            if (localUser && localUser.folders && Array.isArray(localUser.folders)) {
+                for (const lf of localUser.folders) {
+                    if (!folders.some(f => String(f.id) === String(lf.id))) {
+                        folders.push(lf);
+                    }
+                }
+            }
+
             const userCompKey = (u.company || '').toLowerCase();
             const compObj = companies[userCompKey] || (localData.companies && localData.companies[userCompKey]);
             const resolvedCompanyId = u.company_id || (localUser && localUser.companyId) || (compObj && compObj.companyId) || (userCompKey ? generateCompanyId(userCompKey, companies) : '');

@@ -714,8 +714,13 @@ app.post('/api/add-contract', async (req, res) => {
 // API: Add Payment
 app.post('/api/add-payment', async (req, res) => {
     const { username, folderId, amount, date, method, notes, depositPaidFull, receipts } = req.body;
-    if (!folderId || !amount || !date || !method) {
+    if (!folderId || amount === undefined || amount === null || amount === '' || !date || !method) {
         return res.status(400).json({ success: false, message: "Missing required parameters" });
+    }
+
+    const cleanAmount = typeof amount === 'number' ? amount : parseFloat(String(amount).replace(/[^0-9.-]/g, ''));
+    if (isNaN(cleanAmount) || cleanAmount <= 0) {
+        return res.status(400).json({ success: false, message: "Valid positive payment amount required" });
     }
 
     const data = await getData();
@@ -726,15 +731,15 @@ app.post('/api/add-payment', async (req, res) => {
         return res.status(404).json({ success: false, message: "Project not found" });
     }
 
-    if (!folder.payments) {
+    if (!folder.payments || !Array.isArray(folder.payments)) {
         folder.payments = [];
     }
 
     const newPayment = {
         id: Date.now(),
-        amount: parseFloat(amount),
+        amount: cleanAmount,
         date: date,
-        method: method,
+        method: method || 'Cash',
         depositPaidFull: !!depositPaidFull,
         notes: notes || '',
         receipts: receipts || []

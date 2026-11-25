@@ -1,5 +1,15 @@
 let currentUser = null;
 let currentActiveView = 'login';
+let currentFolderId = null;
+let currentFolder = null;
+
+function parseNumericPrice(val) {
+    if (val === null || val === undefined) return 0;
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    const cleaned = String(val).trim().replace(/^\$/, '').replace(/,/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+}
 
 const ORIGINAL_FETCH = window.fetch;
 // Resolves the remote Node server address. Change this URL to your deployed server hostname when publishing to the App Store!
@@ -986,6 +996,91 @@ async function finalSaveContract(event) {
     });
 }
 
+function updateRemainingBalance(folder) {
+    const remainingBalanceEl = document.getElementById('remaining-balance-value');
+    if (!remainingBalanceEl) return;
+    if (!folder) {
+        remainingBalanceEl.innerText = '$0.00';
+        return;
+    }
+
+    let totalProjectPrice = 0;
+    // 1. Calculate from active contracts (non-void base contract + change orders)
+    if (folder.contracts && Array.isArray(folder.contracts) && folder.contracts.length > 0) {
+        folder.contracts.forEach(c => {
+            if (!c.void) {
+                totalProjectPrice += parseNumericPrice(c.price);
+            }
+        });
+    }
+    // 2. If no active contracts exist, calculate from contracted notes
+    if (totalProjectPrice === 0 && folder.notes && Array.isArray(folder.notes)) {
+        folder.notes.forEach(note => {
+            if (!note.uncontract) {
+                totalProjectPrice += parseNumericPrice(note.price);
+            }
+        });
+    }
+
+    let totalPayments = 0;
+    if (folder.payments && Array.isArray(folder.payments) && folder.payments.length > 0) {
+        folder.payments.forEach(p => {
+            totalPayments += parseNumericPrice(p.amount);
+        });
+    }
+
+    const remainingBalance = Math.max(0, totalProjectPrice - totalPayments);
+    remainingBalanceEl.innerText = `$${remainingBalance.toFixed(2)}`;
+}
+
+function renderPayments(folder) {
+    const container = document.getElementById('payments-list');
+    if (!container) return;
+
+    const payments = (folder && folder.payments && Array.isArray(folder.payments)) ? folder.payments : [];
+
+    if (payments.length > 0) {
+        container.innerHTML = payments.map(payment => {
+            const amountFormatted = parseNumericPrice(payment.amount).toFixed(2);
+            const badgeHtml = payment.depositPaidFull ? `
+                <span style="font-size: 10px; margin-left: 8px; padding: 2px 6px; border-radius: 4px; background: #def7ec; font-weight: bold; color: #03543f;">
+                    ${t('deposit_paid_full', 'Deposit Paid Full')}
+                </span>
+            ` : '';
+            const rawMethod = payment.method || 'Cash';
+            const methodKey = String(rawMethod).toLowerCase().replace(/\s+/g, '_');
+            const methodText = t(methodKey, rawMethod);
+            const dateText = payment.date || '';
+
+            return `
+                <div style="border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 5px; background: #ffffff; border-radius: 4px;">
+                    <p style="margin: 0 0 4px 0;"><strong>Amount:</strong> $${amountFormatted}${badgeHtml}</p>
+                    <p style="margin: 0 0 4px 0;"><strong>Method:</strong> ${escapeHtml(methodText)}</p>
+                    <p style="margin: 0 0 4px 0;"><strong>Date:</strong> ${escapeHtml(dateText)}</p>
+                    ${payment.notes ? `<p style="font-size: 12px; color: #555; margin-top: 4px; margin-bottom: 8px;"><strong>Notes:</strong> ${escapeHtml(payment.notes)}</p>` : ''}
+                    ${payment.receipts && payment.receipts.length > 0 ? `
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                            ${payment.receipts.map(receipt => {
+                                if (receipt.startsWith('data:application/pdf')) {
+                                    return `
+                                        <a href="${receipt}" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 8px; background: #fee2e2; border-radius: 4px; color: #991b1b; text-decoration: none; border: 1px solid #fca5a5; font-weight: 500;">
+                                            📄 PDF Receipt
+                                        </a>
+                                    `;
+                                } else {
+                                    return `<img src="${receipt}" style="max-width: 60px; max-height: 60px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ddd;" onclick="viewFullImage('${receipt}')">`;
+                                }
+                            }).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    } else {
+        container.innerHTML = `<p>${t('no_payments', 'No payments recorded for this project.')}</p>`;
+    }
+}
+
 async function loadWorkData() {
     const username = sessionStorage.getItem('username');
     const role = sessionStorage.getItem('role');
@@ -1002,9 +1097,19 @@ async function loadWorkData() {
         const folders = await res.json().catch(() => []);
         folder = folders.find(f => String(f.id) === String(currentFolderId));
     }
-    currentFolder = folder;
 
     if (folder) {
+        // Merge with in-memory currentFolder payments so newly added payments are never lost
+        if (currentFolder && currentFolder.payments && Array.isArray(currentFolder.payments) && currentFolder.payments.length > 0) {
+            if (!folder.payments) folder.payments = [];
+            currentFolder.payments.forEach(p => {
+                if (!folder.payments.some(fp => String(fp.id) === String(p.id))) {
+                    folder.payments.push(p);
+                }
+            });
+        }
+        currentFolder = folder;
+
         const contractsCol = document.getElementById('contracts-column');
         const paymentsCol = document.getElementById('payments-column');
         if (role === 'crew') {
@@ -1036,36 +1141,8 @@ async function loadWorkData() {
             paymentSelect.disabled = (role !== 'manager' && role !== 'admin');
         }
 
-        let totalProjectPrice = 0;
-        // 1. Calculate from active contracts (non-void base contract + change orders)
-        if (folder.contracts && folder.contracts.length > 0) {
-            folder.contracts.forEach(c => {
-                if (!c.void) {
-                    totalProjectPrice += parseFloat(c.price) || 0;
-                }
-            });
-        }
-        // 2. If no active contracts exist, calculate from contracted notes
-        if (totalProjectPrice === 0 && folder.notes) {
-            folder.notes.forEach(note => {
-                if (!note.uncontract) {
-                    totalProjectPrice += parseFloat(note.price) || 0;
-                }
-            });
-        }
-
-        let totalPayments = 0;
-        if (folder.payments && folder.payments.length > 0) {
-            folder.payments.forEach(p => {
-                totalPayments += parseFloat(p.amount) || 0;
-            });
-        }
-
-        const remainingBalance = Math.max(0, totalProjectPrice - totalPayments);
-        const remainingBalanceEl = document.getElementById('remaining-balance-value');
-        if (remainingBalanceEl) {
-            remainingBalanceEl.innerText = `$${remainingBalance.toFixed(2)}`;
-        }
+        // Calculate and update Remaining Balance on top of work page
+        updateRemainingBalance(folder);
 
         // Toggle Add Contract button visibility
         const addContractBtn = document.getElementById('add-contract-btn');
@@ -1096,71 +1173,36 @@ async function loadWorkData() {
     // Render Contracts
     loadContracts();
 
-    // Render Payments
-    loadPayments(true);
+    // Render Payments directly using currentFolder
+    renderPayments(currentFolder);
 
-    // Call your existing loadNotes logic here or merge them
+    // Call your existing loadNotes logic
     loadNotes(true);
 }
 
 async function loadPayments(forceFetch = false) {
-    const username = sessionStorage.getItem('username');
-    let folder = (!forceFetch && currentFolder && String(currentFolder.id) === String(currentFolderId)) ? currentFolder : null;
-    if (!folder) {
-        if (currentFolderId) {
-            const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
-            if (directRes.ok) {
-                const data = await directRes.json();
-                folder = data.folder;
-                currentFolder = folder;
+    if (!forceFetch && currentFolder && String(currentFolder.id) === String(currentFolderId)) {
+        renderPayments(currentFolder);
+        return;
+    }
+    let folder = currentFolder;
+    if (currentFolderId) {
+        const directRes = await fetch(`/api/folder?id=${currentFolderId}`);
+        if (directRes.ok) {
+            const data = await directRes.json();
+            folder = data.folder;
+            if (currentFolder && currentFolder.payments && currentFolder.payments.length > 0) {
+                if (!folder.payments) folder.payments = [];
+                currentFolder.payments.forEach(p => {
+                    if (!folder.payments.some(fp => String(fp.id) === String(p.id))) {
+                        folder.payments.push(p);
+                    }
+                });
             }
-        }
-        if (!folder) {
-            const res = await fetch(`/api/folders?username=${username}`);
-            const folders = await res.json().catch(() => []);
-            folder = folders.find(f => String(f.id) === String(currentFolderId));
-            if (folder) currentFolder = folder;
+            currentFolder = folder;
         }
     }
-    const container = document.getElementById('payments-list');
-
-    if (!container) return;
-
-    if (folder && folder.payments && folder.payments.length > 0) {
-        container.innerHTML = folder.payments.map(payment => {
-            const amountFormatted = parseFloat(payment.amount).toFixed(2);
-            const badgeHtml = payment.depositPaidFull ? `
-                <span style="font-size: 10px; margin-left: 8px; padding: 2px 6px; border-radius: 4px; background: #def7ec; font-weight: bold; color: #03543f;">
-                    ${t('deposit_paid_full', 'Deposit Paid Full')}
-                </span>
-            ` : '';
-            return `
-                <div style="border-bottom: 1px solid #ddd; padding: 10px; margin-bottom: 5px;">
-                    <p><strong>Amount:</strong> $${amountFormatted}${badgeHtml}</p>
-                    <p><strong>Method:</strong> ${t(payment.method.toLowerCase().replace(' ', '_'), payment.method)}</p>
-                    <p><strong>Date:</strong> ${payment.date}</p>
-                    ${payment.notes ? `<p style="font-size: 12px; color: #555; margin-top: 4px; margin-bottom: 8px;">Notes: ${payment.notes}</p>` : ''}
-                    ${payment.receipts && payment.receipts.length > 0 ? `
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
-                            ${payment.receipts.map(receipt => {
-                                if (receipt.startsWith('data:application/pdf')) {
-                                    return `
-                                        <a href="${receipt}" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 8px; background: #fee2e2; border-radius: 4px; color: #991b1b; text-decoration: none; border: 1px solid #fca5a5; font-weight: 500;">
-                                            📄 PDF Receipt
-                                        </a>
-                                    `;
-                                } else {
-                                    return `<img src="${receipt}" style="max-width: 60px; max-height: 60px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ddd;" onclick="viewFullImage('${receipt}')">`;
-                                }
-                            }).join('')}
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }).join('');
-    } else {
-        container.innerHTML = `<p>${t('no_payments', 'No payments recorded for this project.')}</p>`;
-    }
+    renderPayments(folder);
 }
 
 async function savePayment(event) {
@@ -1171,13 +1213,14 @@ async function savePayment(event) {
         const notesEl = document.getElementById('payment-notes');
         const depositPaidFullEl = document.getElementById('payment-deposit-paid-full');
 
-        const amount = amountEl ? amountEl.value.trim() : '';
+        const rawAmount = amountEl ? amountEl.value.trim().replace(/^\$/, '').replace(/,/g, '') : '';
+        const numAmount = parseFloat(rawAmount);
         const date = dateEl ? dateEl.value : '';
-        const method = methodEl ? methodEl.value : '';
+        const method = methodEl ? methodEl.value : 'Cash';
         const notes = notesEl ? notesEl.value.trim() : '';
         const depositPaidFull = depositPaidFullEl ? depositPaidFullEl.checked : false;
 
-        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+        if (isNaN(numAmount) || numAmount <= 0) {
             alert("Please enter a valid positive payment amount.");
             return;
         }
@@ -1195,7 +1238,7 @@ async function savePayment(event) {
             body: JSON.stringify({
                 username: username,
                 folderId: currentFolderId,
-                amount: amount,
+                amount: numAmount,
                 date: date,
                 method: method,
                 depositPaidFull: depositPaidFull,
@@ -1218,18 +1261,37 @@ async function savePayment(event) {
             if (receiptInput) receiptInput.value = '';
             paymentReceiptsData = [];
 
-            // Optimistically update currentFolder
-            if (currentFolder) {
-                if (!currentFolder.payments) currentFolder.payments = [];
-                if (data.payment && !currentFolder.payments.some(p => String(p.id) === String(data.payment.id))) {
-                    currentFolder.payments.push(data.payment);
-                }
-                if (depositPaidFull) {
-                    currentFolder.paymentStatus = 'Paid in Full';
-                }
+            // Update currentFolder in memory immediately
+            if (!currentFolder) {
+                currentFolder = { id: currentFolderId, payments: [] };
+            }
+            if (!currentFolder.payments || !Array.isArray(currentFolder.payments)) {
+                currentFolder.payments = [];
+            }
+            const newPaymentRecord = data.payment || {
+                id: Date.now(),
+                amount: numAmount,
+                date: date,
+                method: method,
+                depositPaidFull: depositPaidFull,
+                notes: notes,
+                receipts: []
+            };
+            if (!currentFolder.payments.some(p => String(p.id) === String(newPaymentRecord.id))) {
+                currentFolder.payments.push(newPaymentRecord);
+            }
+            if (depositPaidFull) {
+                currentFolder.paymentStatus = 'Paid in Full';
             }
 
+            // Immediately render payments list and update remaining balance on the page
+            renderPayments(currentFolder);
+            updateRemainingBalance(currentFolder);
+
+            // Navigate back to work view
             navigate('work');
+
+            // Refresh project state from server
             await loadWorkData();
         } else {
             const err = await res.json().catch(() => ({}));
@@ -1829,9 +1891,6 @@ async function saveNewProject(event) {
         }
     });
 }
-
-let currentFolderId = null;
-let currentFolder = null;
 
 // Called when a folder card is clicked
 async function openFolder(folderId, folderName) {
@@ -4108,7 +4167,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let hash = window.location.hash.substring(1);
     
     // Sub-views requiring project folder context (fall back to dashboard if refreshed)
-    const contextViews = ['work', 'add-note', 'add-contract', 'contract-preview', 'final-contract-preview', 'contract-signature', 'edit-project'];
+    const contextViews = ['work', 'add-note', 'add-contract', 'contract-preview', 'final-contract-preview', 'contract-signature', 'edit-project', 'add-payment'];
     if (contextViews.includes(hash)) {
         hash = 'dashboard';
     }
