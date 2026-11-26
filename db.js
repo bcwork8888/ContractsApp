@@ -20,7 +20,7 @@ if (isSupabaseConfigured) {
 }
 
 // User Metadata Cloud Serialization Helpers
-function formatUserFullname(fullname, email, cellphone) {
+function formatUserFullname(fullname, email, cellphone, resetToken, resetExpires) {
     const cleanName = (fullname || '').split(' ::: ')[0].trim();
     const metaParts = [];
     if (email && typeof email === 'string' && email.trim()) {
@@ -28,6 +28,12 @@ function formatUserFullname(fullname, email, cellphone) {
     }
     if (cellphone && typeof cellphone === 'string' && cellphone.trim()) {
         metaParts.push(`phone=${encodeURIComponent(cellphone.trim())}`);
+    }
+    if (resetToken && typeof resetToken === 'string' && resetToken.trim()) {
+        metaParts.push(`resetToken=${encodeURIComponent(resetToken.trim())}`);
+    }
+    if (resetExpires) {
+        metaParts.push(`resetExpires=${encodeURIComponent(String(resetExpires))}`);
     }
     if (metaParts.length > 0) {
         return `${cleanName} ::: ${metaParts.join('&')}`;
@@ -37,22 +43,27 @@ function formatUserFullname(fullname, email, cellphone) {
 
 function parseUserFullname(rawFullname) {
     if (!rawFullname || typeof rawFullname !== 'string') {
-        return { fullname: '', email: '', cellphone: '' };
+        return { fullname: '', email: '', cellphone: '', resetPasswordToken: null, resetPasswordExpires: null };
     }
     const parts = rawFullname.split(' ::: ');
     const cleanName = parts[0].trim();
     let email = '';
     let cellphone = '';
+    let resetPasswordToken = null;
+    let resetPasswordExpires = null;
     if (parts.length > 1) {
         try {
             const params = new URLSearchParams(parts[1]);
             email = params.get('email') ? decodeURIComponent(params.get('email')) : '';
             cellphone = params.get('phone') ? decodeURIComponent(params.get('phone')) : '';
+            resetPasswordToken = params.get('resetToken') ? decodeURIComponent(params.get('resetToken')) : null;
+            const exp = params.get('resetExpires') ? decodeURIComponent(params.get('resetExpires')) : null;
+            resetPasswordExpires = exp ? Number(exp) : null;
         } catch (e) {
             // ignore malformed metadata
         }
     }
-    return { fullname: cleanName, email, cellphone };
+    return { fullname: cleanName, email, cellphone, resetPasswordToken, resetPasswordExpires };
 }
 
 // Metadata serialization for note uncontract flag when Supabase notes table lacks an uncontract column
@@ -271,6 +282,8 @@ async function getData() {
             const resolvedFullname = parsedMeta.fullname || (localUser && localUser.fullname) || u.fullname;
             const resolvedEmail = u.email || (localUser && localUser.email) || parsedMeta.email || '';
             const resolvedCellphone = u.cellphone || (localUser && localUser.cellphone) || parsedMeta.cellphone || '';
+            const resolvedResetToken = parsedMeta.resetPasswordToken || (localUser && localUser.resetPasswordToken) || null;
+            const resolvedResetExpires = parsedMeta.resetPasswordExpires || (localUser && localUser.resetPasswordExpires) || null;
 
             const folders = userProjects.map(p => {
                 let localFolder = null;
@@ -400,8 +413,8 @@ async function getData() {
                 active: u.active !== undefined ? u.active : (localUser && localUser.active !== undefined ? localUser.active : true),
                 deactivated: u.deactivated !== undefined ? u.deactivated : (localUser && localUser.deactivated !== undefined ? localUser.deactivated : false),
                 denied: u.denied !== undefined ? u.denied : (localUser && localUser.denied !== undefined ? localUser.denied : false),
-                resetPasswordToken: (localUser && localUser.resetPasswordToken) || null,
-                resetPasswordExpires: (localUser && localUser.resetPasswordExpires) || null,
+                resetPasswordToken: resolvedResetToken,
+                resetPasswordExpires: resolvedResetExpires,
                 folders: folders
             };
         });
@@ -449,7 +462,7 @@ async function saveData(data) {
                 usersList.push({
                     username: user.username.toLowerCase(),
                     password: user.password,
-                    fullname: formatUserFullname(user.fullname || user.username, user.email, user.cellphone),
+                    fullname: formatUserFullname(user.fullname || user.username, user.email, user.cellphone, user.resetPasswordToken, user.resetPasswordExpires),
                     company: user.company || '',
                     role: user.role || 'user',
                     approved: user.approved !== false
@@ -601,5 +614,7 @@ module.exports = {
     testConnection,
     readLocalData,
     writeLocalData,
-    generateCompanyId
+    generateCompanyId,
+    formatUserFullname,
+    parseUserFullname
 };

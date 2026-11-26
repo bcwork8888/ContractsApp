@@ -1579,6 +1579,44 @@ async function requestPasswordReset(event) {
     });
 }
 
+function extractPasswordResetParams() {
+    let token = '';
+    let username = '';
+
+    // 1. Check window.location.search (?token=...&username=...)
+    if (window.location.search) {
+        const sp = new URLSearchParams(window.location.search);
+        if (sp.get('token')) token = sp.get('token');
+        if (sp.get('username')) username = sp.get('username');
+    }
+
+    // 2. Check window.location.hash (#reset-password?token=... or #reset-password&token=...)
+    if ((!token || !username) && window.location.hash) {
+        const rawHash = window.location.hash.substring(1);
+        if (rawHash.includes('?')) {
+            const hp = new URLSearchParams(rawHash.split('?')[1]);
+            if (!token && hp.get('token')) token = hp.get('token');
+            if (!username && hp.get('username')) username = hp.get('username');
+        }
+        if (!token || !username) {
+            const cleanHash = rawHash.replace(/^reset-password&?/, '');
+            const hp = new URLSearchParams(cleanHash);
+            if (!token && hp.get('token')) token = hp.get('token');
+            if (!username && hp.get('username')) username = hp.get('username');
+        }
+    }
+
+    // 3. Regex fallback across full URL
+    if (!token || !username) {
+        const tokenMatch = window.location.href.match(/[?&#]token=([^&#]+)/);
+        const userMatch = window.location.href.match(/[?&#]username=([^&#]+)/);
+        if (!token && tokenMatch) token = decodeURIComponent(tokenMatch[1]);
+        if (!username && userMatch) username = decodeURIComponent(userMatch[1]);
+    }
+
+    return { token: (token || '').trim(), username: (username || '').trim() };
+}
+
 async function submitNewPassword(event) {
     return withButtonLock(event, async () => {
         const newPass = document.getElementById('new-reset-password').value;
@@ -1590,6 +1628,26 @@ async function submitNewPassword(event) {
         }
         if (newPass !== confirmPass) {
             return alert("Passwords do not match");
+        }
+
+        if (!currentResetToken || !currentResetUsername) {
+            const params = extractPasswordResetParams();
+            if (params.token) currentResetToken = params.token;
+            if (params.username) currentResetUsername = params.username;
+        }
+
+        if (!currentResetToken || !currentResetUsername) {
+            const missingMsg = "Password reset token or username is missing from URL. Please use the complete link sent to your email.";
+            if (msgEl) {
+                msgEl.style.display = 'block';
+                msgEl.style.backgroundColor = '#fef2f2';
+                msgEl.style.color = '#991b1b';
+                msgEl.style.border = '1px solid #fecaca';
+                msgEl.innerText = missingMsg;
+            } else {
+                alert(missingMsg);
+            }
+            return;
         }
 
         try {
@@ -4242,16 +4300,9 @@ window.onpopstate = function(event) {
 // Initial page load hash routing setup
 window.addEventListener('DOMContentLoaded', () => {
     // Check for password reset token in URL parameters or hash
-    const searchParams = new URLSearchParams(window.location.search || '');
-    let tokenParam = searchParams.get('token');
-    let userParam = searchParams.get('username');
-
-    if (!tokenParam && window.location.hash.includes('?')) {
-        const hashQuery = window.location.hash.split('?')[1];
-        const hashParams = new URLSearchParams(hashQuery);
-        tokenParam = hashParams.get('token');
-        userParam = hashParams.get('username');
-    }
+    const resetParams = extractPasswordResetParams();
+    let tokenParam = resetParams.token;
+    let userParam = resetParams.username;
 
     // Load translation pref
     const lang = localStorage.getItem('lang') || 'zh';

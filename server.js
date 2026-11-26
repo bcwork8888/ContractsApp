@@ -473,17 +473,21 @@ app.post('/api/reset-password', async (req, res) => {
         return res.status(400).json({ success: false, message: "Username, token, and new password are required" });
     }
 
+    const cleanUsername = String(username || '').trim().toLowerCase();
+    const cleanToken = String(token || '').trim();
+
     const data = await getData();
-    const user = data.users.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+    const user = data.users.find(u => u.username.toLowerCase() === cleanUsername);
     if (!user) {
         return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    if (!user.resetPasswordToken || user.resetPasswordToken !== token) {
+    const storedToken = String(user.resetPasswordToken || '').trim();
+    if (!storedToken || storedToken !== cleanToken) {
         return res.status(400).json({ success: false, message: "Invalid or expired password reset token" });
     }
 
-    if (user.resetPasswordExpires && Date.now() > user.resetPasswordExpires) {
+    if (user.resetPasswordExpires && Date.now() > Number(user.resetPasswordExpires)) {
         return res.status(400).json({ success: false, message: "Password reset token has expired. Please request a new one." });
     }
 
