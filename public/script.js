@@ -301,6 +301,7 @@ const TRANSLATIONS = {
     "actions": "操作",
     "active": "正常",
     "inactive": "已停用",
+    "deactive": "已停用",
     "deactivated": "已禁用",
     "activate": "启用",
     "deactivate": "禁用",
@@ -532,6 +533,7 @@ const TRANSLATIONS = {
     "actions": "Actions",
     "active": "Active",
     "inactive": "Inactive",
+    "deactive": "Deactive",
     "deactivated": "Deactivated",
     "activate": "Activate",
     "deactivate": "Deactivate",
@@ -761,6 +763,7 @@ const TRANSLATIONS = {
     "actions": "Acciones",
     "active": "Activo",
     "inactive": "Inactivo",
+    "deactive": "Desactivado",
     "deactivated": "Desactivado",
     "activate": "Activar",
     "deactivate": "Desactivar",
@@ -2506,8 +2509,8 @@ function renderCompanyEmployees(employees) {
 
     tbody.innerHTML = employees.map(emp => {
         const isSelf = emp.username.toLowerCase() === currentLoggedInUser;
-        const isPending = emp.approved === false && !emp.denied;
-        const isActive = emp.active !== false && !emp.denied;
+        const isPending = emp.approved === false && !emp.denied && !emp.deactivated;
+        const isActive = emp.active !== false && !emp.denied && !emp.deactivated;
 
         let statusBadge = '';
         if (isPending) {
@@ -2515,7 +2518,7 @@ function renderCompanyEmployees(employees) {
         } else if (isActive) {
             statusBadge = `<span style="display: inline-block; background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('active', 'Active')}</span>`;
         } else {
-            statusBadge = `<span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('inactive', 'Inactive')}</span>`;
+            statusBadge = `<span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600;">● ${t('deactive', 'Deactive')}</span>`;
         }
 
         let actionBtnsHtml = '';
@@ -2600,6 +2603,9 @@ async function toggleUserActiveStatus(username, activate, event) {
             }
 
             await loadCompanyPeople();
+            if (typeof loadAdminConsole === 'function') {
+                await loadAdminConsole();
+            }
         } catch (err) {
             console.error("toggleUserActiveStatus error:", err);
             alert("Network error updating user status");
@@ -3549,6 +3555,9 @@ async function approveUser(username, event) {
         if (res.ok) {
             alert(`User ${username} approved successfully!`);
             loadAdminConsole();
+            if (typeof loadCompanyPeople === 'function') {
+                loadCompanyPeople();
+            }
         } else {
             alert("Failed to approve user");
         }
@@ -3564,8 +3573,11 @@ async function denyUser(username, event) {
             body: JSON.stringify({ username })
         });
         if (res.ok) {
-            alert(`User ${username} denied. The user has been added to the employee list with inactive status.`);
+            alert(`User ${username} denied. The user has been added to the employee list with deactive status.`);
             loadAdminConsole();
+            if (typeof loadCompanyPeople === 'function') {
+                loadCompanyPeople();
+            }
         } else {
             alert("Failed to deny user");
         }

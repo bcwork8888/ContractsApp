@@ -46,4 +46,47 @@ describe('Data Layer Unit Tests (db.js)', () => {
         expect(clearedParsed.resetPasswordToken).toBeNull();
         expect(clearedParsed.resetPasswordExpires).toBeNull();
     });
+
+    test('formatUserFullname & parseUserFullname - should serialize and deserialize active, deactivated, and denied flags', () => {
+        // Test with object parameter (active = false, deactivated = true, denied = true)
+        const userObj = {
+            fullname: 'Bob Crew',
+            email: 'bob@example.com',
+            cellphone: '555-9876',
+            active: false,
+            deactivated: true,
+            denied: true
+        };
+        const serialized = db.formatUserFullname(userObj);
+        expect(serialized).toContain('Bob Crew');
+        expect(serialized).toContain('email=bob%40example.com');
+        expect(serialized).toContain('phone=555-9876');
+        expect(serialized).toContain('active=false');
+        expect(serialized).toContain('deactivated=true');
+        expect(serialized).toContain('denied=true');
+
+        const parsed = db.parseUserFullname(serialized);
+        expect(parsed.fullname).toBe('Bob Crew');
+        expect(parsed.email).toBe('bob@example.com');
+        expect(parsed.cellphone).toBe('555-9876');
+        expect(parsed.active).toBe(false);
+        expect(parsed.deactivated).toBe(true);
+        expect(parsed.denied).toBe(true);
+
+        // Test with active = true
+        const activeUserObj = {
+            fullname: 'Bob Crew',
+            email: 'bob@example.com',
+            active: true
+        };
+        const activeSerialized = db.formatUserFullname(activeUserObj);
+        expect(activeSerialized).toContain('active=true');
+        expect(activeSerialized).not.toContain('deactivated');
+        expect(activeSerialized).not.toContain('denied');
+
+        const activeParsed = db.parseUserFullname(activeSerialized);
+        expect(activeParsed.active).toBe(true);
+        expect(activeParsed.deactivated).toBeUndefined();
+        expect(activeParsed.denied).toBeUndefined();
+    });
 });

@@ -106,11 +106,14 @@ app.post('/api/login', async (req, res) => {
     const user = data.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
     
     if (user) {
-        if (user.active === false || user.deactivated === true || user.denied === true) {
-            return res.status(403).json({ success: false, message: "Your account has been deactivated (inactive). Please contact your company administrator." });
+        if (user.denied === true) {
+            return res.status(403).json({ success: false, message: "Your registration request has been denied by your company administrator." });
         }
-        if (user.approved === false) {
+        if (user.approved === false && !user.deactivated) {
             return res.status(403).json({ success: false, message: "Your account is pending approval by your company administrator." });
+        }
+        if (user.active === false || user.deactivated === true) {
+            return res.status(403).json({ success: false, message: "Your account has been deactivated (inactive). Please contact your company administrator." });
         }
 
         // Find company info
@@ -1387,7 +1390,7 @@ app.get('/api/admin/company-data', async (req, res) => {
     const pendingUsers = [];
 
     companyUsers.forEach(u => {
-        if (u.approved === false && !u.denied) {
+        if (u.approved === false && !u.denied && !u.deactivated) {
             pendingUsers.push({
                 username: u.username,
                 fullname: u.fullname || u.username,
@@ -1443,9 +1446,10 @@ app.get('/api/admin/company-data', async (req, res) => {
         role: u.role || 'crew',
         email: u.email || '',
         cellphone: u.cellphone || '',
-        approved: u.approved !== false,
+        approved: u.approved !== false && !u.denied,
         active: u.active !== false && u.deactivated !== true && !u.denied,
-        denied: u.denied === true
+        denied: u.denied === true,
+        deactivated: u.deactivated === true
     }));
 
     res.json({ managers, crews, projects: sortFolders(projects), pendingUsers, tier, companyId, employees });
@@ -2050,7 +2054,7 @@ app.post('/api/admin/deny-user', async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     // Mark as denied and inactive so they appear on the employee list with inactive status
-    user.approved = true;
+    user.approved = false;
     user.active = false;
     user.deactivated = true;
     user.denied = true;

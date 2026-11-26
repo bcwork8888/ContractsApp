@@ -20,20 +20,50 @@ if (isSupabaseConfigured) {
 }
 
 // User Metadata Cloud Serialization Helpers
-function formatUserFullname(fullname, email, cellphone, resetToken, resetExpires) {
-    const cleanName = (fullname || '').split(' ::: ')[0].trim();
+function formatUserFullname(fullname, email, cellphone, resetToken, resetExpires, active, deactivated, denied) {
+    let cleanName = '';
+    let em = email;
+    let ph = cellphone;
+    let rToken = resetToken;
+    let rExpires = resetExpires;
+    let act = active;
+    let deact = deactivated;
+    let den = denied;
+
+    if (fullname && typeof fullname === 'object' && !Array.isArray(fullname)) {
+        cleanName = (fullname.fullname || fullname.username || '').split(' ::: ')[0].trim();
+        em = fullname.email;
+        ph = fullname.cellphone;
+        rToken = fullname.resetPasswordToken || fullname.resetToken;
+        rExpires = fullname.resetPasswordExpires || fullname.resetExpires;
+        act = fullname.active;
+        deact = fullname.deactivated;
+        den = fullname.denied;
+    } else {
+        cleanName = (fullname || '').split(' ::: ')[0].trim();
+    }
+
     const metaParts = [];
-    if (email && typeof email === 'string' && email.trim()) {
-        metaParts.push(`email=${encodeURIComponent(email.trim())}`);
+    if (em && typeof em === 'string' && em.trim()) {
+        metaParts.push(`email=${encodeURIComponent(em.trim())}`);
     }
-    if (cellphone && typeof cellphone === 'string' && cellphone.trim()) {
-        metaParts.push(`phone=${encodeURIComponent(cellphone.trim())}`);
+    if (ph && typeof ph === 'string' && ph.trim()) {
+        metaParts.push(`phone=${encodeURIComponent(ph.trim())}`);
     }
-    if (resetToken && typeof resetToken === 'string' && resetToken.trim()) {
-        metaParts.push(`resetToken=${encodeURIComponent(resetToken.trim())}`);
+    if (rToken && typeof rToken === 'string' && rToken.trim()) {
+        metaParts.push(`resetToken=${encodeURIComponent(rToken.trim())}`);
     }
-    if (resetExpires) {
-        metaParts.push(`resetExpires=${encodeURIComponent(String(resetExpires))}`);
+    if (rExpires) {
+        metaParts.push(`resetExpires=${encodeURIComponent(String(rExpires))}`);
+    }
+    if (act !== undefined && act !== null) {
+        metaParts.push(`active=${Boolean(act)}`);
+    }
+    if (deact) {
+        metaParts.push(`deactivated=true`);
+    }
+    if (den) {
+        metaParts.push(`denied=true`);
     }
     if (metaParts.length > 0) {
         return `${cleanName} ::: ${metaParts.join('&')}`;
@@ -43,7 +73,7 @@ function formatUserFullname(fullname, email, cellphone, resetToken, resetExpires
 
 function parseUserFullname(rawFullname) {
     if (!rawFullname || typeof rawFullname !== 'string') {
-        return { fullname: '', email: '', cellphone: '', resetPasswordToken: null, resetPasswordExpires: null };
+        return { fullname: '', email: '', cellphone: '', resetPasswordToken: null, resetPasswordExpires: null, active: undefined, deactivated: undefined, denied: undefined };
     }
     const parts = rawFullname.split(' ::: ');
     const cleanName = parts[0].trim();
@@ -51,6 +81,9 @@ function parseUserFullname(rawFullname) {
     let cellphone = '';
     let resetPasswordToken = null;
     let resetPasswordExpires = null;
+    let active = undefined;
+    let deactivated = undefined;
+    let denied = undefined;
     if (parts.length > 1) {
         try {
             const params = new URLSearchParams(parts[1]);
@@ -59,11 +92,20 @@ function parseUserFullname(rawFullname) {
             resetPasswordToken = params.get('resetToken') ? decodeURIComponent(params.get('resetToken')) : null;
             const exp = params.get('resetExpires') ? decodeURIComponent(params.get('resetExpires')) : null;
             resetPasswordExpires = exp ? Number(exp) : null;
+            if (params.has('active')) {
+                active = params.get('active') === 'true';
+            }
+            if (params.has('deactivated')) {
+                deactivated = params.get('deactivated') === 'true';
+            }
+            if (params.has('denied')) {
+                denied = params.get('denied') === 'true';
+            }
         } catch (e) {
             // ignore malformed metadata
         }
     }
-    return { fullname: cleanName, email, cellphone, resetPasswordToken, resetPasswordExpires };
+    return { fullname: cleanName, email, cellphone, resetPasswordToken, resetPasswordExpires, active, deactivated, denied };
 }
 
 // Metadata serialization for note uncontract flag when Supabase notes table lacks an uncontract column
@@ -285,6 +327,22 @@ async function getData() {
             const resolvedResetToken = parsedMeta.resetPasswordToken || (localUser && localUser.resetPasswordToken) || null;
             const resolvedResetExpires = parsedMeta.resetPasswordExpires || (localUser && localUser.resetPasswordExpires) || null;
 
+            const resolvedDenied = parsedMeta.denied !== undefined
+                ? parsedMeta.denied
+                : (u.denied !== undefined ? u.denied : (localUser && localUser.denied !== undefined ? localUser.denied : false));
+
+            const resolvedDeactivated = parsedMeta.deactivated !== undefined
+                ? parsedMeta.deactivated
+                : (u.deactivated !== undefined ? u.deactivated : (localUser && localUser.deactivated !== undefined ? localUser.deactivated : false));
+
+            const resolvedActive = parsedMeta.active !== undefined
+                ? parsedMeta.active
+                : (resolvedDenied || resolvedDeactivated ? false : (u.active !== undefined ? u.active : (localUser && localUser.active !== undefined ? localUser.active : true)));
+
+            const resolvedApproved = resolvedDenied
+                ? false
+                : (resolvedDeactivated ? true : (u.approved !== undefined ? Boolean(u.approved) : (localUser && localUser.approved !== undefined ? Boolean(localUser.approved) : true)));
+
             const folders = userProjects.map(p => {
                 let localFolder = null;
                 for (const lu of (localData.users || [])) {
@@ -407,12 +465,12 @@ async function getData() {
                 company: u.company,
                 companyId: resolvedCompanyId,
                 role: u.role,
-                approved: u.approved,
+                approved: resolvedApproved,
                 email: resolvedEmail,
                 cellphone: resolvedCellphone,
-                active: u.active !== undefined ? u.active : (localUser && localUser.active !== undefined ? localUser.active : true),
-                deactivated: u.deactivated !== undefined ? u.deactivated : (localUser && localUser.deactivated !== undefined ? localUser.deactivated : false),
-                denied: u.denied !== undefined ? u.denied : (localUser && localUser.denied !== undefined ? localUser.denied : false),
+                active: resolvedActive,
+                deactivated: resolvedDeactivated,
+                denied: resolvedDenied,
                 resetPasswordToken: resolvedResetToken,
                 resetPasswordExpires: resolvedResetExpires,
                 folders: folders
@@ -459,13 +517,15 @@ async function saveData(data) {
             const repliesList = [];
 
             for (const user of data.users) {
+                const isUserActive = user.active !== false && !user.deactivated && !user.denied;
+                const isUserApproved = user.approved !== false && !user.denied;
                 usersList.push({
                     username: user.username.toLowerCase(),
                     password: user.password,
-                    fullname: formatUserFullname(user.fullname || user.username, user.email, user.cellphone, user.resetPasswordToken, user.resetPasswordExpires),
+                    fullname: formatUserFullname(user),
                     company: user.company || '',
                     role: user.role || 'user',
-                    approved: user.approved !== false
+                    approved: isUserApproved && isUserActive
                 });
 
                 if (user.folders && Array.isArray(user.folders)) {
